@@ -53,6 +53,9 @@ p{margin:0}
 .opt:hover{border-color:var(--accent)}
 .opt[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
 .opt small{display:block;color:var(--muted);font-size:14px}
+.opt:disabled{opacity:.5;cursor:not-allowed;border-style:dashed}
+.opt:disabled:hover{border-color:var(--line)}
+.opt .why{color:var(--bad)}
 .dot{flex:none;width:18px;height:18px;border-radius:50%;border:2px solid var(--line);margin-top:3px}
 .opt[aria-pressed="true"] .dot{border-color:var(--accent);background:radial-gradient(var(--accent) 45%,transparent 50%)}
 .yn{display:flex;flex-direction:column;gap:6px;padding-block:6px;border-top:1px solid var(--line)}
@@ -143,6 +146,7 @@ const CONFIG = {
 };
 
 const OPTIONS = [
+  {id:"prihlaska", code:"Nový člen", name:"Přihláška člena", what:"Znovu se staneš členem Českého florbalu přes klub, do kterého se hlásíš.", goal:["trvale"]},
   {id:"zop", code:"Bez přestupu", name:"Změna oddílové příslušnosti", what:"Přihlásíš se do nového klubu bez přestupu a zdarma. Jde to, když nemáš žádný klub, nebo když jsi rok nehrál(a).", goal:["trvale"]},
   {id:"prestup", code:"Natrvalo", name:"Přestup", what:"Přejdeš do nového klubu natrvalo. Z mateřského oddílu tě vyřadí k datu přestupu.", goal:["trvale"]},
   {id:"host", code:"Dočasně", name:"Hostování", what:"Dočasně budeš hrát za jiný klub, nejdéle do konce sezóny 30. 6. Pak se vracíš.", goal:["docasne"]},
@@ -193,15 +197,20 @@ const STEPS = [
   {id:"hostStart", show:() => A.state==="hostuji", title:"Kdy tvoje hostování začalo?", hint:"Hostování musí trvat alespoň 30 dnů, než ho lze ukončit.", type:"date"},
   {id:"goal", title:"Co chceš udělat?", type:"choice",
     options:() => {
-      const o = [["trvale","Hrát natrvalo za jiný klub",""],["docasne","Hrát dočasně za jiný klub","Třeba na půl sezóny."]];
-      if (sthAge()) o.push(["dva","Hrát za dva kluby zároveň",""]);
+      // 4. položka = důvod, proč je možnost zašedlá (nelze vybrat)
+      const bez = A.state==="bez";
+      const o = [
+        bez ? ["trvale","Přihlásit se do nového klubu","Přes změnu oddílové příslušnosti."] : ["trvale","Hrát natrvalo za jiný klub",""],
+        ["docasne","Hrát dočasně za jiný klub","Třeba na půl sezóny.", bez ? "Bez klubu to nejde. Nejdřív se musíš přihlásit do nového klubu." : ""],
+        ["dva","Hrát za dva kluby zároveň","", bez ? "Bez klubu to nejde. Nejdřív se musíš přihlásit do nového klubu." : !sthAge() ? "Za dva kluby můžou hrát jen kategorie od U15 starších žáků po muže a ženy 19–21 let." : ""]
+      ];
       if (["hostuji","stst"].includes(A.state)) o.push(["ukoncit", A.state==="hostuji" ? "Ukončit hostování" : "Ukončit střídavý start",""]);
       o.push(["vse","Nevím, ukaž mi všechno",""]);
       return o;
     }},
   {id:"date", title:"Ke kterému dni to chceš řešit?", hint:"Předvyplnili jsme dnešek. Můžeš zadat i budoucí datum a naplánovat si to.", type:"date", def:todayIso},
   {id:"zopQ", show:() => A.state==="bez" || ["trvale","vse"].includes(A.goal), title:"Pár otázek ke změně oddílové příslušnosti", hint:"Podle nich zjistíme, jestli můžeš změnit klub zdarma a kdykoliv v roce.", type:"multi",
-    items:() => A.state==="bez" ? [["zop3m","Měl(a) jsi za poslední 3 měsíce změnu oddílové příslušnosti?"]] :
+    items:() => A.state==="bez" ? [["memberNow","Jsi pořád členem Českého florbalu?"],["zop3m","Měl(a) jsi za poslední 3 měsíce změnu oddílové příslušnosti?"]] :
       [["member1y","Jsi členem Českého florbalu déle než 1 rok?"],["match1y","Uběhl od tvého posledního utkání v soutěžích ČF víc než 1 rok?"],["dodatek","Máš podepsaný evidenční dodatek?"],["zop3m","Měl(a) jsi za poslední 3 měsíce změnu oddílové příslušnosti?"]]},
   {id:"recent", show:() => A.state!=="bez" && A.goal!=="ukoncit", title:"Měl(a) jsi za poslední 3 měsíce přestup?", hint:"Po přestupu nelze 3 měsíce podat další žádost o přestup ani hostování.", type:"choice",
     options:() => YN.map(([v,l]) => [v,l])},
@@ -219,14 +228,21 @@ function evaluate(){
   const c = cat(), s = season(A.date, c.group), tier = c.high ? "hi" : "lo";
   const inPeriod = s.d >= s.start && s.d <= s.end;
   const R = {};
-  const fee = id => CONFIG.fees[id][tier] === 0 ? "Zdarma" : CONFIG.fees[id][tier] + " Kč";
+  const fee = id => !CONFIG.fees[id] ? "Podle klubu" : CONFIG.fees[id][tier] === 0 ? "Zdarma" : CONFIG.fees[id][tier] + " Kč";
   const nextNote = `Nejbližší možnost od ${fmt(s.d > s.end ? s.next : s.start)}.`;
   const set = (id, status, deadline, reason, steps) => R[id] = {status, deadline, reason, steps, fee:fee(id)};
 
   // Změna oddílové příslušnosti
+  const clubLink = `<a href="${CONFIG.findClubUrl}" target="_blank" rel="noopener">mickoni.cz</a>`;
+  if (A.state!=="bez") set("prihlaska","no","Kdykoliv v roce","Týká se jen hráčů bez klubu, kteří už nejsou členy ČF.");
+  else if (A.memberNow==="ne") set("prihlaska","yes","Kdykoliv v roce","",[`Najdi si klub na ${clubLink}.`,"Přihlášku člena podáš přes klub, do kterého se hlásíš."]);
+  else if (A.memberNow==="nevim") set("prihlaska","maybe","Kdykoliv v roce","Pokud už nejsi členem ČF, potřebuješ místo změny oddílové příslušnosti novou přihlášku člena. Ověř to u klubu.",[`Najdi si klub na ${clubLink}.`]);
+  else set("prihlaska","no","Kdykoliv v roce","Jsi pořád členem ČF, stačí ti změna oddílové příslušnosti.");
+
   if (A.state==="bez") {
-    if (A.zop3m==="ano") set("zop","no","Kdykoliv v roce","Od poslední změny oddílové příslušnosti musí uběhnout alespoň 3 měsíce.");
-    else if (A.zop3m==="nevim") set("zop","maybe","Kdykoliv v roce","Ověř, jestli jsi v posledních 3 měsících neměl(a) změnu oddílové příslušnosti.");
+    if (A.memberNow==="ne") set("zop","no","Kdykoliv v roce","Nejsi členem ČF. Nejdřív musíš podat přihlášku člena.");
+    else if (A.zop3m==="ano") set("zop","no","Kdykoliv v roce","Od poslední změny oddílové příslušnosti musí uběhnout alespoň 3 měsíce.");
+    else if (A.zop3m==="nevim" || A.memberNow==="nevim") set("zop","maybe","Kdykoliv v roce", A.memberNow==="nevim" ? "Ověř, jestli jsi pořád členem ČF." : "Ověř, jestli jsi v posledních 3 měsících neměl(a) změnu oddílové příslušnosti.");
     else set("zop","yes","Kdykoliv v roce","",["Vyber si nový klub a domluv se s ním.","Žádost se podává v informačním systému ČF."]);
   } else if (A.member1y===undefined) {
     set("zop","maybe","Kdykoliv v roce","Změna oddílové příslušnosti je jen pro hráče bez klubu nebo pro ty, kdo rok nehráli a nemají evidenční dodatek.");
@@ -307,7 +323,7 @@ function stepDone(st){
 }
 
 // Při změně odpovědi smaž odpovědi z pozdějších kroků, aby nezůstaly neplatné (např. po změně kategorie).
-const MULTI_KEYS = {zopQ:["member1y","match1y","dodatek","zop3m"], twoQ:["league","ststUsed","sthHigher"]};
+const MULTI_KEYS = {zopQ:["memberNow","member1y","match1y","dodatek","zop3m"], twoQ:["league","ststUsed","sthHigher"]};
 function clearAfter(stepId){
   const i = STEPS.findIndex(s => s.id === stepId);
   STEPS.slice(i+1).forEach(s => (MULTI_KEYS[s.id] || [s.id]).forEach(k => delete A[k]));
@@ -321,8 +337,9 @@ function render(){
   const pct = Math.round(idx / steps.length * 100);
   let body = "";
   if (st.type==="choice") {
-    body = `<div class="opts">` + st.options().map(([v,l,sub]) =>
-      `<button class="opt" data-k="${st.id}" data-v="${v}" aria-pressed="${A[st.id]===v}"><span class="dot"></span><span>${l}${sub?`<small>${sub}</small>`:""}</span></button>`).join("") + `</div>`;
+    body = `<div class="opts">` + st.options().map(([v,l,sub,why]) => why
+      ? `<button class="opt" disabled aria-disabled="true"><span class="dot"></span><span>${l}${sub?`<small>${sub}</small>`:""}<small class="why">${why}</small></span></button>`
+      : `<button class="opt" data-k="${st.id}" data-v="${v}" aria-pressed="${A[st.id]===v}"><span class="dot"></span><span>${l}${sub?`<small>${sub}</small>`:""}</span></button>`).join("") + `</div>`;
   } else if (st.type==="date") {
     body = `<label class="lbl" for="in-${st.id}">Datum</label><input type="date" id="in-${st.id}" value="${A[st.id]||""}">`;
   } else {
@@ -390,7 +407,14 @@ function renderResult(){
   if (A.state==="novy") return renderNewPlayer();
   const R = evaluate(), rank = {yes:0, maybe:1, no:2};
   const isMatch = o => o.goal.includes(A.goal);
-  const applicable = o => (!["stst","endStst"].includes(o.id) || ststAge()) && (o.id!=="sth" || sthAge());
+  // Karty, které pro hráče nemají smysl, vůbec nezobrazujeme.
+  const applicable = o =>
+    A.state==="bez" ? o.id==="zop" || (o.id==="prihlaska" && A.memberNow!=="ano") :
+    o.id==="prihlaska" ? false :
+    o.id==="endHost" ? A.state==="hostuji" :
+    o.id==="endStst" ? A.state==="stst" :
+    o.id==="stst" ? ststAge() :
+    o.id==="sth" ? sthAge() : true;
   const sorted = OPTIONS.filter(applicable).sort((a,b) => rank[R[a.id].status]-rank[R[b.id].status] || isMatch(b)-isMatch(a));
   const now = sorted.filter(o => R[o.id].status!=="no"), later = sorted.filter(o => R[o.id].status==="no");
   const goalLabel = {trvale:"natrvalo jinam",docasne:"dočasně jinam",dva:"za dva kluby",ukoncit:"ukončit",vse:"vše"}[A.goal];
@@ -401,7 +425,7 @@ function renderResult(){
     </div>
     <div class="cards">${now.map(o => card(o,R[o.id],isMatch(o))).join("") || `<p class="reason">Podívej se níže, proč to teď nejde a kdy to bude možné.</p>`}</div>
     ${later.length?`<details class="later" ${now.length?"":"open"}><summary>Teď nejde (${later.length})</summary><div class="cards">${later.map(o => card(o,R[o.id],isMatch(o))).join("")}</div></details>`:""}
-    <p class="note">Mateřský oddíl nesouhlasí s přestupem? <a href="${CONFIG.disputeUrl}" target="_blank" rel="noopener">Postup při neshodě u žádosti o přestup</a></p>
+    ${A.state==="bez" ? "" : `<p class="note">Mateřský oddíl nesouhlasí s přestupem? <a href="${CONFIG.disputeUrl}" target="_blank" rel="noopener">Postup při neshodě u žádosti o přestup</a></p>`}
     <div class="nav"><button class="btn" id="back">Upravit odpovědi</button><button class="btn primary" id="restart">Začít znovu</button></div>
   </div>`;
   document.getElementById("back").onclick = () => { idx = visible().length-1; render(); };
@@ -410,7 +434,7 @@ function renderResult(){
 
 /* ===== Přehled všech možností ===== */
 function renderAll(){
-  const f = (id) => { const x = CONFIG.fees[id]; return x.hi===x.lo ? (x.hi? x.hi+" Kč":"Zdarma") : `${x.hi} / ${x.lo} Kč`; };
+  const f = (id) => { const x = CONFIG.fees[id]; if (!x) return "Podle klubu"; return x.hi===x.lo ? (x.hi? x.hi+" Kč":"Zdarma") : `${x.hi} / ${x.lo} Kč`; };
   const rows = [
     ["zop","Kdykoliv, nejdříve 3 měsíce od předchozí změny oddílové příslušnosti","Bez klubu, nebo členem ČF déle než 1 rok, 1 rok bez utkání a bez evidenčního dodatku"],
     ["prestup","V přestupním období","Po přestupu 3 měsíce nelze podat další přestup ani hostování"],
@@ -418,7 +442,8 @@ function renderAll(){
     ["stst","Začátek 1. 7. – 31. 1., nejdéle do 30. 6.",`Jen muži a ženy 19–21 let (${yearsOf("dospeli21")}); A-tým klubu v nejvyšší soutěži; o 1–2 úrovně níže; jen 1× za sezónu`],
     ["sth","Začátek 1. 7. až konec přestupního období, nejvýše 105 dní",`Od starších žáků po první tři sezóny v dospělých (${yearsFor(catById("starsi").minAge, catById("dospeli21").maxAge)}); jen do vyšší celostátní soutěže, kterou klub nemá`],
     ["endHost","Nejpozději konec přestupního období","Hostování trvá alespoň 30 dnů"],
-    ["endStst","Nejpozději 31. 1.","—"]
+    ["endStst","Nejpozději 31. 1.","—"],
+    ["prihlaska","Kdykoliv","Bez klubu a už nejsi členem ČF"]
   ];
   document.getElementById("all").innerHTML = `<div class="panel">
     <div style="display:flex;flex-direction:column;gap:6px"><h2>Všechny možnosti</h2>
