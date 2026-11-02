@@ -1,6 +1,6 @@
 # Průvodce přestupem
 
-Interaktivní průvodce tuzemskými přestupy v Českém florbalu. Hráč odpoví na pár otázek a uvidí, které možnosti změny klubu může využít (změna klubu bez přestupu, přestup, hostování, střídavý start, střídavé hostování a jejich ukončení), kolik stojí a co udělat dál.
+Interaktivní průvodce tuzemskými přestupy v Českém florbalu. Hráč odpoví na pár otázek a uvidí, které možnosti změny klubu může využít (změna oddílové příslušnosti, přestup, hostování, střídavý start, střídavé hostování a jejich ukončení), kolik stojí a co udělat dál.
 
 Web: https://fialacf.github.io/prestup-hostovani/
 

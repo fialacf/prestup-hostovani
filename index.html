@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Průvodce přestupem</title>
-<meta name="description" content="Interaktivní průvodce tuzemskými přestupy v Českém florbalu: přestup, hostování, střídavý start, střídavé hostování a změna klubu bez přestupu.">
+<meta name="description" content="Interaktivní průvodce tuzemskými přestupy v Českém florbalu: přestup, hostování, střídavý start, střídavé hostování a změna oddílové příslušnosti.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600;700&display=swap">
@@ -140,7 +140,7 @@ const CONFIG = {
 };
 
 const OPTIONS = [
-  {id:"zop", code:"Bez přestupu", name:"Změna klubu bez přestupu", what:"Přihlásíš se do nového klubu bez přestupu a zdarma. Jde to, když nemáš žádný klub, nebo když jsi rok nehrál(a). Oficiálně se tomu říká změna oddílové příslušnosti.", goal:["trvale"]},
+  {id:"zop", code:"Bez přestupu", name:"Změna oddílové příslušnosti", what:"Přihlásíš se do nového klubu bez přestupu a zdarma. Jde to, když nemáš žádný klub, nebo když jsi rok nehrál(a).", goal:["trvale"]},
   {id:"prestup", code:"Natrvalo", name:"Přestup", what:"Přejdeš do nového klubu natrvalo. Z mateřského oddílu tě vyřadí k datu přestupu.", goal:["trvale"]},
   {id:"host", code:"Dočasně", name:"Hostování", what:"Dočasně budeš hrát za jiný klub, nejdéle do konce sezóny 30. 6. Pak se vracíš.", goal:["docasne"]},
   {id:"stst", code:"Dva kluby", name:"Střídavý start", what:"Budeš hrát za A-družstvo svého klubu i za A-družstvo druhého klubu v nižší soutěži.", goal:["dva"]},
@@ -189,9 +189,9 @@ const STEPS = [
       return o;
     }},
   {id:"date", title:"Ke kterému dni to chceš řešit?", hint:"Předvyplnili jsme dnešek. Můžeš zadat i budoucí datum a naplánovat si to.", type:"date", def:todayIso},
-  {id:"zopQ", show:() => A.state==="bez" || ["trvale","vse"].includes(A.goal), title:"Pár otázek ke změně klubu bez přestupu", hint:"Podle nich zjistíme, jestli můžeš změnit klub zdarma a kdykoliv v roce.", type:"multi",
-    items:() => A.state==="bez" ? [["zop3m","Měnil(a) jsi za poslední 3 měsíce klub bez přestupu?"]] :
-      [["member1y","Jsi členem Českého florbalu déle než 1 rok?"],["match1y","Uběhl od tvého posledního utkání v soutěžích ČF víc než 1 rok?"],["dodatek","Máš podepsaný evidenční dodatek?"],["zop3m","Měnil(a) jsi za poslední 3 měsíce klub bez přestupu?"]]},
+  {id:"zopQ", show:() => A.state==="bez" || ["trvale","vse"].includes(A.goal), title:"Pár otázek ke změně oddílové příslušnosti", hint:"Podle nich zjistíme, jestli můžeš změnit klub zdarma a kdykoliv v roce.", type:"multi",
+    items:() => A.state==="bez" ? [["zop3m","Měl(a) jsi za poslední 3 měsíce změnu oddílové příslušnosti?"]] :
+      [["member1y","Jsi členem Českého florbalu déle než 1 rok?"],["match1y","Uběhl od tvého posledního utkání v soutěžích ČF víc než 1 rok?"],["dodatek","Máš podepsaný evidenční dodatek?"],["zop3m","Měl(a) jsi za poslední 3 měsíce změnu oddílové příslušnosti?"]]},
   {id:"recent", show:() => A.state!=="bez" && A.goal!=="ukoncit", title:"Měl(a) jsi za poslední 3 měsíce přestup?", hint:"Po přestupu nelze 3 měsíce podat další žádost o přestup ani hostování.", type:"choice",
     options:() => YN.map(([v,l]) => [v,l])},
   {id:"twoQ", show:() => ["dva","vse"].includes(A.goal) && sthAge() && A.state!=="bez", title:"Hraní za dva kluby", type:"multi",
@@ -212,19 +212,19 @@ function evaluate(){
   const nextNote = `Nejbližší možnost od ${fmt(s.d > s.end ? s.next : s.start)}.`;
   const set = (id, status, deadline, reason, steps) => R[id] = {status, deadline, reason, steps, fee:fee(id)};
 
-  // Změna klubu bez přestupu (změna oddílové příslušnosti)
+  // Změna oddílové příslušnosti
   if (A.state==="bez") {
-    if (A.zop3m==="ano") set("zop","no","Kdykoliv v roce","Od poslední změny klubu bez přestupu musí uběhnout alespoň 3 měsíce.");
-    else if (A.zop3m==="nevim") set("zop","maybe","Kdykoliv v roce","Ověř, jestli jsi v posledních 3 měsících neměnil(a) klub bez přestupu.");
+    if (A.zop3m==="ano") set("zop","no","Kdykoliv v roce","Od poslední změny oddílové příslušnosti musí uběhnout alespoň 3 měsíce.");
+    else if (A.zop3m==="nevim") set("zop","maybe","Kdykoliv v roce","Ověř, jestli jsi v posledních 3 měsících neměl(a) změnu oddílové příslušnosti.");
     else set("zop","yes","Kdykoliv v roce","",["Vyber si nový klub a domluv se s ním.","Žádost se podává v informačním systému ČF."]);
   } else if (A.member1y===undefined) {
-    set("zop","maybe","Kdykoliv v roce","Změna klubu bez přestupu je jen pro hráče bez klubu nebo pro ty, kdo rok nehráli a nemají evidenční dodatek.");
+    set("zop","maybe","Kdykoliv v roce","Změna oddílové příslušnosti je jen pro hráče bez klubu nebo pro ty, kdo rok nehráli a nemají evidenční dodatek.");
   } else {
     const fails = [];
     if (A.member1y==="ne") fails.push("jsi členem ČF kratší dobu než 1 rok");
     if (A.match1y==="ne") fails.push("od posledního utkání neuběhl 1 rok");
     if (A.dodatek==="ano") fails.push("máš podepsaný evidenční dodatek");
-    if (A.zop3m==="ano") fails.push("od poslední změny klubu bez přestupu neuběhly 3 měsíce");
+    if (A.zop3m==="ano") fails.push("od poslední změny oddílové příslušnosti neuběhly 3 měsíce");
     const unsure = ["member1y","match1y","dodatek","zop3m"].some(k => A[k]==="nevim");
     if (fails.length) set("zop","no","Kdykoliv v roce","Nesplňuješ podmínky: " + fails.join(", ") + ".");
     else if (unsure) set("zop","maybe","Kdykoliv v roce","Některé podmínky jsi nevěděl(a). Ověř je u svého klubu nebo v informačním systému ČF.");
@@ -232,7 +232,7 @@ function evaluate(){
   }
 
   // Přestup a hostování
-  const blockReason = A.state==="bez" ? "Nemáš žádný klub, stačí ti změna klubu bez přestupu." :
+  const blockReason = A.state==="bez" ? "Nemáš žádný klub, stačí ti změna oddílové příslušnosti." :
     A.recent==="ano" ? "Po přestupu nelze 3 měsíce podat další žádost o přestup ani hostování." :
     !inPeriod ? "Datum je mimo přestupní období tvé kategorie. " + nextNote : "";
   const unsureT = A.recent==="nevim" ? "Ověř, jestli jsi neměl(a) přestup v posledních 3 měsících." :
@@ -276,7 +276,7 @@ function evaluate(){
   else if (!A.hostStart) set("endHost","maybe",fmt(s.end),"Ověř, že hostování trvá alespoň 30 dnů.");
   else set("endHost","yes",fmt(s.end),"",["Den ukončení je posledním dnem, kdy hostování platí.",`Uhraď poplatek ${fee("endHost")}.`]);
 
-  // Ukončení STST
+  // Ukončení střídavého startu
   if (A.state!=="stst") set("endStst","no",fmt(s.ststEnd),"Týká se jen hráčů se střídavým startem.");
   else if (s.d > s.ststEnd) set("endStst","no",fmt(s.ststEnd),"Střídavý start lze ukončit nejpozději 31. 1.");
   else set("endStst","yes",fmt(s.ststEnd),"",["Den ukončení je posledním dnem, kdy střídavý start platí.",`Uhraď poplatek ${fee("endStst")}.`]);
@@ -368,7 +368,7 @@ function renderResult(){
 function renderAll(){
   const f = (id) => { const x = CONFIG.fees[id]; return x.hi===x.lo ? (x.hi? x.hi+" Kč":"Zdarma") : `${x.hi} / ${x.lo} Kč`; };
   const rows = [
-    ["zop","Kdykoliv, nejdříve 3 měsíce od předchozí změny klubu bez přestupu","Bez klubu, nebo členem ČF déle než 1 rok, 1 rok bez utkání a bez evidenčního dodatku"],
+    ["zop","Kdykoliv, nejdříve 3 měsíce od předchozí změny oddílové příslušnosti","Bez klubu, nebo členem ČF déle než 1 rok, 1 rok bez utkání a bez evidenčního dodatku"],
     ["prestup","V přestupním období","Po přestupu 3 měsíce nelze podat další přestup ani hostování"],
     ["host","Začátek 1. 7. až konec přestupního období, nejdéle do 30. 6.","Nejméně 30 dnů"],
     ["stst","Začátek 1. 7. – 31. 1., nejdéle do 30. 6.","19–21 let; A-tým klubu v nejvyšší soutěži; o 1–2 úrovně níže; jen 1× za sezónu"],
