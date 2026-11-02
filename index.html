@@ -120,15 +120,18 @@ th{font-size:13px;color:var(--muted);font-weight:600}
 /* ===== Konfigurace: vše, co se mění se sezónou ===== */
 const CONFIG = {
   categories: [
-    {id:"dospeli", label:"Muži / ženy", group:"A", high:true},
-    {id:"junior", label:"Junioři / juniorky", group:"A", high:true},
-    {id:"dorost", label:"Dorostenci / dorostenky", group:"A", high:false},
-    {id:"starsi", label:"Starší žáci / žákyně", group:"B", high:false},
-    {id:"mladsi", label:"Mladší žáci / žákyně", group:"B", high:false},
-    {id:"elevove", label:"Elévové / elévky", group:"B", high:false},
-    {id:"pripravka", label:"Přípravka", group:"B", high:false},
-    {id:"mini", label:"Mini žákyně / mini přípravka", group:"B", high:false}
+    // minAge/maxAge = věk dovršený v kalendářním roce, kdy sezóna začíná; z toho se počítají ročníky narození
+    {id:"dospeli", label:"Muži / ženy", group:"A", high:true, minAge:19},
+    {id:"junior", label:"Junioři / juniorky", group:"A", high:true, minAge:17, maxAge:18},
+    {id:"dorost", label:"Dorostenci / dorostenky", group:"A", high:false, minAge:15, maxAge:16},
+    {id:"starsi", label:"Starší žáci / žákyně", group:"B", high:false, minAge:13, maxAge:14},
+    {id:"mladsi", label:"Mladší žáci / žákyně", group:"B", high:false, minAge:11, maxAge:12},
+    {id:"elevove", label:"Elévové / elévky", group:"B", high:false, minAge:9, maxAge:10},
+    {id:"pripravka", label:"Přípravka", group:"B", high:false, minAge:7, maxAge:8},
+    {id:"mini", label:"Mini žákyně / mini přípravka", group:"B", high:false, minAge:5, maxAge:6}
   ],
+  // první tři sezóny v dospělých (střídavý start, střídavé hostování)
+  youngAdultAges: [19,21],
   // konec přestupního období: [měsíc, den] v následujícím kalendářním roce sezóny
   periodEnd: {A:[1,31], B:[3,31]},
   fees: {
@@ -156,6 +159,11 @@ const iso = dt => dt.toISOString().slice(0,10);
 const fmt = dt => `${dt.getUTCDate()}. ${dt.getUTCMonth()+1}. ${dt.getUTCFullYear()}`;
 const addDays = (dt,n) => new Date(dt.getTime()+n*864e5);
 const daysBetween = (a,b) => Math.round((b-a)/864e5);
+const seasonStartYear = () => { const n = new Date(); return n.getMonth() >= 6 ? n.getFullYear() : n.getFullYear()-1; };
+const seasonLabel = () => { const y = seasonStartYear(); return `${y}/${String(y+1).slice(2)}`; };
+const yearsFor = (minAge, maxAge) => { const y = seasonStartYear();
+  return maxAge === undefined ? `ročník ${y-minAge} a starší` : `ročníky ${y-maxAge}–${y-minAge}`; };
+const youngYears = () => yearsFor(...CONFIG.youngAdultAges);
 const todayIso = () => { const n = new Date(); return iso(D(n.getFullYear(), n.getMonth()+1, n.getDate())); };
 
 function season(dateIso, group){
@@ -169,21 +177,26 @@ function season(dateIso, group){
 const A = {}; // odpovědi
 const YN = [["ano","Ano"],["ne","Ne"],["nevim","Nevím"]];
 const cat = () => CONFIG.categories.find(c => c.id === A.cat);
-const askYoung = () => ["dospeli","junior"].includes(A.cat);
-const sthAge = () => ["starsi","dorost"].includes(A.cat) || (askYoung() && A.young !== "ne");
-const ststAge = () => askYoung() && A.young !== "ne";
+const askYoung = () => A.cat === "dospeli";
+// střídavý start: jen dospělí v prvních třech sezónách
+const ststAge = () => A.cat === "dospeli" && A.young === "ano";
+// střídavé hostování: od starších žáků po první tři sezóny v dospělých
+const sthAge = () => ["starsi","dorost","junior"].includes(A.cat) || ststAge();
 
 const STEPS = [
-  {id:"cat", title:"V jaké jsi kategorii?", hint:"Podle kategorie se řídí přestupní období a výše poplatků.", type:"choice",
-    options:() => CONFIG.categories.map(c => [c.id, c.label, c.group==="A" ? "Přestupní období 1. 7. – 31. 1." : "Přestupní období 1. 7. – 31. 3."])},
-  {id:"young", show:askYoung, title:"Je ti v této sezóně 19, 20 nebo 21 let?", hint:"Tedy jsi v první až třetí sezóně v kategorii dospělých. Rozhoduje o střídavém startu a střídavém hostování.", type:"choice",
-    options:() => YN.map(([v,l]) => [v,l])},
+  {id:"cat", title:"V jaké jsi kategorii?", hint:() => `Ročníky narození platí pro sezónu ${seasonLabel()}. Podle kategorie se řídí přestupní období a výše poplatků.`, type:"choice",
+    options:() => CONFIG.categories.map(c => [c.id, `${c.label} (${yearsFor(c.minAge, c.maxAge)})`, c.group==="A" ? "Přestupní období 1. 7. – 31. 1." : "Přestupní období 1. 7. – 31. 3."])},
+  {id:"young", show:askYoung, title:() => `Narodil(a) ses v letech ${youngYears().replace("ročníky ","")}?`, hint:"Tedy jsi v první až třetí sezóně v kategorii dospělých. Rozhoduje o střídavém startu a střídavém hostování.", type:"choice",
+    options:() => [["ano","Ano"],["ne","Ne, jsem starší"]]},
   {id:"state", title:"Jaká je tvoje situace teď?", type:"choice",
-    options:() => [["oddil","Mám svůj (mateřský) klub","Jsem registrovaný v klubu a hraju za něj."],["bez","Nemám žádný klub","Nejsem registrovaný v žádném klubu."],["hostuji","Právě hostuji v jiném klubu",""],["stst","Mám střídavý start",""]]},
+    options:() => [["oddil","Mám svůj (mateřský) klub","Jsem registrovaný v klubu a hraju za něj."],["bez","Nemám žádný klub","Nejsem registrovaný v žádném klubu."],["hostuji","Právě hostuji v jiném klubu",""]]
+      .concat(ststAge() ? [["stst","Mám střídavý start",""]] : [])
+      .concat(sthAge() ? [["sth","Mám střídavé hostování",""]] : [])},
   {id:"hostStart", show:() => A.state==="hostuji", title:"Kdy tvoje hostování začalo?", hint:"Hostování musí trvat alespoň 30 dnů, než ho lze ukončit.", type:"date"},
   {id:"goal", title:"Co chceš udělat?", type:"choice",
     options:() => {
-      const o = [["trvale","Hrát natrvalo za jiný klub",""],["docasne","Hrát dočasně za jiný klub","Třeba na půl sezóny."],["dva","Hrát za dva kluby zároveň",""]];
+      const o = [["trvale","Hrát natrvalo za jiný klub",""],["docasne","Hrát dočasně za jiný klub","Třeba na půl sezóny."]];
+      if (sthAge()) o.push(["dva","Hrát za dva kluby zároveň",""]);
       if (["hostuji","stst"].includes(A.state)) o.push(["ukoncit", A.state==="hostuji" ? "Ukončit hostování" : "Ukončit střídavý start",""]);
       o.push(["vse","Nevím, ukaž mi všechno",""]);
       return o;
@@ -236,7 +249,7 @@ function evaluate(){
     A.recent==="ano" ? "Po přestupu nelze 3 měsíce podat další žádost o přestup ani hostování." :
     !inPeriod ? "Datum je mimo přestupní období tvé kategorie. " + nextNote : "";
   const unsureT = A.recent==="nevim" ? "Ověř, jestli jsi neměl(a) přestup v posledních 3 měsících." :
-    ["hostuji","stst"].includes(A.state) ? "Právě máš hostování nebo střídavý start. Postup ověř u svého klubu nebo na sekretariátu ČF." : "";
+    ["hostuji","stst","sth"].includes(A.state) ? "Právě máš hostování, střídavý start nebo střídavé hostování. Postup ověř u svého klubu nebo na sekretariátu ČF." : "";
   if (blockReason) set("prestup","no",fmt(s.end),blockReason);
   else if (unsureT) set("prestup","maybe",fmt(s.end),unsureT);
   else set("prestup","yes",fmt(s.end),"",["Domluv se s novým i mateřským klubem.","Žádost se podává v informačním systému ČF, datum přestupu musí být v přestupním období.",`Uhraď poplatek ${fee("prestup")}.`]);
@@ -249,7 +262,7 @@ function evaluate(){
 
   // Střídavý start
   const inStst = s.d >= s.start && s.d <= s.ststEnd;
-  if (!ststAge()) set("stst","no",fmt(s.ststEnd),"Střídavý start je jen pro hráče v prvních třech sezónách v dospělých (19–21 let).");
+  if (!ststAge()) set("stst","no",fmt(s.ststEnd),`Střídavý start je jen pro dospělé v prvních třech sezónách (${youngYears()}).`);
   else if (A.state==="bez") set("stst","no",fmt(s.ststEnd),"Nemáš mateřský klub.");
   else if (A.state==="stst") set("stst","no",fmt(s.ststEnd),"Střídavý start už máš. Lze ho využít jen jednou za sezónu.");
   else if (A.ststUsed==="ano") set("stst","no",fmt(s.ststEnd),"Střídavý start lze využít jen jednou za sezónu.");
@@ -261,8 +274,9 @@ function evaluate(){
   else set("stst","yes",fmt(s.ststEnd),"",["Druhý klub musí hrát o 1–2 úrovně níže (nejníže Regionální liga mužů / 3. liga žen).","Hrát můžeš jen za A-družstva obou klubů.","Pokud nenastoupíš aspoň k 30 % zápasů základní části, střídavý start automaticky skončí.",`Uhraď poplatek ${fee("stst")}.`]);
 
   // Střídavé hostování
-  if (!sthAge()) set("sth","no",fmt(s.end),"Střídavé hostování je pro hráče od starších žáků po třetí sezónu v dospělých (14–21 let).");
+  if (!sthAge()) set("sth","no",fmt(s.end),"Střídavé hostování je pro hráče od starších žáků po třetí sezónu v dospělých.");
   else if (A.state==="bez") set("sth","no",fmt(s.end),"Nemáš mateřský klub.");
+  else if (A.state==="sth") set("sth","no",fmt(s.end),"Střídavé hostování už máš.");
   else if (!inPeriod) set("sth","no",fmt(s.end),"Datum je mimo přestupní období tvé kategorie. " + nextNote);
   else if (!A.sthHigher) set("sth","maybe",fmt(s.end),"Záleží na soutěži, kam chceš hostovat. Zvol v průvodci „Hrát za dva kluby zároveň“.");
   else if (A.sthHigher==="ne") set("sth","no",fmt(s.end),"Střídavě hostovat lze jen do vyšší celostátní soutěže, kde tvůj klub nemá družstvo.");
@@ -294,6 +308,13 @@ function stepDone(st){
   return !!A[st.id];
 }
 
+// Při změně odpovědi smaž odpovědi z pozdějších kroků, aby nezůstaly neplatné (např. po změně kategorie).
+const MULTI_KEYS = {zopQ:["member1y","match1y","dodatek","zop3m"], twoQ:["league","ststUsed","sthHigher"]};
+function clearAfter(stepId){
+  const i = STEPS.findIndex(s => s.id === stepId);
+  STEPS.slice(i+1).forEach(s => (MULTI_KEYS[s.id] || [s.id]).forEach(k => delete A[k]));
+}
+const val = x => typeof x === "function" ? x() : x;
 function render(){
   const steps = visible();
   if (idx >= steps.length) return renderResult();
@@ -317,11 +338,12 @@ function render(){
   }
   W.innerHTML = `<div class="panel">
     <div class="progress"><span>Krok ${idx+1} z ${steps.length}</span><div class="bar"><i style="width:${pct}%"></i></div></div>
-    <div style="display:flex;flex-direction:column;gap:6px"><h2>${st.title}</h2>${st.hint?`<p class="hint">${st.hint}</p>`:""}</div>
+    <div style="display:flex;flex-direction:column;gap:6px"><h2>${val(st.title)}</h2>${st.hint?`<p class="hint">${val(st.hint)}</p>`:""}</div>
     ${body}
     <div class="nav"><button class="btn" id="back" ${idx===0?"disabled":""}>Zpět</button><button class="btn primary" id="next" ${stepDone(st)?"":"disabled"}>${idx===steps.length-1?"Zobrazit možnosti":"Pokračovat"}</button></div>
   </div>`;
   W.querySelectorAll("button[data-k]").forEach(b => b.onclick = () => {
+    if (st.type==="choice" && A[st.id] !== b.dataset.v) clearAfter(st.id);
     A[b.dataset.k] = b.dataset.v;
     if (st.type==="choice") { idx++; render(); } else render();
   });
@@ -347,7 +369,8 @@ function card(o, r, match){
 function renderResult(){
   const R = evaluate(), rank = {yes:0, maybe:1, no:2};
   const isMatch = o => o.goal.includes(A.goal);
-  const sorted = OPTIONS.slice().sort((a,b) => rank[R[a.id].status]-rank[R[b.id].status] || isMatch(b)-isMatch(a));
+  const applicable = o => (!["stst","endStst"].includes(o.id) || ststAge()) && (o.id!=="sth" || sthAge());
+  const sorted = OPTIONS.filter(applicable).sort((a,b) => rank[R[a.id].status]-rank[R[b.id].status] || isMatch(b)-isMatch(a));
   const now = sorted.filter(o => R[o.id].status!=="no"), later = sorted.filter(o => R[o.id].status==="no");
   const goalLabel = {trvale:"natrvalo jinam",docasne:"dočasně jinam",dva:"za dva kluby",ukoncit:"ukončit",vse:"vše"}[A.goal];
   W.innerHTML = `<div style="display:flex;flex-direction:column;gap:16px">
@@ -371,8 +394,8 @@ function renderAll(){
     ["zop","Kdykoliv, nejdříve 3 měsíce od předchozí změny oddílové příslušnosti","Bez klubu, nebo členem ČF déle než 1 rok, 1 rok bez utkání a bez evidenčního dodatku"],
     ["prestup","V přestupním období","Po přestupu 3 měsíce nelze podat další přestup ani hostování"],
     ["host","Začátek 1. 7. až konec přestupního období, nejdéle do 30. 6.","Nejméně 30 dnů"],
-    ["stst","Začátek 1. 7. – 31. 1., nejdéle do 30. 6.","19–21 let; A-tým klubu v nejvyšší soutěži; o 1–2 úrovně níže; jen 1× za sezónu"],
-    ["sth","Začátek 1. 7. až konec přestupního období, nejvýše 105 dní","14–21 let; jen do vyšší celostátní soutěže, kterou klub nemá"],
+    ["stst","Začátek 1. 7. – 31. 1., nejdéle do 30. 6.",`Jen dospělí v prvních třech sezónách (${youngYears()}); A-tým klubu v nejvyšší soutěži; o 1–2 úrovně níže; jen 1× za sezónu`],
+    ["sth","Začátek 1. 7. až konec přestupního období, nejvýše 105 dní",`Od starších žáků po první tři sezóny v dospělých (${yearsFor(CONFIG.categories.find(c=>c.id==="starsi").minAge, CONFIG.youngAdultAges[1])}); jen do vyšší celostátní soutěže, kterou klub nemá`],
     ["endHost","Nejpozději konec přestupního období","Hostování trvá alespoň 30 dnů"],
     ["endStst","Nejpozději 31. 1.","—"]
   ];
