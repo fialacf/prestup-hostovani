@@ -142,7 +142,11 @@ const CONFIG = {
   },
   topLeagues: ["Superliga","1. liga mužů","Národní liga","Extraliga žen","1. liga žen"],
   disputeUrl: "https://www.ceskyflorbal.cz/neshoda-u-zadosti-o-prestup",
-  findClubUrl: "https://mickoni.cz/",
+  // hledání klubu: pro děti Míčkoni, od dorostenců (od 15 let) web Českého florbalu
+  findClub: {
+    kids:  {url:"https://mickoni.cz/", label:"mickoni.cz"},
+    older: {url:"https://www.ceskyflorbal.cz/hraj", label:"ceskyflorbal.cz/hraj", fromAge:15}
+  },
   membershipFee: 200, // členský příspěvek ČF za sezónu (Kč)
   fisLoginUrl: "https://login.ceskyflorbal.cz/osoba/",
   fisApplicationUrl: "https://fis.ceskyflorbal.cz/index.php?pageid=2599&onlycontent=1" // přihláška; po zadání RČ předvyplní členské číslo
@@ -173,6 +177,7 @@ const yearsFor = (minAge, maxAge) => { const y = seasonStartYear();
 const catById = id => CONFIG.categories.find(c => c.id === id);
 const yearsOf = id => { const c = catById(id); return yearsFor(c.minAge, c.maxAge); };
 const memberFeeText = () => `Zdarma, pak členský příspěvek ${CONFIG.membershipFee} Kč na sezónu`;
+const findClub = () => { const f = CONFIG.findClub, c = cat(); return c && c.minAge >= f.older.fromAge ? f.older : f.kids; };
 const todayIso = () => { const n = new Date(); return iso(D(n.getFullYear(), n.getMonth()+1, n.getDate())); };
 
 function season(dateIso, group){
@@ -238,7 +243,7 @@ function evaluate(){
 
   // Změna oddílové příslušnosti
   const link = (url, text) => `<a href="${url}" target="_blank" rel="noopener">${text}</a>`;
-  const clubLink = link(CONFIG.findClubUrl, "mickoni.cz");
+  const clubLink = link(findClub().url, findClub().label);
   const fisApply = link(CONFIG.fisApplicationUrl, "přihlášku ve FISu");
   const fisLogin = link(CONFIG.fisLoginUrl, "přihlásit do FISu");
   if (A.state!=="bez") set("prihlaska","no","Kdykoliv v roce","Týká se jen hráčů bez klubu, kteří už nejsou členy ČF.");
@@ -398,11 +403,11 @@ function renderNewPlayer(){
       <div class="card-head"><div><div class="code">Nový hráč</div><h3>Vyber si klub a přihlas se</h3></div><span class="pill yes">Můžeš hned</span></div>
       <p>Přestup, hostování ani změnu oddílové příslušnosti nepotřebuješ. Stačí si najít klub a zaregistrovat se v něm. Můžeš kdykoliv v roce.</p>
       <ol class="steps">
-        <li>Najdi si klub ve svém okolí na <a href="${CONFIG.findClubUrl}" target="_blank" rel="noopener">mickoni.cz</a>.</li>
+        <li>Najdi si klub ve svém okolí na <a href="${findClub().url}" target="_blank" rel="noopener">${findClub().label}</a>.</li>
         <li>Ozvi se klubu a domluv se na tréninku.</li>
         <li>Registraci do Českého florbalu za tebe vyřídí klub.</li>
       </ol>
-      <a class="btn primary" style="text-align:center;text-decoration:none" href="${CONFIG.findClubUrl}" target="_blank" rel="noopener">Najít klub na mickoni.cz</a>
+      <a class="btn primary" style="text-align:center;text-decoration:none" href="${findClub().url}" target="_blank" rel="noopener">Najít klub na ${findClub().label}</a>
     </article>
     <div class="nav"><button class="btn" id="back">Upravit odpovědi</button><button class="btn primary" id="restart">Začít znovu</button></div>
   </div>`;
