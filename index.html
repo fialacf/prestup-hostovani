@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Průvodce přestupem</title>
+<meta name="description" content="Interaktivní průvodce tuzemskými přestupy v Českém florbalu: přestup, hostování, střídavý start, střídavé hostování a změna oddílové příslušnosti.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+/* Layout: úzký sloupec jako mobilní aplikace; nahoře „tabule“ s přepínačem, pod ní jedna otázka na obrazovku */
+:root{
+  --bg:#f2f5f9; --surface:#ffffff; --fg:#13213a; --muted:#56647c; --line:#d6dde8;
+  --accent:#1f4fd1; --accent-ink:#ffffff; --accent-soft:#e3eafc;
+  --good:#1b7f4b; --good-soft:#e2f4ea; --warn:#9a6200; --warn-soft:#fbf0dc; --bad:#a3313a; --bad-soft:#f8e4e6;
+  --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --body:"Source Sans 3","Segoe UI",system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e1626; --surface:#162238; --fg:#e8eef8; --muted:#9fb0c9; --line:#2a3a56;
+  --accent:#6f95ff; --accent-ink:#0b1424; --accent-soft:#1f3260;
+  --good:#5fd394; --good-soft:#163a2a; --warn:#f0bb5a; --warn-soft:#3c2e12; --bad:#ff8a93; --bad-soft:#41202a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1626; --surface:#162238; --fg:#e8eef8; --muted:#9fb0c9; --line:#2a3a56;
+  --accent:#6f95ff; --accent-ink:#0b1424; --accent-soft:#1f3260;
+  --good:#5fd394; --good-soft:#163a2a; --warn:#f0bb5a; --warn-soft:#3c2e12; --bad:#ff8a93; --bad-soft:#41202a; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+img{max-width:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:17px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-top:calc(20px + env(safe-area-inset-top,0px));padding-bottom:calc(40px + env(safe-area-inset-bottom,0px))}
+.wrap{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+header{display:flex;flex-direction:column;gap:6px}
+.eyebrow{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{font-family:var(--display);font-size:40px;line-height:1;margin:0;letter-spacing:.01em;text-wrap:balance}
+h2{font-family:var(--display);font-size:28px;line-height:1.1;margin:0;text-wrap:balance}
+h3{font-size:18px;margin:0}
+p{margin:0}
+.lead{color:var(--muted)}
+.tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:4px}
+.tabs button{flex:1;border:0;background:none;color:var(--muted);font:600 15px var(--body);padding:10px;border-radius:7px;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:18px}
+.progress{display:flex;align-items:center;gap:12px;font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums}
+.bar{flex:1;height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);transition:width .25s}
+.hint{font-size:15px;color:var(--muted)}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{display:flex;align-items:flex-start;gap:12px;text-align:left;width:100%;background:var(--bg);border:1.5px solid var(--line);border-radius:10px;padding:13px 14px;color:var(--fg);font:inherit;cursor:pointer}
+.opt:hover{border-color:var(--accent)}
+.opt[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.opt small{display:block;color:var(--muted);font-size:14px}
+.dot{flex:none;width:18px;height:18px;border-radius:50%;border:2px solid var(--line);margin-top:3px}
+.opt[aria-pressed="true"] .dot{border-color:var(--accent);background:radial-gradient(var(--accent) 45%,transparent 50%)}
+.yn{display:flex;flex-direction:column;gap:6px;padding-block:6px;border-top:1px solid var(--line)}
+.yn:first-child{border-top:0}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{flex:1;min-width:80px;background:var(--bg);border:1.5px solid var(--line);border-radius:8px;padding:9px;font:600 15px var(--body);color:var(--fg);cursor:pointer}
+.seg button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+input[type=date],select{font:inherit;color:var(--fg);background:var(--bg);border:1.5px solid var(--line);border-radius:8px;padding:10px 12px;width:100%}
+label.lbl{font-weight:600}
+.nav{display:flex;justify-content:space-between;gap:12px}
+.btn{font:700 16px var(--body);border-radius:9px;padding:12px 20px;cursor:pointer;border:1.5px solid var(--line);background:none;color:var(--fg)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn:disabled{opacity:.4;cursor:default}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.cards{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:10px}
+.card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.code{font-family:var(--display);font-size:15px;letter-spacing:.06em;color:var(--muted);text-transform:uppercase}
+.pill{font-size:13px;font-weight:700;padding:3px 10px;border-radius:999px;white-space:nowrap}
+.pill.yes{background:var(--good-soft);color:var(--good)}
+.pill.maybe{background:var(--warn-soft);color:var(--warn)}
+.pill.no{background:var(--bad-soft);color:var(--bad)}
+.match{font-size:12px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.06em}
+.facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 16px;font-size:15px}
+.facts dt{color:var(--muted);font-size:13px}
+.facts dd{margin:0;font-weight:600;font-variant-numeric:tabular-nums}
+.reason{font-size:15px;padding:8px 12px;border-radius:8px;background:var(--bg)}
+.steps{margin:0;padding-left:20px;font-size:15px}
+.summary{display:flex;flex-wrap:wrap;gap:8px;font-size:14px;color:var(--muted)}
+.summary span{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px 10px}
+details.later{border-top:1px solid var(--line);padding-top:12px}
+details.later summary{cursor:pointer;font-weight:700}
+details.later .cards{margin-top:12px}
+.note{font-size:14px;color:var(--muted)}
+a{color:var(--accent)}
+table{border-collapse:collapse;width:100%;font-size:15px}
+.tbl{overflow-x:auto}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:13px;color:var(--muted);font-weight:600}
+@media (max-width:420px){h1{font-size:34px}.facts{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Český florbal · tuzemské přestupy</div>
+    <h1>Průvodce přestupem</h1>
+    <p class="lead">Odpověz na pár otázek a uvidíš, jaké máš možnosti změnit klub, kolik to stojí a co udělat dál.</p>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button id="tab-wizard" role="tab" aria-selected="true">Průvodce</button>
+    <button id="tab-all" role="tab" aria-selected="false">Všechny možnosti</button>
+  </div>
+
+  <section id="wizard"></section>
+  <section id="all" hidden></section>
+
+  <p class="note">Průvodce je orientační, závazný je Přestupní řád Českého florbalu. Prototyp – pravidla podle podkladů k 2. 11. 2026.</p>
+</div>
+
+<script>
+/* ===== Konfigurace: vše, co se mění se sezónou ===== */
+const CONFIG = {
+  categories: [
+    {id:"dospeli", label:"Muži / ženy", group:"A", high:true},
+    {id:"junior", label:"Junioři / juniorky", group:"A", high:true},
+    {id:"dorost", label:"Dorostenci / dorostenky", group:"A", high:false},
+    {id:"starsi", label:"Starší žáci / žákyně", group:"B", high:false},
+    {id:"mladsi", label:"Mladší žáci / žákyně", group:"B", high:false},
+    {id:"elevove", label:"Elévové / elévky", group:"B", high:false},
+    {id:"pripravka", label:"Přípravka", group:"B", high:false},
+    {id:"mini", label:"Mini žákyně / mini přípravka", group:"B", high:false}
+  ],
+  // konec přestupního období: [měsíc, den] v následujícím kalendářním roce sezóny
+  periodEnd: {A:[1,31], B:[3,31]},
+  fees: {
+    zop:{hi:0,lo:0}, prestup:{hi:500,lo:250}, host:{hi:300,lo:150},
+    stst:{hi:300,lo:300}, sth:{hi:250,lo:250}, endHost:{hi:200,lo:200}, endStst:{hi:200,lo:200}
+  },
+  topLeagues: ["Superliga","1. liga mužů","Národní liga","Extraliga žen","1. liga žen"],
+  disputeUrl: "https://www.ceskyflorbal.cz/neshoda-u-zadosti-o-prestup"
+};
+
+const OPTIONS = [
+  {id:"zop", code:"ZOP", name:"Změna oddílové příslušnosti", what:"Získáš nebo změníš klub bez přestupu, pokud jsi delší dobu nehrál(a) nebo nemáš žádný klub.", goal:["trvale"]},
+  {id:"prestup", code:"Přestup", name:"Přestup", what:"Přejdeš do nového klubu natrvalo. Z mateřského oddílu tě vyřadí k datu přestupu.", goal:["trvale"]},
+  {id:"host", code:"Hostování", name:"Hostování", what:"Dočasně budeš hrát za jiný klub, nejdéle do konce sezóny 30. 6. Pak se vracíš.", goal:["docasne"]},
+  {id:"stst", code:"STST", name:"Střídavý start", what:"Budeš hrát za A-družstvo svého klubu i za A-družstvo druhého klubu v nižší soutěži.", goal:["dva"]},
+  {id:"sth", code:"STH", name:"Střídavé hostování", what:"Budeš hrát za svůj klub a zároveň za jedno družstvo jiného klubu ve vyšší celostátní soutěži.", goal:["dva"]},
+  {id:"endHost", code:"Ukončení", name:"Ukončení hostování", what:"Předčasně ukončíš hostování a vrátíš se do mateřského oddílu.", goal:["ukoncit"]},
+  {id:"endStst", code:"Ukončení", name:"Ukončení střídavého startu", what:"Předčasně ukončíš střídavý start.", goal:["ukoncit"]}
+];
+
+/* ===== Pomocné funkce pro data ===== */
+const D = (y,m,d) => new Date(Date.UTC(y,m-1,d));
+const parse = s => { const [y,m,d] = s.split("-").map(Number); return D(y,m,d); };
+const iso = dt => dt.toISOString().slice(0,10);
+const fmt = dt => `${dt.getUTCDate()}. ${dt.getUTCMonth()+1}. ${dt.getUTCFullYear()}`;
+const addDays = (dt,n) => new Date(dt.getTime()+n*864e5);
+const daysBetween = (a,b) => Math.round((b-a)/864e5);
+const todayIso = () => { const n = new Date(); return iso(D(n.getFullYear(), n.getMonth()+1, n.getDate())); };
+
+function season(dateIso, group){
+  const d = parse(dateIso), y = d.getUTCFullYear(), m = d.getUTCMonth()+1;
+  const sy = m >= 7 ? y : y-1;
+  const [em,ed] = CONFIG.periodEnd[group];
+  return { d, start:D(sy,7,1), end:D(sy+1,em,ed), ststEnd:D(sy+1,1,31), seasonEnd:D(sy+1,6,30), next:D(sy+1,7,1) };
+}
+
+/* ===== Otázky ===== */
+const A = {}; // odpovědi
+const YN = [["ano","Ano"],["ne","Ne"],["nevim","Nevím"]];
+const cat = () => CONFIG.categories.find(c => c.id === A.cat);
+const askYoung = () => ["dospeli","junior"].includes(A.cat);
+const sthAge = () => ["starsi","dorost"].includes(A.cat) || (askYoung() && A.young !== "ne");
+const ststAge = () => askYoung() && A.young !== "ne";
+
+const STEPS = [
+  {id:"cat", title:"V jaké jsi kategorii?", hint:"Podle kategorie se řídí přestupní období a výše poplatků.", type:"choice",
+    options:() => CONFIG.categories.map(c => [c.id, c.label, c.group==="A" ? "Přestupní období 1. 7. – 31. 1." : "Přestupní období 1. 7. – 31. 3."])},
+  {id:"young", show:askYoung, title:"Je ti v této sezóně 19, 20 nebo 21 let?", hint:"Tedy jsi v první až třetí sezóně v kategorii dospělých. Rozhoduje o střídavém startu a střídavém hostování.", type:"choice",
+    options:() => YN.map(([v,l]) => [v,l])},
+  {id:"state", title:"Jaká je tvoje situace teď?", type:"choice",
+    options:() => [["oddil","Mám svůj (mateřský) klub","Jsem registrovaný v klubu a hraju za něj."],["bez","Nemám žádný klub","Nemám oddílovou příslušnost."],["hostuji","Právě hostuji v jiném klubu",""],["stst","Mám střídavý start",""]]},
+  {id:"hostStart", show:() => A.state==="hostuji", title:"Kdy tvoje hostování začalo?", hint:"Hostování musí trvat alespoň 30 dnů, než ho lze ukončit.", type:"date"},
+  {id:"goal", title:"Co chceš udělat?", type:"choice",
+    options:() => {
+      const o = [["trvale","Hrát natrvalo za jiný klub",""],["docasne","Hrát dočasně za jiný klub","Třeba na půl sezóny."],["dva","Hrát za dva kluby zároveň",""]];
+      if (["hostuji","stst"].includes(A.state)) o.push(["ukoncit", A.state==="hostuji" ? "Ukončit hostování" : "Ukončit střídavý start",""]);
+      o.push(["vse","Nevím, ukaž mi všechno",""]);
+      return o;
+    }},
+  {id:"date", title:"Ke kterému dni to chceš řešit?", hint:"Předvyplnili jsme dnešek. Můžeš zadat i budoucí datum a naplánovat si to.", type:"date", def:todayIso},
+  {id:"zopQ", show:() => A.state==="bez" || ["trvale","vse"].includes(A.goal), title:"Pár otázek ke změně oddílové příslušnosti", hint:"Podle nich zjistíme, jestli můžeš změnit klub zdarma a kdykoliv v roce.", type:"multi",
+    items:() => A.state==="bez" ? [["zop3m","Měl(a) jsi změnu oddílové příslušnosti (ZOP) za poslední 3 měsíce?"]] :
+      [["member1y","Jsi členem Českého florbalu déle než 1 rok?"],["match1y","Uběhl od tvého posledního utkání v soutěžích ČF víc než 1 rok?"],["dodatek","Máš podepsaný evidenční dodatek?"],["zop3m","Měl(a) jsi ZOP za poslední 3 měsíce?"]]},
+  {id:"recent", show:() => A.state!=="bez" && A.goal!=="ukoncit", title:"Měl(a) jsi za poslední 3 měsíce přestup?", hint:"Po přestupu nelze 3 měsíce podat další žádost o přestup ani hostování.", type:"choice",
+    options:() => YN.map(([v,l]) => [v,l])},
+  {id:"twoQ", show:() => ["dva","vse"].includes(A.goal) && sthAge() && A.state!=="bez", title:"Hraní za dva kluby", type:"multi",
+    items:() => {
+      const it = [];
+      if (ststAge()) { it.push(["league","V jaké soutěži hraje A-družstvo tvého klubu?","league"]); it.push(["ststUsed","Využil(a) jsi letos už střídavý start?"]); }
+      it.push(["sthHigher","Chceš hrát za druhý klub ve vyšší celostátní soutěži, ve které tvůj klub nemá družstvo?"]);
+      return it;
+    }}
+];
+
+/* ===== Vyhodnocení ===== */
+function evaluate(){
+  const c = cat(), s = season(A.date, c.group), tier = c.high ? "hi" : "lo";
+  const inPeriod = s.d >= s.start && s.d <= s.end;
+  const R = {};
+  const fee = id => CONFIG.fees[id][tier] === 0 ? "Zdarma" : CONFIG.fees[id][tier] + " Kč";
+  const nextNote = `Nejbližší možnost od ${fmt(s.d > s.end ? s.next : s.start)}.`;
+  const set = (id, status, deadline, reason, steps) => R[id] = {status, deadline, reason, steps, fee:fee(id)};
+
+  // ZOP
+  if (A.state==="bez") {
+    if (A.zop3m==="ano") set("zop","no","Kdykoliv v roce","Od předchozí ZOP musí uběhnout alespoň 3 měsíce.");
+    else if (A.zop3m==="nevim") set("zop","maybe","Kdykoliv v roce","Ověř, jestli jsi neměl(a) ZOP v posledních 3 měsících.");
+    else set("zop","yes","Kdykoliv v roce","",["Vyber si nový klub a domluv se s ním.","Žádost se podává v informačním systému ČF."]);
+  } else if (A.member1y===undefined) {
+    set("zop","maybe","Kdykoliv v roce","ZOP je jen pro hráče bez klubu nebo pro ty, kdo rok nehráli a nemají evidenční dodatek.");
+  } else {
+    const fails = [];
+    if (A.member1y==="ne") fails.push("jsi členem ČF kratší dobu než 1 rok");
+    if (A.match1y==="ne") fails.push("od posledního utkání neuběhl 1 rok");
+    if (A.dodatek==="ano") fails.push("máš podepsaný evidenční dodatek");
+    if (A.zop3m==="ano") fails.push("od poslední ZOP neuběhly 3 měsíce");
+    const unsure = ["member1y","match1y","dodatek","zop3m"].some(k => A[k]==="nevim");
+    if (fails.length) set("zop","no","Kdykoliv v roce","Nesplňuješ podmínky: " + fails.join(", ") + ".");
+    else if (unsure) set("zop","maybe","Kdykoliv v roce","Některé podmínky jsi nevěděl(a). Ověř je u svého klubu nebo v IS ČF.");
+    else set("zop","yes","Kdykoliv v roce","",["Domluv se s novým klubem.","Žádost se podává v informačním systému ČF."]);
+  }
+
+  // Přestup a hostování
+  const blockReason = A.state==="bez" ? "Nemáš žádný klub, tvoje cesta je ZOP." :
+    A.recent==="ano" ? "Po přestupu nelze 3 měsíce podat další žádost o přestup ani hostování." :
+    !inPeriod ? "Datum je mimo přestupní období tvé kategorie. " + nextNote : "";
+  const unsureT = A.recent==="nevim" ? "Ověř, jestli jsi neměl(a) přestup v posledních 3 měsících." :
+    ["hostuji","stst"].includes(A.state) ? "Právě máš hostování nebo střídavý start. Postup ověř u svého klubu nebo na sekretariátu ČF." : "";
+  if (blockReason) set("prestup","no",fmt(s.end),blockReason);
+  else if (unsureT) set("prestup","maybe",fmt(s.end),unsureT);
+  else set("prestup","yes",fmt(s.end),"",["Domluv se s novým i mateřským klubem.","Žádost se podává v informačním systému ČF, datum přestupu musí být v přestupním období.",`Uhraď poplatek ${fee("prestup")}.`]);
+
+  const hostLeft = daysBetween(s.d, s.seasonEnd);
+  if (blockReason) set("host","no",fmt(s.end),blockReason);
+  else if (hostLeft < 30) set("host","no",fmt(s.end),"Hostování musí trvat alespoň 30 dnů a skončí nejpozději 30. 6.");
+  else if (unsureT) set("host","maybe",fmt(s.end),unsureT);
+  else set("host","yes",fmt(s.end),"",["Domluv se s klubem, kde chceš hostovat, a se svým klubem.",`Hostování může trvat 30 dnů až do ${fmt(s.seasonEnd)}.`,`Uhraď poplatek ${fee("host")}.`]);
+
+  // Střídavý start
+  const inStst = s.d >= s.start && s.d <= s.ststEnd;
+  if (!ststAge()) set("stst","no",fmt(s.ststEnd),"Střídavý start je jen pro hráče v prvních třech sezónách v dospělých (19–21 let).");
+  else if (A.state==="bez") set("stst","no",fmt(s.ststEnd),"Nemáš mateřský klub.");
+  else if (A.state==="stst") set("stst","no",fmt(s.ststEnd),"Střídavý start už máš. Lze ho využít jen jednou za sezónu.");
+  else if (A.ststUsed==="ano") set("stst","no",fmt(s.ststEnd),"Střídavý start lze využít jen jednou za sezónu.");
+  else if (!inStst) set("stst","no",fmt(s.ststEnd),"Střídavý start lze začít jen mezi 1. 7. a 31. 1. " + nextNote);
+  else if (A.young==="nevim") set("stst","maybe",fmt(s.ststEnd),"Ověř, jestli jsi v první až třetí sezóně v dospělých.");
+  else if (!A.league) set("stst","maybe",fmt(s.ststEnd),"Záleží na soutěži A-družstva tvého klubu. Zvol v průvodci „Hrát za dva kluby zároveň“.");
+  else if (A.league==="jina") set("stst","no",fmt(s.ststEnd),"A-družstvo tvého klubu musí hrát Superligu, 1. ligu mužů, Národní ligu, Extraligu žen nebo 1. ligu žen.");
+  else if (A.league==="nevim") set("stst","maybe",fmt(s.ststEnd),"Ověř, v jaké soutěži hraje A-družstvo tvého klubu.");
+  else set("stst","yes",fmt(s.ststEnd),"",["Druhý klub musí hrát o 1–2 úrovně níže (nejníže Regionální liga mužů / 3. liga žen).","Hrát můžeš jen za A-družstva obou klubů.","Pokud nenastoupíš aspoň k 30 % zápasů základní části, střídavý start automaticky skončí.",`Uhraď poplatek ${fee("stst")}.`]);
+
+  // Střídavé hostování
+  if (!sthAge()) set("sth","no",fmt(s.end),"Střídavé hostování je pro hráče od starších žáků po třetí sezónu v dospělých (14–21 let).");
+  else if (A.state==="bez") set("sth","no",fmt(s.end),"Nemáš mateřský klub.");
+  else if (!inPeriod) set("sth","no",fmt(s.end),"Datum je mimo přestupní období tvé kategorie. " + nextNote);
+  else if (!A.sthHigher) set("sth","maybe",fmt(s.end),"Záleží na soutěži, kam chceš hostovat. Zvol v průvodci „Hrát za dva kluby zároveň“.");
+  else if (A.sthHigher==="ne") set("sth","no",fmt(s.end),"Střídavě hostovat lze jen do vyšší celostátní soutěže, kde tvůj klub nemá družstvo.");
+  else if (A.sthHigher==="nevim" || A.young==="nevim") set("sth","maybe",fmt(s.end),"Ověř úroveň soutěží. Výjimky platí např. pro 1. ligu dorostenek a pro soutěž o úroveň nižší ve starší kategorii.");
+  else set("sth","yes",fmt(s.end),"",["Délku si zvolíš ve formuláři, nejvýše 105 dní.","Platí nejdéle do konce základní části soutěže, kam hostuješ.",`Uhraď poplatek ${fee("sth")}.`]);
+
+  // Ukončení hostování
+  if (A.state!=="hostuji") set("endHost","no",fmt(s.end),"Týká se jen hráčů, kteří právě hostují.");
+  else if (s.d > s.end) set("endHost","no",fmt(s.end),"Hostování lze ukončit nejpozději ke konci přestupního období. Skončí samo 30. 6.");
+  else if (A.hostStart && daysBetween(parse(A.hostStart), s.d) < 30) set("endHost","no",fmt(s.end),`Hostování musí trvat alespoň 30 dnů. Ukončit ho můžeš nejdříve ${fmt(addDays(parse(A.hostStart),30))}.`);
+  else if (!A.hostStart) set("endHost","maybe",fmt(s.end),"Ověř, že hostování trvá alespoň 30 dnů.");
+  else set("endHost","yes",fmt(s.end),"",["Den ukončení je posledním dnem, kdy hostování platí.",`Uhraď poplatek ${fee("endHost")}.`]);
+
+  // Ukončení STST
+  if (A.state!=="stst") set("endStst","no",fmt(s.ststEnd),"Týká se jen hráčů se střídavým startem.");
+  else if (s.d > s.ststEnd) set("endStst","no",fmt(s.ststEnd),"Střídavý start lze ukončit nejpozději 31. 1.");
+  else set("endStst","yes",fmt(s.ststEnd),"",["Den ukončení je posledním dnem, kdy střídavý start platí.",`Uhraď poplatek ${fee("endStst")}.`]);
+
+  return R;
+}
+
+/* ===== Vykreslení průvodce ===== */
+const W = document.getElementById("wizard");
+let idx = 0;
+const visible = () => STEPS.filter(s => !s.show || s.show());
+
+function stepDone(st){
+  if (st.type==="multi") return st.items().every(([k]) => A[k]);
+  return !!A[st.id];
+}
+
+function render(){
+  const steps = visible();
+  if (idx >= steps.length) return renderResult();
+  const st = steps[idx];
+  if (st.type==="date" && !A[st.id] && st.def) A[st.id] = st.def();
+  const pct = Math.round(idx / steps.length * 100);
+  let body = "";
+  if (st.type==="choice") {
+    body = `<div class="opts">` + st.options().map(([v,l,sub]) =>
+      `<button class="opt" data-k="${st.id}" data-v="${v}" aria-pressed="${A[st.id]===v}"><span class="dot"></span><span>${l}${sub?`<small>${sub}</small>`:""}</span></button>`).join("") + `</div>`;
+  } else if (st.type==="date") {
+    body = `<label class="lbl" for="in-${st.id}">Datum</label><input type="date" id="in-${st.id}" value="${A[st.id]||""}">`;
+  } else {
+    body = `<div>` + st.items().map(([k,q,kind]) => {
+      if (kind==="league") {
+        const o = CONFIG.topLeagues.map(x => [x,x]).concat([["jina","Jiná (nižší) soutěž"],["nevim","Nevím"]]);
+        return `<div class="yn"><label class="lbl" for="in-${k}">${q}</label><select id="in-${k}" data-k="${k}"><option value="">Vyber soutěž…</option>${o.map(([v,l]) => `<option value="${v}" ${A[k]===v?"selected":""}>${l}</option>`).join("")}</select></div>`;
+      }
+      return `<div class="yn"><span class="lbl">${q}</span><div class="seg">${YN.map(([v,l]) => `<button data-k="${k}" data-v="${v}" aria-pressed="${A[k]===v}">${l}</button>`).join("")}</div></div>`;
+    }).join("") + `</div>`;
+  }
+  W.innerHTML = `<div class="panel">
+    <div class="progress"><span>Krok ${idx+1} z ${steps.length}</span><div class="bar"><i style="width:${pct}%"></i></div></div>
+    <div style="display:flex;flex-direction:column;gap:6px"><h2>${st.title}</h2>${st.hint?`<p class="hint">${st.hint}</p>`:""}</div>
+    ${body}
+    <div class="nav"><button class="btn" id="back" ${idx===0?"disabled":""}>Zpět</button><button class="btn primary" id="next" ${stepDone(st)?"":"disabled"}>${idx===steps.length-1?"Zobrazit možnosti":"Pokračovat"}</button></div>
+  </div>`;
+  W.querySelectorAll("button[data-k]").forEach(b => b.onclick = () => {
+    A[b.dataset.k] = b.dataset.v;
+    if (st.type==="choice") { idx++; render(); } else render();
+  });
+  W.querySelectorAll("select[data-k]").forEach(s => s.onchange = () => { A[s.dataset.k] = s.value || undefined; render(); });
+  const di = W.querySelector('input[type=date]');
+  if (di) di.oninput = () => { A[st.id] = di.value; document.getElementById("next").disabled = !di.value; };
+  document.getElementById("back").onclick = () => { idx = Math.max(0, idx-1); render(); };
+  document.getElementById("next").onclick = () => { idx++; render(); };
+}
+
+const LABEL = {yes:"Můžeš využít", maybe:"Možná – ověř", no:"Teď ne"};
+function card(o, r, match){
+  return `<article class="card">
+    <div class="card-head"><div><div class="code">${o.code}</div><h3>${o.name}</h3></div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><span class="pill ${r.status}">${LABEL[r.status]}</span>${match?'<span class="match">Odpovídá tvému cíli</span>':""}</div></div>
+    <p>${o.what}</p>
+    <dl class="facts"><div><dt>Poplatek</dt><dd>${r.fee}</dd></div><div><dt>Podat nejpozději</dt><dd>${r.deadline}</dd></div></dl>
+    ${r.reason?`<p class="reason">${r.reason}</p>`:""}
+    ${r.steps&&r.status!=="no"?`<ol class="steps">${r.steps.map(x=>`<li>${x}</li>`).join("")}</ol>`:""}
+  </article>`;
+}
+
+function renderResult(){
+  const R = evaluate(), rank = {yes:0, maybe:1, no:2};
+  const isMatch = o => o.goal.includes(A.goal);
+  const sorted = OPTIONS.slice().sort((a,b) => rank[R[a.id].status]-rank[R[b.id].status] || isMatch(b)-isMatch(a));
+  const now = sorted.filter(o => R[o.id].status!=="no"), later = sorted.filter(o => R[o.id].status==="no");
+  const goalLabel = {trvale:"natrvalo jinam",docasne:"dočasně jinam",dva:"za dva kluby",ukoncit:"ukončit",vse:"vše"}[A.goal];
+  W.innerHTML = `<div style="display:flex;flex-direction:column;gap:16px">
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <h2>${now.length ? `Máš ${now.length} ${now.length===1?"možnost":now.length<5?"možnosti":"možností"}` : "Teď nemáš žádnou možnost"}</h2>
+      <div class="summary"><span>${cat().label}</span><span>Cíl: ${goalLabel}</span><span>K datu ${fmt(parse(A.date))}</span></div>
+    </div>
+    <div class="cards">${now.map(o => card(o,R[o.id],isMatch(o))).join("") || `<p class="reason">Podívej se níže, proč to teď nejde a kdy to bude možné.</p>`}</div>
+    ${later.length?`<details class="later" ${now.length?"":"open"}><summary>Teď nejde (${later.length})</summary><div class="cards">${later.map(o => card(o,R[o.id],isMatch(o))).join("")}</div></details>`:""}
+    <p class="note">Mateřský oddíl nesouhlasí s přestupem? <a href="${CONFIG.disputeUrl}" target="_blank" rel="noopener">Postup při neshodě u žádosti o přestup</a></p>
+    <div class="nav"><button class="btn" id="back">Upravit odpovědi</button><button class="btn primary" id="restart">Začít znovu</button></div>
+  </div>`;
+  document.getElementById("back").onclick = () => { idx = visible().length-1; render(); };
+  document.getElementById("restart").onclick = () => { for (const k in A) delete A[k]; idx = 0; render(); };
+}
+
+/* ===== Přehled všech možností ===== */
+function renderAll(){
+  const f = (id) => { const x = CONFIG.fees[id]; return x.hi===x.lo ? (x.hi? x.hi+" Kč":"Zdarma") : `${x.hi} / ${x.lo} Kč`; };
+  const rows = [
+    ["zop","Kdykoliv, nejdříve 3 měsíce od předešlé ZOP","Bez klubu, nebo členem ČF déle než 1 rok, 1 rok bez utkání a bez evidenčního dodatku"],
+    ["prestup","V přestupním období","Po přestupu 3 měsíce nelze podat další přestup ani hostování"],
+    ["host","Začátek 1. 7. až konec přestupního období, nejdéle do 30. 6.","Nejméně 30 dnů"],
+    ["stst","Začátek 1. 7. – 31. 1., nejdéle do 30. 6.","19–21 let; A-tým klubu v nejvyšší soutěži; o 1–2 úrovně níže; jen 1× za sezónu"],
+    ["sth","Začátek 1. 7. až konec přestupního období, nejvýše 105 dní","14–21 let; jen do vyšší celostátní soutěže, kterou klub nemá"],
+    ["endHost","Nejpozději konec přestupního období","Hostování trvá alespoň 30 dnů"],
+    ["endStst","Nejpozději 31. 1.","—"]
+  ];
+  document.getElementById("all").innerHTML = `<div class="panel">
+    <div style="display:flex;flex-direction:column;gap:6px"><h2>Všechny možnosti</h2>
+    <p class="hint">Přestupní období: 1. 7. – 31. 1. pro dorost, juniory a dospělé; 1. 7. – 31. 3. pro žáky, elévy a přípravky. U dvou cen platí vyšší pro muže, ženy a juniory, nižší pro mladší kategorie.</p></div>
+    <div class="tbl"><table><thead><tr><th>Možnost</th><th>Kdy</th><th>Podmínky</th><th>Cena</th></tr></thead><tbody>
+    ${rows.map(([id,kdy,pod]) => { const o = OPTIONS.find(x=>x.id===id); return `<tr><td><strong>${o.name}</strong><br><span class="hint">${o.what}</span></td><td>${kdy}</td><td>${pod}</td><td style="white-space:nowrap">${f(id)}</td></tr>`; }).join("")}
+    </tbody></table></div></div>`;
+}
+
+/* ===== Záložky ===== */
+const tabW = document.getElementById("tab-wizard"), tabA = document.getElementById("tab-all");
+function show(which){
+  const w = which==="wizard";
+  tabW.setAttribute("aria-selected", w); tabA.setAttribute("aria-selected", !w);
+  document.getElementById("wizard").hidden = !w; document.getElementById("all").hidden = w;
+}
+tabW.onclick = () => show("wizard"); tabA.onclick = () => show("all");
+
+renderAll(); render();
+</script>
+</body>
+</html>
