@@ -138,7 +138,8 @@ const CONFIG = {
     stst:{hi:300,lo:300}, sth:{hi:250,lo:250}, endHost:{hi:200,lo:200}, endStst:{hi:200,lo:200}
   },
   topLeagues: ["Superliga","1. liga mužů","Národní liga","Extraliga žen","1. liga žen"],
-  disputeUrl: "https://www.ceskyflorbal.cz/neshoda-u-zadosti-o-prestup"
+  disputeUrl: "https://www.ceskyflorbal.cz/neshoda-u-zadosti-o-prestup",
+  findClubUrl: "https://mickoni.cz/"
 };
 
 const OPTIONS = [
@@ -186,7 +187,7 @@ const STEPS = [
   {id:"cat", title:"V jaké jsi kategorii?", hint:() => `Ročníky narození platí pro sezónu ${seasonLabel()}. Podle kategorie se řídí přestupní období a výše poplatků.`, type:"choice",
     options:() => CONFIG.categories.map(c => [c.id, `${c.label} (${yearsFor(c.minAge, c.maxAge)})`, (c.note ? c.note + " " : "") + (c.group==="A" ? "Přestupní období 1. 7. – 31. 1." : "Přestupní období 1. 7. – 31. 3.")])},
   {id:"state", title:"Jaká je tvoje situace teď?", type:"choice",
-    options:() => [["oddil","Mám svůj (mateřský) klub","Jsem registrovaný v klubu a hraju za něj."],["bez","Nemám žádný klub","Nejsem registrovaný v žádném klubu."],["hostuji","Právě hostuji v jiném klubu",""]]
+    options:() => [["oddil","Mám svůj (mateřský) klub","Jsem registrovaný v klubu a hraju za něj."],["bez","Nemám žádný klub","Byl(a) jsem registrovaný v Českém florbalu, ale teď nepatřím k žádnému klubu."],["novy","Jsem nový hráč","Ještě jsem nikdy nebyl(a) registrovaný v Českém florbalu."],["hostuji","Právě hostuji v jiném klubu",""]]
       .concat(ststAge() ? [["stst","Mám střídavý start",""]] : [])
       .concat(sthAge() ? [["sth","Mám střídavé hostování",""]] : [])},
   {id:"hostStart", show:() => A.state==="hostuji", title:"Kdy tvoje hostování začalo?", hint:"Hostování musí trvat alespoň 30 dnů, než ho lze ukončit.", type:"date"},
@@ -297,7 +298,8 @@ function evaluate(){
 /* ===== Vykreslení průvodce ===== */
 const W = document.getElementById("wizard");
 let idx = 0;
-const visible = () => STEPS.filter(s => !s.show || s.show());
+const visible = () => STEPS.filter((s,i) =>
+  !(A.state==="novy" && i > STEPS.findIndex(x => x.id==="state")) && (!s.show || s.show()));
 
 function stepDone(st){
   if (st.type==="multi") return st.items().every(([k]) => A[k]);
@@ -362,7 +364,30 @@ function card(o, r, match){
   </article>`;
 }
 
+function renderNewPlayer(){
+  W.innerHTML = `<div style="display:flex;flex-direction:column;gap:16px">
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <h2>Jako nový hráč přestup neřešíš</h2>
+      <div class="summary"><span>${cat().label}</span><span>Nový hráč</span></div>
+    </div>
+    <article class="card">
+      <div class="card-head"><div><div class="code">Nový hráč</div><h3>Vyber si klub a přihlas se</h3></div><span class="pill yes">Můžeš hned</span></div>
+      <p>Přestup, hostování ani změnu oddílové příslušnosti nepotřebuješ. Stačí si najít klub a zaregistrovat se v něm. Můžeš kdykoliv v roce.</p>
+      <ol class="steps">
+        <li>Najdi si klub ve svém okolí na <a href="${CONFIG.findClubUrl}" target="_blank" rel="noopener">mickoni.cz</a>.</li>
+        <li>Ozvi se klubu a domluv se na tréninku.</li>
+        <li>Registraci do Českého florbalu za tebe vyřídí klub.</li>
+      </ol>
+      <a class="btn primary" style="text-align:center;text-decoration:none" href="${CONFIG.findClubUrl}" target="_blank" rel="noopener">Najít klub na mickoni.cz</a>
+    </article>
+    <div class="nav"><button class="btn" id="back">Upravit odpovědi</button><button class="btn primary" id="restart">Začít znovu</button></div>
+  </div>`;
+  document.getElementById("back").onclick = () => { idx = visible().length-1; render(); };
+  document.getElementById("restart").onclick = () => { for (const k in A) delete A[k]; idx = 0; render(); };
+}
+
 function renderResult(){
+  if (A.state==="novy") return renderNewPlayer();
   const R = evaluate(), rank = {yes:0, maybe:1, no:2};
   const isMatch = o => o.goal.includes(A.goal);
   const applicable = o => (!["stst","endStst"].includes(o.id) || ststAge()) && (o.id!=="sth" || sthAge());
