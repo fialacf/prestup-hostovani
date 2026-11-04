@@ -19,13 +19,13 @@
     <p class="lead">Odpověz na pár otázek a uvidíš, jaké máš možnosti změnit klub, kolik to stojí a co udělat dál.</p>
   </header>
 
-  <div class="tabs" role="tablist">
-    <button id="tab-wizard" role="tab" aria-selected="true">Průvodce</button>
-    <button id="tab-all" role="tab" aria-selected="false">Všechny možnosti</button>
+  <div class="tabs" role="tablist" aria-label="Zobrazení">
+    <button id="tab-wizard" role="tab" aria-selected="true" aria-controls="wizard" tabindex="0">Průvodce</button>
+    <button id="tab-all" role="tab" aria-selected="false" aria-controls="all" tabindex="-1">Všechny možnosti</button>
   </div>
 
-  <section id="wizard"></section>
-  <section id="all" hidden></section>
+  <section id="wizard" role="tabpanel" aria-labelledby="tab-wizard"></section>
+  <section id="all" role="tabpanel" aria-labelledby="tab-all" hidden></section>
 
   <p class="note">Průvodce je orientační, závazný je Přestupní řád Českého florbalu (Edice 2026, platný od 1. 7. 2026). Řeší jen přestupy mezi kluby v ČR. Mezinárodní přestup do zahraničního klubu se řídí přestupním řádem IFF, přestup ze zahraničí do ČF řeší Registrační řád.</p>
   <p class="note"><a href="podklady.html">Podklady a pravidla</a> – všechna data, ze kterých průvodce vychází, pro kontrolu.</p>
@@ -141,7 +141,7 @@ const STEPS = [
       o.push(["vse","Nevím, ukaž mi všechno",""]);
       return o;
     }},
-  {id:"date", title:"Ke kterému dni to chceš řešit?", hint:"Je to datum, od kterého má změna platit. Předvyplnili jsme dnešek, můžeš zadat i budoucí datum. Žádosti lze podávat už od 1. 5., datum musí spadat do přestupního období.", type:"date", def:todayIso},
+  {id:"date", title:"Ke kterému dni to chceš řešit?", hint:"Je to datum, od kterého má změna platit. Předvyplnili jsme dnešek, můžeš zadat i budoucí datum. Žádosti lze podávat už od 1. 5., datum musí spadat do přestupního období.", type:"date", def:todayIso, show:() => A.state!=="bez"},
   {id:"zopQ", show:() => zopQShown(), title:() => A.state==="bez" ? "Pár otázek ke změně oddílové příslušnosti" : "Pár otázek před výsledkem",
     hint:() => A.state==="bez" ? "Podle nich zjistíme, jestli můžeš změnit klub zdarma a kdykoliv v roce." : "Dvě věci znějí podobně, ale jsou to různá pravidla. U každé je vysvětlení, co přesně myslíme.", type:"multi",
     items:() => {
@@ -185,6 +185,7 @@ const STEPS = [
 
 /* ===== Vyhodnocení ===== */
 function evaluate(){
+  if (!A.date) A.date = todayIso(); // hráč bez klubu se na datum neptá
   const c = cat(), s = season(A.date, c.group), tier = c.high ? "hi" : "lo";
   const inPeriod = s.d >= s.start && s.d <= s.end;
   const R = {};
@@ -295,7 +296,7 @@ function evaluate(){
 
   // Ukončení hostování
   if (A.state!=="hostuji") set("endHost","no",fmt(s.end),"Týká se jen hráčů, kteří právě hostují.");
-  else if (s.d > s.end) set("endHost","no",fmt(s.end),"Hostování lze ukončit nejpozději ke konci přestupního období. Skončí samo 30. 6.");
+  else if (s.d > s.end) set("endHost","no",fmt(s.end),"Hostování lze ukončit nejpozději ke konci přestupního období. Skončí nejpozději 30. 6.");
   else if (A.hostStart && daysBetween(parse(A.hostStart), s.d) < 30) set("endHost","no",fmt(s.end),`Hostování musí trvat minimálně 30 dnů. Ukončit ho můžeš nejdříve ${fmt(addDays(parse(A.hostStart),30))}.`);
   else if (!A.hostStart) set("endHost","maybe",fmt(s.end),"Ověř, že hostování trvá alespoň 30 dnů.");
   else set("endHost","yes",fmt(s.end),"",["Ukončení se dělá dohodou obou klubů a tebe, žádost „Ukončení hostování“ se podává ve FISu.","Den ukončení je posledním dnem, kdy hostování platí.",`Uhraď poplatek ${fee("endHost")}.`,"Potom můžeš podat přestup do jiného klubu."]);
@@ -305,6 +306,11 @@ function evaluate(){
   else if (s.d > s.ststEnd) set("endStst","no",fmt(s.ststEnd),"Střídavý start lze ukončit nejpozději 31. 1.");
   else set("endStst","yes",fmt(s.ststEnd),"",["Ukončení se dělá dohodou obou klubů a tebe, žádost „Ukončení střídavého startu“ se podává ve FISu.","Den ukončení je posledním dnem, kdy střídavý start platí.",`Poplatek ${fee("endStst")} se platí jen při ukončení dohodou.`,"Zdarma střídavý start zaniká sám, když přestoupíš do jiného klubu nebo když v základní části soutěže nenastoupíš aspoň k 30 % utkání družstva, ve kterém střídavě startuješ."]);
 
+  // Je-li datum po konci přestupního období, ukaž termín příští sezóny, ne už uplynulý.
+  if (s.d > s.end) {
+    const nx = season(iso(s.next), c.group), swap = {[fmt(s.end)]: fmt(nx.end), [fmt(s.ststEnd)]: fmt(nx.ststEnd)};
+    for (const id in R) if (swap[R[id].deadline]) R[id].deadline = swap[R[id].deadline];
+  }
   return R;
 }
 
@@ -328,32 +334,58 @@ function clearAfter(stepId){
 const val = x => typeof x === "function" ? x() : x;
 // Každý krok je vlastní položka historie prohlížeče (tlačítko Zpět), odpovědi přežijí obnovení stránky.
 let navFromPop = false;
+function saveState(){ try { sessionStorage.setItem("prestup", JSON.stringify({A, idx})); } catch(e) {} }
 function syncHistory(){
-  try { sessionStorage.setItem("prestup", JSON.stringify({A, idx})); } catch(e) {}
-  if (navFromPop) return;
+  saveState();
   try {
     const cur = history.state ? history.state.idx : undefined;
     if (cur === idx) return;
     const hash = "#" + (idx >= visible().length ? "vysledek" : "krok-" + (idx+1));
-    if (cur === undefined) history.replaceState({idx}, "", hash); else history.pushState({idx}, "", hash);
+    // při návratu v historii záznam jen opravíme, nový nepřidáváme
+    if (cur === undefined || navFromPop) history.replaceState({idx}, "", hash); else history.pushState({idx}, "", hash);
   } catch(e) {}
 }
-function render(){
+// Obnovení po načtení stránky: přijmeme jen známé odpovědi (řetězce) a platná data, jinak začneme znovu.
+function restoreState(){
+  try {
+    const sv = JSON.parse(sessionStorage.getItem("prestup") || "null");
+    if (!sv || typeof sv.A !== "object" || sv.A === null) return;
+    for (const [k,v] of Object.entries(sv.A)) if (SHORT[k] && typeof v === "string") A[k] = v;
+    for (const k of ["date","hostStart"]) if (A[k] && !(/^\d{4}-\d{2}-\d{2}$/.test(A[k]) && A[k] >= CONFIG.dateMin && A[k] <= CONFIG.dateMax)) delete A[k];
+    if (!catById(A.cat)) { for (const k in A) delete A[k]; return; }
+    idx = Number.isInteger(sv.idx) && sv.idx > 0 ? sv.idx : 0;
+  } catch(e) { for (const k in A) delete A[k]; }
+}
+// Po změně kroku přesuneme zaměření na nadpis (čtečky a klávesnice), při překreslení téhož kroku vrátíme zaměření na stejný ovladač.
+let renderedIdx = null;
+function render(focusHeading){
+  const f = document.activeElement;
+  const sel = f && W.contains(f) ? (f.dataset && f.dataset.k && f.dataset.v ? `button[data-k="${f.dataset.k}"][data-v="${f.dataset.v}"]` : f.id ? `#${f.id}` : "") : "";
+  const before = renderedIdx;
+  renderView();
+  renderedIdx = idx;
+  if (before === null) return; // první vykreslení: zaměření nepřebíráme
+  if (before !== idx || focusHeading) { const h = W.querySelector("h2"); if (h) { h.tabIndex = -1; h.focus({preventScroll:true}); } }
+  else if (sel) { const el = W.querySelector(sel); if (el && !el.disabled) el.focus({preventScroll:true}); }
+}
+function renderView(){
   const steps = visible();
   // Neukazuj výsledek, když chybí odpověď (např. po návratu v historii): vrať se k první nezodpovězené otázce.
   if (idx >= steps.length) { const bad = steps.findIndex(x => !stepDone(x)); if (bad >= 0) idx = bad; }
   syncHistory();
   if (idx >= steps.length) return renderResult();
   const st = steps[idx];
+  const dateLo = st.id==="date" && A.hostStart ? A.hostStart : CONFIG.dateMin; // konec hostování nemůže být před jeho začátkem
   if (st.type==="date" && !A[st.id] && st.def) A[st.id] = st.def();
+  if (st.type==="date" && A[st.id] && A[st.id] < dateLo) A[st.id] = dateLo;
   const pct = Math.round(idx / steps.length * 100);
   let body = "";
   if (st.type==="choice") {
-    body = `<div class="opts">` + st.options().map(([v,l,sub,why]) => why
+    body = `<div class="opts" role="group" aria-labelledby="step-title">` + st.options().map(([v,l,sub,why]) => why
       ? `<button class="opt" disabled aria-disabled="true"><span class="dot"></span><span>${l}${sub?`<small>${sub}</small>`:""}<small class="why">${why}</small></span></button>`
       : `<button class="opt" data-k="${st.id}" data-v="${v}" aria-pressed="${A[st.id]===v}"><span class="dot"></span><span>${l}${sub?`<small>${sub}</small>`:""}</span></button>`).join("") + `</div>`;
   } else if (st.type==="date") {
-    body = `<label class="lbl" for="in-${st.id}">Datum</label><input type="date" id="in-${st.id}" value="${A[st.id]||""}">`;
+    body = `<label class="lbl" for="in-${st.id}">Datum</label><input type="date" id="in-${st.id}" aria-describedby="step-title" min="${dateLo}" max="${CONFIG.dateMax}" value="${escHtml(A[st.id]||"")}">`;
   } else {
     body = `<div>` + st.items().map(([k,q,kind,o,hint]) => {
       if (kind==="heading") return `<h3 class="qgrp">${q}</h3>`;
@@ -361,17 +393,18 @@ function render(){
       if (kind==="select") {
         return `<div class="yn"><label class="lbl" for="in-${k}">${q}</label>${h}<select id="in-${k}" data-k="${k}"><option value="">Vyber soutěž…</option>${o.map(([v,l]) => `<option value="${v}" ${A[k]===v?"selected":""}>${l}</option>`).join("")}</select></div>`;
       }
-      return `<div class="yn"><span class="lbl">${q}</span>${h}<div class="seg">${(o||YN).map(([v,l]) => `<button data-k="${k}" data-v="${v}" aria-pressed="${A[k]===v}">${l}</button>`).join("")}</div></div>`;
+      return `<div class="yn"><span class="lbl" id="q-${k}">${q}</span>${h}<div class="seg" role="group" aria-labelledby="q-${k}">${(o||YN).map(([v,l]) => `<button data-k="${k}" data-v="${v}" aria-pressed="${A[k]===v}">${l}</button>`).join("")}</div></div>`;
     }).join("") + `</div>`;
   }
   W.innerHTML = `<div class="panel">
-    <div class="progress"><span>Krok ${idx+1} z ${steps.length}</span><div class="bar"><i style="width:${pct}%"></i></div></div>
+    <div class="progress"><span>Krok ${idx+1} z ${steps.length}</span><div class="bar" role="progressbar" aria-label="Postup" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}"><i style="width:${pct}%"></i></div></div>
     ${answersBlock(idx)}
-    <div style="display:flex;flex-direction:column;gap:6px"><h2>${val(st.title)}</h2>${st.hint?`<p class="hint">${val(st.hint)}</p>`:""}</div>
+    <div style="display:flex;flex-direction:column;gap:6px"><h2 id="step-title">${val(st.title)}</h2>${st.hint?`<p class="hint">${val(st.hint)}</p>`:""}</div>
     ${body}
     <div class="nav"><button class="btn" id="back" ${idx===0?"disabled":""}>Zpět</button><button class="btn primary" id="next" ${stepDone(st)?"":"disabled"}>${idx===steps.length-1?"Zobrazit možnosti":"Pokračovat"}</button></div>
   </div>`;
-  W.querySelectorAll("button[data-k]").forEach(b => b.onclick = () => {
+  W.querySelectorAll("button[data-k]").forEach(b => b.onclick = ev => {
+    if (ev.detail > 1) return; // dvojklik by hned zodpověděl i následující otázku
     if (st.type==="choice" && A[st.id] !== b.dataset.v) clearAfter(st.id);
     if (b.dataset.k==="sthG" && A.sthG !== b.dataset.v) delete A.sthHome; // úrovně se liší podle pohlaví
     A[b.dataset.k] = b.dataset.v;
@@ -383,9 +416,13 @@ function render(){
     render();
   });
   const di = W.querySelector('input[type=date]');
-  if (di) di.oninput = () => { A[st.id] = di.value; document.getElementById("next").disabled = !di.value; };
+  if (di) di.oninput = () => {
+    const okv = di.value && di.checkValidity();
+    if (okv) { A[st.id] = di.value; if (st.id==="hostStart" && A.date && A.date < di.value) delete A.date; } else delete A[st.id];
+    document.getElementById("next").disabled = !okv; saveState();
+  };
   document.getElementById("back").onclick = () => { idx = Math.max(0, idx-1); render(); };
-  document.getElementById("next").onclick = () => { idx++; render(); };
+  document.getElementById("next").onclick = ev => { if (ev.detail > 1) return; idx++; render(); };
 }
 
 // Přehled všech odpovědí hráče (krátký název otázky: odpověď) nad výsledkem
@@ -489,7 +526,7 @@ function hostEndNotice(){
   const s0 = season(A.date, cat().group);
   if (s0.d > s0.end) return ""; // přestupní období skončilo, vysvětluje to upozornění o přestupním období
   const tail = h.afterEnd
-    ? ` To je ale už po konci přestupního období (${fmt(h.end)}), takže hostování letos skončí samo 30. 6.`
+    ? ` To je ale už po konci přestupního období (${fmt(h.end)}), takže hostování letos skončí nejpozději 30. 6.`
     : ` <button type="button" class="btn small" data-setdate="${iso(h.earliest)}">Zobrazit k datu ${fmt(h.earliest)}</button>`;
   return `<div class="notice"><strong>Hostování zatím nejde ukončit.</strong> Musí trvat minimálně 30 dnů od začátku (${fmt(h.start)}), ukončit ho můžeš nejdříve ${fmt(h.earliest)}. Do té doby můžeš přestoupit jen do klubu, kde hostuješ, a hostovat v jiném klubu nejde.${tail}</div>`;
 }
@@ -502,9 +539,9 @@ function periodNotice(R){
   const may1 = D(s.next.getUTCFullYear(), 5, 1);
   const apply = s.d >= may1 ? "Žádost už můžeš podat (od 1. 5.)" : `Žádost můžeš podat od ${fmt(may1)}`;
   let extra = "";
-  if (A.state==="hostuji") extra += " Současné hostování skončí samo 30. 6.";
+  if (A.state==="hostuji") extra += " Současné hostování skončí nejpozději 30. 6.";
   if (A.state==="stst") extra += " Střídavý start skončí nejpozději 30. 6.";
-  if (R.zop && R.zop.status!=="no") extra += " Změna oddílové příslušnosti bez přestupu jde kdykoliv.";
+  if (R.zop && R.zop.status!=="no" && zopQShown()) extra += " Změna oddílové příslušnosti bez přestupu jde kdykoliv.";
   const btn = A.state==="oddil" ? " " + setDateBtn(s.next) : "";
   return `<div class="notice"><strong>Přestupní období tvé kategorie skončilo (${fmt(s.end)}).</strong> Přestup, hostování, střídavý start ani střídavé hostování zatím nejdou. ${apply}, ale datum OD musí být nejdříve ${fmt(s.next)}.${extra}${btn}</div>`;
 }
@@ -529,14 +566,16 @@ function renderResult(){
   mailLines = null;
   const R = evaluate(), rank = {yes:0, maybe:1, no:2};
   const isMatch = o => o.goal.includes(A.goal);
-  // Karty, které pro hráče nemají smysl, vůbec nezobrazujeme.
+  const twoGoal = ["dva","vse"].includes(A.goal);
+  // Karty, které pro hráče nemají smysl, vůbec nezobrazujeme (například změnu příslušnosti, na kterou se nezeptali).
   const applicable = o =>
     A.state==="bez" ? o.id==="zop" || (o.id==="prihlaska" && A.memberNow!=="ano") :
     o.id==="prihlaska" ? false :
+    o.id==="zop" ? zopQShown() || TEMP_STATES.includes(A.state) :
     o.id==="endHost" ? A.state==="hostuji" :
     o.id==="endStst" ? A.state==="stst" :
-    o.id==="stst" ? ststAge() :
-    o.id==="sth" ? sthAge() : true;
+    o.id==="stst" ? ststAge() && (twoGoal || TEMP_STATES.includes(A.state)) :
+    o.id==="sth" ? sthAge() && (twoGoal || TEMP_STATES.includes(A.state)) : true;
   const sorted = OPTIONS.filter(applicable).sort((a,b) => rank[R[a.id].status]-rank[R[b.id].status] || isMatch(b)-isMatch(a));
   const now = sorted.filter(o => R[o.id].status!=="no"), later = sorted.filter(o => R[o.id].status==="no");
   W.innerHTML = `<div style="display:flex;flex-direction:column;gap:16px">
@@ -627,9 +666,17 @@ const tabW = document.getElementById("tab-wizard"), tabA = document.getElementBy
 function show(which){
   const w = which==="wizard";
   tabW.setAttribute("aria-selected", w); tabA.setAttribute("aria-selected", !w);
+  tabW.tabIndex = w ? 0 : -1; tabA.tabIndex = w ? -1 : 0;
   document.getElementById("wizard").hidden = !w; document.getElementById("all").hidden = w;
 }
 tabW.onclick = () => show("wizard"); tabA.onclick = () => { renderAll(); show("all"); };
+// šipky, Home a End přepínají záložky (vzor WAI-ARIA tabs)
+document.querySelector(".tabs").addEventListener("keydown", ev => {
+  if (!["ArrowLeft","ArrowRight","Home","End"].includes(ev.key)) return;
+  ev.preventDefault();
+  const toAll = ev.key==="ArrowRight" || ev.key==="End";
+  (toAll ? tabA : tabW).onclick(); (toAll ? tabA : tabW).focus();
+});
 document.getElementById("all").addEventListener("click", ev => {
   const t = ev.target.closest("button[data-tier]");
   if (t) { priceTier = t.dataset.tier; renderAll(); return; }
@@ -644,7 +691,7 @@ document.addEventListener("click", ev => {
     // Odpovědi vázané na čas po přesunu data přestanou platit: po 3 měsících už není „přestup za poslední 3 měsíce“, v nové sezóně není využitý střídavý start.
     if (daysBetween(oldD, newD) >= 92) { if (A.recent==="ano") A.recent = "ne"; if (A.zop3m==="ano") A.zop3m = "ne"; }
     if (A.ststUsed==="ano" && season(iso(oldD), g).start.getTime() !== season(iso(newD), g).start.getTime()) A.ststUsed = "ne";
-    A.date = d.dataset.setdate; render(); window.scrollTo({top:0, behavior:"smooth"}); return;
+    A.date = d.dataset.setdate; render(true); window.scrollTo({top:0, behavior:"smooth"}); return;
   }
   const c = ev.target.closest && ev.target.closest("button.chip");
   if (!c) return;
@@ -654,11 +701,12 @@ document.addEventListener("click", ev => {
 window.addEventListener("popstate", ev => {
   const i = ev.state && ev.state.idx;
   if (typeof i !== "number") return;
+  show("wizard"); // při návratu v historii ukaž průvodce, i když byla otevřená záložka Všechny možnosti
   navFromPop = true; idx = i; render(); navFromPop = false;
   window.scrollTo({top:0});
 });
-try { const sv = JSON.parse(sessionStorage.getItem("prestup") || "null"); if (sv && sv.A) { Object.assign(A, sv.A); idx = sv.idx || 0; } } catch(e) {}
-render();
+try { restoreState(); render(); }
+catch(e) { for (const k in A) delete A[k]; idx = 0; try { sessionStorage.removeItem("prestup"); } catch(_) {} render(); }
 </script>
 </body>
 </html>

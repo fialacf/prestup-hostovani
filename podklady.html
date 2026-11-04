@@ -40,7 +40,7 @@ tr[hidden],li[hidden]{display:none}
 
   <div class="search">
     <input type="search" id="q" placeholder="Hledat v pravidlech a datech (např. hostování, 30 dnů, juniorky)…" aria-label="Hledat">
-    <span class="count" id="count"></span>
+    <span class="count" id="count" aria-live="polite"></span>
   </div>
 
   <section class="sec panel" id="s-legend">
@@ -89,8 +89,8 @@ $("s-cat").innerHTML = `<h2>Kategorie a ročníky narození</h2>
   ]));
 
 // ---- 2) Poplatky ----
-const feeNames = {zop:["Změna oddílové příslušnosti","RegŘ 2.1"], prestup:["Přestup","PŘ čl. 2.3"], host:["Hostování","PŘ čl. 3.4"], stst:["Střídavý start","PŘ čl. 5.6"], sth:["Střídavé hostování","PŘ čl. 4.8"], endHost:["Ukončení hostování","PŘ čl. 3.6"], endStst:["Ukončení střídavého startu (dohodou)","PŘ čl. 5.7"]};
-$("s-fees").innerHTML = `<h2>Poplatky</h2>` + table(["Možnost","Muži, ženy, junioři","Dorost a mladší","Zdroj"],
+const feeNames = {zop:["Změna oddílové příslušnosti","RegŘ čl. 2.1 (výjimka čl. 5.2)"], prestup:["Přestup","PŘ čl. 2.3"], host:["Hostování","PŘ čl. 3.4"], stst:["Střídavý start","PŘ čl. 5.6"], sth:["Střídavé hostování","PŘ čl. 4.8"], endHost:["Ukončení hostování","PŘ čl. 3.6"], endStst:["Ukončení střídavého startu (dohodou)","PŘ čl. 5.7"]};
+$("s-fees").innerHTML = `<h2>Poplatky</h2><p class="hint">U změny oddílové příslušnosti: RegŘ čl. 2.1 říká, že registrace je bezplatná, s výjimkou obnovy podle čl. 5.2. Při obnově do 6 měsíců po zrušení registrace klubem se platí poplatek ve výši přestupního poplatku. Průvodce tuto výjimku zatím neřeší.</p>` + table(["Možnost","Muži, ženy, junioři","Dorost a mladší","Zdroj"],
   Object.entries(feeNames).map(([id,[n,src]]) => [`<td><strong>${n}</strong></td>`, `<td>${f(CONFIG.fees[id],"hi")}</td>`, `<td>${f(CONFIG.fees[id],"lo")}</td>`, `<td class="src">${src}</td>`])
   .concat([[`<td><strong>Členský příspěvek ČF</strong></td>`, `<td colspan="2">${CONFIG.membershipFee} Kč na sezónu (platí se ve FISu, nebo přes klub)</td>`, `<td class="src">upřesnění ČF</td>`]]));
 
@@ -102,7 +102,7 @@ $("s-ladders").innerHTML = `<h2>Úrovně soutěží</h2>
   <p class="hint">Muži a ženy se porovnávají zvlášť (1 = nejvyšší). Tučně jsou nejvyšší celostátní soutěže, jejichž A-družstva smí uvolňovat hráče na střídavý start (PŘ čl. 5.3). Druhý klub hraje o 1–2 úrovně níže. Sloupce „celostátní“ říkají, jestli se soutěž pro střídavé hostování počítá jako celostátní.</p>` +
   table(["Úroveň","Muži","Ženy","Muži: celostátní","Ženy: celostátní"], rows3) +
   `<h3>Mládež (střídavé hostování)</h3>
-  <p class="hint">Tučně jsou soutěže, které se pro střídavé hostování počítají jako celostátní. Starší žáci a žákyně celostátní soutěž nemají. 1. liga dorostenek je regionální, ale pro střídavé hostování se počítá jako celostátní (PŘ čl. 4.3).</p>` +
+  <p class="hint">Tučně jsou soutěže, které se pro střídavé hostování počítají jako celostátní. Starší žáci a žákyně celostátní soutěž nemají. Liga dorostenek se pro střídavé hostování počítá jako celostátní soutěž (PŘ čl. 4.3). Že je jinak regionální a že existuje i 2. liga dorostenek, uvedla ČF, řády to neuvádějí.</p>` +
   table(["Kategorie","Úrovně"], [["junior","m","U19 junioři"],["junior","z","U19 juniorky"],["dorost","m","U17 dorostenci"],["dorost","z","U17 dorostenky"],["starsi","m","U15 starší žáci"],["starsi","z","U15 starší žákyně"]].map(([c,g,l]) => {
     const d = S[c][g]; return [`<td><strong>${l}</strong></td>`, `<td>${d.names.length ? d.names.map((x,i) => i < d.nat ? `<strong>${esc(x)}</strong>` : esc(x)).join(" · ") : "žádná celostátní soutěž"}</td>`]; }));
 
@@ -111,7 +111,7 @@ const F = CONFIG.fees, Y = n => `${F[n].lo} Kč pro dorostence a mladší, ${F[n
 const R = [
   ["Termíny","Přestupní období je 1. 7. – "+d2+". "+m2+". pro starší žáky a mladší kategorie a 1. 7. – "+d1+". "+m1+". pro ostatní.","PŘ čl. 1.4 a)","rad"],
   ["Termíny","Žádosti lze podat už od 1. 5. Datum OD musí spadat do přestupního období.","PŘ čl. 1.4 a), 1.6","rad"],
-  ["Termíny","Když je zvolené datum po konci přestupního období, průvodce řekne, od kdy to půjde: žádost od 1. 5., datum OD nejdříve 1. 7. nové sezóny. Změna oddílové příslušnosti jde kdykoliv.","PŘ čl. 1.4 a), 1.6","rad"],
+  ["Termíny","Když je zvolené datum po konci přestupního období, průvodce řekne, od kdy to půjde: žádost od 1. 5., datum OD nejdříve 1. 7. nové sezóny.","PŘ čl. 1.4 a), 1.6","rad"],
   ["Přestup",`Poplatek: ${Y("prestup")}.`,"PŘ čl. 2.3","rad"],
   ["Přestup","Po schválení přestupu nelze 3 měsíce podat další přestup ani hostování. Netýká se střídavého hostování a střídavého startu.","PŘ čl. 1.4 c)","rad"],
   ["Přestup","Mateřský klub se má vyjádřit do 14 dnů. Když se nevyjádří, nic se neděje automaticky. Hráč věc řeší aktivně s matrikou ČF před vypršením lhůty a matrika může žádost posoudit, jako by klub souhlasil.","PŘ čl. 2.2, 3.3, 4.7, 5.5","up","Slovo „lhůta“ chápeme jako 14 dnů (nepotvrzeno)."],
@@ -122,16 +122,17 @@ const R = [
   ["Přestup","Hráč se střídavým startem: přestup jde a střídavý start k datu přestupu zanikne bez poplatku.","PŘ čl. 5.7 b)","rad"],
   ["Přestup","Hráč se střídavým hostováním: přestup jen do klubu, kde střídavě hostuje (střídavé hostování nejde předčasně ukončit).","PŘ čl. 8.1 c), 4.2","rad"],
   ["Hostování",`Poplatek: ${Y("host")}.`,"PŘ čl. 3.4","rad"],
-  ["Hostování","Hostování, které trvá přes konec přestupního období, skončí samo 30. 6. (hráč se vrací do mateřského klubu).","PŘ čl. 3.2, 3.5","rad"],
+  ["Hostování","Datum DO hostování je nejpozději 30. 6. Ke konci dne DO se hráč vrací do mateřského klubu.","PŘ čl. 3.2, RegŘ čl. 3.3","rad"],
   ["Hostování","Hostování trvá nejméně 30 dnů a končí nejpozději 30. 6.","PŘ čl. 3.2","rad"],
   ["Hostování","Jen jedno hostování najednou. Chce-li hráč hostovat v jiném klubu, nejdřív současné hostování ukončí a pak (je-li přestupní období) podá nové.","ČF","up"],
   ["Hostování","Během střídavého startu nelze hostovat.","PŘ čl. 5.4, 9.1 e)","rad"],
   ["Hostování","Při střídavém hostování jde hostovat jen do klubu, kde hráč střídavě hostuje.","PŘ čl. 9.1 d)","rad"],
   ["Ukončení hostování",`Poplatek ${F.endHost.hi} Kč. Ukončuje se dohodou oddílů a hráče v termínu přestupního období.`,"PŘ čl. 3.5, 3.6","rad"],
-  ["Ukončení hostování","Když 30 dnů od začátku ještě neuběhlo, průvodce ukáže nejdřívější datum ukončení (začátek + 30 dnů). Je-li to po konci přestupního období, hostování letos skončí samo 30. 6.","ČF","up"],
+  ["Ukončení hostování","Když 30 dnů od začátku ještě neuběhlo, průvodce ukáže nejdřívější datum ukončení (začátek + 30 dnů). Je-li to po konci přestupního období, hostování letos skončí nejpozději 30. 6.","ČF","up"],
   ["Ukončení hostování","Hostování nelze ukončit dříve než 30 dnů od jeho začátku.","ČF","up","PŘ čl. 3.5 mluví o 30 dnech ode dne rozhodnutí o schválení hostování. Průvodce se řídí upřesněním ČF."],
   ["Střídavý start",`Poplatek ${F.stst.hi} Kč.`,"PŘ čl. 5.6","rad"],
-  ["Střídavý start","Mohou ho využít jen hráči v prvních třech sezónách v kategorii dospělých (19–21 let).","PŘ čl. 5.1","rad"],
+  ["Střídavý start","Mohou ho využít jen hráči v prvních třech sezónách v kategorii dospělých.","PŘ čl. 5.1","rad"],
+  ["Střídavý start",`První tři sezóny v dospělých odpovídají věku 19–21 let (v sezóně ${sezona} ročníky ${y0-21}–${y0-19}).`,"kategorie ČF","up"],
   ["Střídavý start","Hráč hraje jen za A-družstvo mateřského klubu a za A-družstvo klubu pro střídavý start. Netýká se pohárových soutěží.","PŘ čl. 5.1","rad"],
   ["Střídavý start","Hráče mohou uvolňovat jen kluby, jejichž A-družstvo hraje nejvyšší celostátní soutěž.","PŘ čl. 5.3","rad"],
   ["Střídavý start","Druhý klub hraje o 1–2 úrovně níže než A-družstvo mateřského klubu. Muži a ženy se porovnávají zvlášť (viz tabulka úrovní).","PŘ čl. 5.3 + ČF","up"],
@@ -141,6 +142,7 @@ const R = [
   ["Ukončení střídavého startu",`Dohodou oddílů a hráče, poplatek ${F.endStst.hi} Kč. Zdarma zaniká sám při přestupu, nebo když hráč v základní části soutěže nenastoupí aspoň k 30 % utkání družstva, ve kterém střídavě startuje.`,"PŘ čl. 5.7","rad"],
   ["Střídavé hostování",`Poplatek ${F.sth.hi} Kč pro všechny kategorie.`,"PŘ čl. 4.8","rad"],
   ["Střídavé hostování","Mohou ho využít hráči v mládežnických kategoriích a maximálně první tři ročníky v kategorii dospělých. Hráči mladší než starší žáci ne.","PŘ čl. 4.1, 4.3","rad"],
+  ["Střídavé hostování","Liga dorostenek se pro střídavé hostování počítá jako celostátní soutěž.","PŘ čl. 4.3","rad"],
   ["Střídavé hostování","Nejvýše 105 dnů, jen v základní části soutěže, nelze předčasně ukončit.","PŘ čl. 4.1, 4.2","rad"],
   ["Střídavé hostování","Do stejného klubu jen jednou za sezónu. Hráč nesmí být současně na hostování.","PŘ čl. 4.6","rad"],
   ["Střídavé hostování","Starší žáci a žákyně nemají celostátní soutěž. Smějí jen do 1. ligy dorostenců, resp. dorostenek, a to jen když ji klub sám nehraje.","PŘ čl. 4.3, 4.4 + ČF","up"],
@@ -152,9 +154,10 @@ const R = [
   ["Změna oddílové příslušnosti","Žádost je papírová (ne elektronická) a řeší se e-mailem na "+CONFIG.matrikaEmail+".","ČF","up"],
   ["Změna oddílové příslušnosti","Podmínky: rok od posledního utkání, bez evidenčního dodatku, 3 měsíce od předchozí změny. Podmínka „členem ČF déle než 1 rok“ je výklad ČF (rok neaktivity).","RegŘ čl. 4.2, 4.5, 5.3 + ČF","up"],
   ["Změna oddílové příslušnosti","Nejde během hostování, střídavého startu ani střídavého hostování. Zdarma.","ČF","up"],
+  ["Změna oddílové příslušnosti","Podává se kdykoliv v roce, ne jen v přestupním období.","RegŘ čl. 7.1 + ČF","up","RegŘ čl. 7.1 vyjímá obnovu oddílové příslušnosti (čl. 5) a čl. 5.1 zakazuje obnovu po zrušení klubem v období 16. 1.–30. 6. Průvodce tuto výjimku zatím neřeší (viz otevřené body)."],
   ["Členství","Zrušené členství se obnoví přihláškou ve FISu. Do roka od posledního zápasu se obnoví do původního klubu. Zrušení členství není způsob, jak změnit klub.","ČF","up"],
   ["Členství",`Členský příspěvek ${CONFIG.membershipFee} Kč na sezónu, platí se ve FISu, nebo přes klub.`,"ČF","up"],
-  ["Nový hráč","Registrace se dělá Přihláškou člena do ČF (s názvem klubu, souhlasem klubu a hráče, u hráčů do 15 let i zákonného zástupce). Registrace je bezplatná.","RegŘ čl. 2.1","rad"],
+  ["Nový hráč","Registrace se dělá Přihláškou člena do ČF (s názvem klubu, souhlasem klubu a hráče, u hráčů mladších 15 let i zákonného zástupce). Registrace je bezplatná.","RegŘ čl. 2.1","rad"],
   ["Evidenční dodatek","Smlouvu s klubem (a tedy evidenční dodatek) lze uzavřít jen s hráčem starším 16 let. U hráčů mladších 18 let podepisuje i zákonný zástupce. Nejdéle na 3 roky. Matrika za registraci dodatku neúčtuje.","PŘ čl. 6.2, 6.5, 6.6, 6.7","rad","Průvodce se na dodatek neptá kategorií U15 a mladších. Od U17 ano (hráč může během sezóny oslavit 17. narozeniny)."],
   ["Mimo rozsah","Mezinárodní přestupy průvodce neřeší.","PŘ čl. 7","rad"]
 ];
@@ -163,13 +166,16 @@ $("s-rules").innerHTML = `<h2>Pravidla podle možností</h2>` + table(["Oblast",
 
 // ---- 4b) Upozornění a chování průvodce ----
 const B = [
-  ["Přestupní období skončilo","Zvolené datum je po konci přestupního období kategorie (31. 1., resp. 31. 3.). Netýká se hráče bez klubu a nového hráče.","Řekne, že žádost lze podat od 1. 5. a datum OD musí být nejdříve 1. 7. Hráč s klubem dostane tlačítko „Zobrazit k datu 1. 7.“. Hráči, který hostuje, řekne, že hostování skončí samo 30. 6."],
-  ["Hostování zatím nejde ukončit","Hráč hostuje, od začátku uplynulo méně než 30 dnů a přestupní období neskončilo.","Řekne nejdřívější datum ukončení (začátek + 30 dnů) a nabídne tlačítko „Zobrazit k datu“. Stejné datum je v kartách Přestup a Hostování. Padne-li datum až po konci přestupního období, řekne, že hostování skončí samo 30. 6."],
+  ["Přestupní období skončilo","Zvolené datum je po konci přestupního období kategorie (31. 1., resp. 31. 3.). Netýká se hráče bez klubu a nového hráče.","Řekne, že žádost lze podat od 1. 5. a datum OD musí být nejdříve 1. 7. Hráč s klubem, který nehostuje a nemá střídavý start ani střídavé hostování, dostane tlačítko „Zobrazit k datu 1. 7.“. Hráči, který hostuje, řekne, že hostování skončí nejpozději 30. 6."],
+  ["Hostování zatím nejde ukončit","Hráč hostuje, od začátku uplynulo méně než 30 dnů a přestupní období neskončilo.","Řekne nejdřívější datum ukončení (začátek + 30 dnů) a nabídne tlačítko „Zobrazit k datu“. Stejné datum je v kartách Přestup a Hostování. Padne-li datum až po konci přestupního období, řekne, že hostování skončí nejpozději 30. 6."],
   ["Střídavý start už letos využit","Hráč odpověděl, že střídavý start v sezóně už využil, a přestupní období neskončilo.","Řekne, že další je možný v nové sezóně (žádost od 1. 5., datum OD nejdříve 1. 7.), a nabídne tlačítko „Zobrazit k datu“."],
-  ["Teď nemáš žádnou možnost","Nezbyde žádná možnost a není žádné z upozornění výše.","Ukáže důvod první nedostupné možnosti, která odpovídá cíli hráče."],
+  ["Teď nemáš žádnou možnost","Nezbyde žádná možnost a není žádné z upozornění výše.","Ukáže důvod první nedostupné možnosti, která odpovídá cíli hráče, jinak první nedostupné možnosti v pořadí."],
   ["Tlačítko „Zobrazit k datu“","Použije se u upozornění výše.","Přepočítá výsledek k datu. Při posunu o 92 dnů a víc změní odpověď „přestup za poslední 3 měsíce: Ano“ a „změna oddílové příslušnosti za 3 měsíce: Ano“ na „Ne“. Při posunu do nové sezóny změní „střídavý start letos: Ano“ na „Ne“."],
   ["Zeptat se matriky e-mailem","Karta s výsledkem „Možná – ověř“.","Otevře e-mail na "+CONFIG.matrikaEmail+" s předvyplněným předmětem a všemi odpověďmi hráče. Rodné číslo se nepřidává."],
   ["Evidenční dodatek","Kategorie U15 a mladší.","Průvodce se neptá a bere to jako „Ne“ (smlouvu lze uzavřít jen s hráčem starším 16 let)."],
+  ["Změna oddílové příslušnosti, střídavý start, střídavé hostování","Karta se ukazuje jen tam, kde ji hráč svým cílem nebo situací potřebuje (změna příslušnosti při cíli natrvalo nebo „vše“, u hráče bez klubu a u hráče s hostováním nebo střídavým startem; střídavý start a střídavé hostování při cíli dva kluby nebo „vše“, a u hráče, který je má).","Zbytek se nezobrazuje, aby se ve výsledcích neobjevovaly karty „Možná – ověř“, na které se hráč nezeptal."],
+  ["Hráč bez klubu","Situace hráče.","Průvodce se neptá na datum (nepoužívá se); výsledek počítá k dnešnímu dni."],
+  ["Datum","Zadávané datum.","Lze zadat 1. 1. 2020 až 31. 12. 2035; konec hostování nemůže být před jeho začátkem. Neplatné datum zablokuje tlačítko Pokračovat."],
   ["Hráč, který hostuje nebo má střídavý start či střídavé hostování","Situace hráče.","Nezobrazují se mu otázky ke změně oddílové příslušnosti, ta pro něj nejde."]
 ];
 $("s-behav").innerHTML = `<h2>Upozornění a chování průvodce</h2><p class="hint">Co průvodce dělá automaticky a kdy. Stojí za kontrolu, jestli to odpovídá praxi.</p>` +
@@ -180,7 +186,8 @@ const O = [
   ["Nový hráč","Průvodce říká, že registraci do ČF za hráče vyřídí klub. Registrační řád (čl. 2.1) říká, že Přihlášku člena do ČF vyplňuje hráč (u dětí zákonný zástupce) a klub s ní souhlasí. Zatím ponecháno."],
   ["Hráč bez klubu","Průvodce se neptá, proč hráč klub nemá (klub mu zrušil registraci, zrušil si ji sám, klub zanikl). Podle RegŘ čl. 4.1, 4.2, 4.4 a 5.1–5.5 se podmínky liší, včetně poplatku ve výši přestupního poplatku při obnově do 6 měsíců po zrušení klubem. Odloženo."],
   ["Období 16. 1.–30. 6.","RegŘ čl. 5.1 zakazuje obnovu v tomto období „roku zrušení registrace“. Výklad není jasný (zrušení v říjnu 2026: platí zákaz v roce 2026, nebo 2027?). Průvodce to zatím neřeší."],
-  ["Liga dorostenek","Pro střídavé hostování se počítá jako celostátní, ale její přesná úroveň při porovnávání není uvedena. Proto je tam výsledek „Možná – ověř“."],
+  ["Úrovně lig mládeže","Žebříčky (1.–4. liga juniorů, 1.–2. liga juniorek, 1.–3. liga dorostenců, 1.–2. liga dorostenek) a to, že jen první liga je celostátní, zadala ČF. Řády je neuvádějí."],
+  ["Opakovaný přestup","Přestup do téhož klubu po 6 měsících od předchozího přestupu (PŘ čl. 1.4 b, 8.3 b) jde podat kdykoliv a platí se odstupné. Průvodce to záměrně neřeší, takže tvrzení „přestup jde jen v přestupním období“ pro tento případ neplatí."],
   ["Střídavé hostování 19–21 let","Pravidlo „vyšší celostátní soutěž než A-družstvo klubu“ je odvozené, ne potvrzené."],
   ["Střídavé hostování – družstvo klubu","Průvodce bere v úvahu jen družstvo klubu ve vlastní kategorii hráče. Čl. 4.4 přestupního řádu by šel číst i šířeji (jakékoli družstvo klubu)."],
   ["Posun data tlačítkem","Při „Zobrazit k datu“ průvodce odhaduje, že čekací doby po posunu uplynuly: 3 měsíce počítá jako 92 dnů a ví jen, že se přestup stal „za poslední 3 měsíce“, ne přesné datum. Je to předpoklad."],
@@ -208,6 +215,10 @@ const items = () => [...document.querySelectorAll(".wrap tbody tr, .wrap .open-l
 function filter(){
   const q = $("q").value.trim().toLowerCase(); let shown = 0, all = 0;
   items().forEach(el => { all++; const ok = !q || el.textContent.toLowerCase().includes(q); el.hidden = !ok; if (ok) shown++; });
+  document.querySelectorAll("section.sec").forEach(sec => { // při hledání schováme sekce bez nálezů
+    const its = sec.querySelectorAll("tbody tr, .open-list li");
+    sec.hidden = q && its.length > 0 && ![...its].some(x => !x.hidden);
+  });
   $("count").textContent = q ? `Nalezeno ${shown} z ${all} řádků` : `${all} řádků`;
 }
 $("q").addEventListener("input", filter); filter();

@@ -1,6 +1,7 @@
 /* ===== Konfigurace: vše, co se mění se sezónou ===== */
 const CONFIG = {
   dataUpdated: "2026-11-04", // datum poslední úpravy dat (zobrazuje se na stránce Podklady)
+  dateMin: "2020-01-01", dateMax: "2035-12-31", // rozsah data, které lze v průvodci zadat
   categories: [
     // minAge/maxAge = věk dovršený v kalendářním roce, kdy sezóna začíná; z toho se počítají ročníky narození
     {id:"dospeli", label:"Muži / ženy", group:"A", high:true, minAge:22},

@@ -38,7 +38,8 @@ p{margin:0}
 .opt:hover{border-color:var(--accent)}
 .opt[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
 .opt small{display:block;color:var(--muted);font-size:14px}
-.opt:disabled{opacity:.5;cursor:not-allowed;border-style:dashed}
+.opt:disabled{cursor:not-allowed;border-style:dashed;color:var(--muted)}
+.opt:disabled .dot{opacity:.5}
 .opt:disabled:hover{border-color:var(--line)}
 .opt .why{color:var(--bad)}
 .dot{flex:none;width:18px;height:18px;border-radius:50%;border:2px solid var(--line);margin-top:3px}
@@ -112,3 +113,5 @@ th{font-size:13px;color:var(--muted);font-weight:600}
 /* Upozornění nad výsledky (například hostování zatím nejde ukončit) */
 .notice{background:var(--warn-soft);border-left:4px solid var(--warn);border-radius:10px;padding:12px 14px;font-size:15px;display:flex;flex-direction:column;gap:8px;align-items:flex-start}
 .notice .btn.small{font-size:14px;padding:8px 12px}
+
+#wizard h2:focus{outline:none}
