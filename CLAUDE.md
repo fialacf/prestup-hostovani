@@ -51,8 +51,9 @@ Náhodný průchod je dobrý důkaz, že úklid kódu nic nezměnil: spusť ho p
 porovnej uložené soubory.
 
 ## Co vědět
-- Ročníky narození se počítají z věku dovršeného v kalendářním roce začátku sezóny a přepínají se 1. 7.
-  (žádosti na novou sezónu se přitom podávají od 1. 5., viz otevřené body v podkladech).
+- Ročníky narození se počítají z věku dovršeného v kalendářním roce začátku sezóny a dnes se přepínají 1. 7.
+  Žádosti na novou sezónu se ale podávají od 1. 5., přechod mezi sezónami není vyřešen a návrh je přepnout vždy k 1. 5.
+  (viz otevřené body v podkladech).
 - Přestupní období: 1. 7. – 31. 1. (dorost, junioři, dospělí) a 1. 7. – 31. 3. (starší žáci a mladší).
 - Mimo rozsah: mezinárodní přestupy. Odloženo: obnova po zrušení klubem (otázka na důvod a datum ztráty klubu)
   a opakovaný přestup. Jsou v podkladech jako otevřené body.
