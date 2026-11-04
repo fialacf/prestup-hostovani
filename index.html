@@ -116,7 +116,7 @@ th{font-size:13px;color:var(--muted);font-weight:600}
   <section id="wizard"></section>
   <section id="all" hidden></section>
 
-  <p class="note">Průvodce je orientační, závazný je Přestupní řád Českého florbalu. Prototyp – pravidla podle podkladů k 2. 11. 2026.</p>
+  <p class="note">Průvodce je orientační, závazný je Přestupní řád Českého florbalu (Edice 2026, platný od 1. 7. 2026). Řeší jen přestupy mezi kluby v ČR. Mezinárodní přestup do zahraničního klubu se řídí přestupním řádem IFF, přestup ze zahraničí do ČF řeší Registrační řád.</p>
 </div>
 
 <script>
@@ -147,6 +147,14 @@ const CONFIG = {
   },
   // nejnižší úroveň, kde smí hrát A-družstvo mateřského klubu (nejvyšší celostátní soutěže)
   ststHomeMax: {m:3, z:2},
+  // Úrovně soutěží podle Soutěžního řádu, čl. 3.1 (pro střídavé hostování). Pořadí = od nejvyšší.
+  levels: [
+    {id:"a", label:"Nejvyšší celostátní", eg:"Superliga mužů, Extraliga žen, 1. liga mužů, Národní liga, 1. liga žen", national:true},
+    {id:"b", label:"Vyšší celostátní", eg:"CE soutěž juniorů, Divize, 1. liga juniorek, play-off 1. ligy dorostenců", national:true},
+    {id:"c", label:"Ostatní celostátní", eg:"pohárové soutěže mužů a žen, 1. liga dorostenců, celostátní finále žákovských soutěží, nadstavba dorostenek, nadstavba soutěže veteránů a soutěže veteránek", national:true},
+    {id:"d", label:"Nejvyšší regionální", eg:"soutěže mužů, juniorů a veteránů", national:false},
+    {id:"e", label:"Ostatní regionální", eg:"všechny další soutěže", national:false}
+  ],
   disputeUrl: "https://www.ceskyflorbal.cz/neshoda-u-zadosti-o-prestup",
   // hledání klubu: pro děti Míčkoni, od dorostenců (od 15 let) web Českého florbalu
   findClub: {
@@ -190,6 +198,21 @@ const leagueName = (g,l) => LADDERS()[g][l-1];
 const leagueOpts = g => LADDERS()[g].map((n,i) => [g+(i+1), n]);
 const ststTargets = own => [1,2].map(d => own.level+d).filter(l => l <= LADDERS()[own.g].length).map(l => leagueName(own.g,l));
 const ststHomeNames = () => Object.keys(LADDERS()).flatMap(g => LADDERS()[g].slice(0, CONFIG.ststHomeMax[g]));
+// Střídavé hostování: porovnání úrovní soutěží (Přestupní řád čl. 4.1, 4.3, 4.4)
+function sthLevelCheck(){
+  const lv = id => CONFIG.levels.findIndex(l => l.id===id)+1;
+  const home = A.sthHome, tgt = A.sthTarget;
+  if (!home || !tgt) return {status:"maybe", reason:"Záleží na soutěži, kam chceš hostovat, a na soutěžích tvého klubu. Zvol v průvodci „Hrát za dva kluby zároveň“."};
+  if (home==="nevim" || tgt==="nevim") return {status:"maybe", reason:"Ověř úrovně soutěží u svého klubu nebo u matriky ČF."};
+  const dor = tgt==="dor";
+  const t = dor ? 3 : lv(tgt); // Liga dorostenek je celostátní, ale její přesná úroveň v řádu není: počítáme nejnižší celostátní (ostatní)
+  if (!dor && !CONFIG.levels[t-1].national) return {status:"no", reason:`Střídavě hostovat lze jen v celostátní soutěži. Zvolená soutěž (${CONFIG.levels[t-1].label.toLowerCase()}) celostátní není.`};
+  const h = home==="none" ? 99 : lv(home);
+  if (t < h) return {status:"yes"};
+  if (dor) return {status:"maybe", reason:"Liga dorostenek se pro střídavé hostování počítá jako celostátní soutěž, její úroveň ale řád neuvádí. Ověř u matriky ČF, jestli je vyšší než soutěž tvého klubu."};
+  if (t === h+1) return {status:"maybe", reason:"Tvůj klub má družstvo na vyšší úrovni. Projde jen soutěž o úroveň nižší ve starší věkové kategorii (čl. 4.3). Ověř to u matriky ČF."};
+  return {status:"no", reason:`Tvůj klub už má družstvo na stejné nebo vyšší úrovni (${CONFIG.levels[h-1].label.toLowerCase()}). Střídavě hostovat lze jen do soutěže vyšší úrovně (čl. 4.4).`};
+}
 const todayIso = () => { const n = new Date(); return iso(D(n.getFullYear(), n.getMonth()+1, n.getDate())); };
 
 function season(dateIso, group){
@@ -215,27 +238,27 @@ const STEPS = [
     options:() => [["oddil","Mám svůj (mateřský) klub","Jsem registrovaný v klubu a hraju za něj."],["bez","Nemám žádný klub","Byl(a) jsem registrovaný v Českém florbalu, ale teď nepatřím k žádnému klubu."],["novy","Jsem nový hráč","Ještě jsem nikdy nebyl(a) registrovaný v Českém florbalu."],["hostuji","Právě hostuji v jiném klubu",""]]
       .concat(ststAge() ? [["stst","Mám střídavý start",""]] : [])
       .concat(sthAge() ? [["sth","Mám střídavé hostování",""]] : [])},
-  {id:"hostStart", show:() => A.state==="hostuji", title:"Kdy tvoje hostování začalo?", hint:"Hostování musí trvat alespoň 30 dnů, než ho lze ukončit.", type:"date"},
+  {id:"hostStart", show:() => A.state==="hostuji", title:"Kdy ti bylo hostování schváleno?", hint:"Hostování lze předčasně ukončit nejdříve 30 dnů po schválení (rozhodnutí matriky), ne po jeho začátku.", type:"date"},
   {id:"goal", title:"Co chceš udělat?", type:"choice",
     options:() => {
       // 4. položka = důvod, proč je možnost zašedlá (nelze vybrat)
       const bez = A.state==="bez";
       const o = [
         bez ? ["trvale","Přihlásit se do nového klubu","Přes změnu oddílové příslušnosti."] : ["trvale","Hrát natrvalo za jiný klub",""],
-        ["docasne","Hrát dočasně za jiný klub","Třeba na půl sezóny.", bez ? "Bez klubu to nejde. Nejdřív se musíš přihlásit do nového klubu." : ""],
-        ["dva","Hrát za dva kluby zároveň","", bez ? "Bez klubu to nejde. Nejdřív se musíš přihlásit do nového klubu." : !sthAge() ? "Za dva kluby můžou hrát jen kategorie od U15 starších žáků po muže a ženy 19–21 let." : ""]
+        ["docasne","Hrát dočasně za jiný klub","Třeba na půl sezóny.", bez ? "Bez klubu to nejde. Nejdřív se musíš přihlásit do nového klubu." : A.state==="stst" ? "Po dobu střídavého startu nejde hostovat." : ""],
+        ["dva","Hrát za dva kluby zároveň","", bez ? "Bez klubu to nejde. Nejdřív se musíš přihlásit do nového klubu." : {hostuji:"Dokud hostuješ, nejde hrát za dva kluby. Nejdřív ukonči hostování.", stst:"Střídavý start už máš.", sth:"Střídavé hostování už máš."}[A.state] ? {hostuji:"Dokud hostuješ, nejde hrát za dva kluby. Nejdřív ukonči hostování.", stst:"Střídavý start už máš.", sth:"Střídavé hostování už máš."}[A.state] : !sthAge() ? "Za dva kluby můžou hrát jen kategorie od U15 starších žáků po muže a ženy 19–21 let." : ""]
       ];
       if (["hostuji","stst"].includes(A.state)) o.push(["ukoncit", A.state==="hostuji" ? "Ukončit hostování" : "Ukončit střídavý start",""]);
       o.push(["vse","Nevím, ukaž mi všechno",""]);
       return o;
     }},
-  {id:"date", title:"Ke kterému dni to chceš řešit?", hint:"Předvyplnili jsme dnešek. Můžeš zadat i budoucí datum a naplánovat si to.", type:"date", def:todayIso},
+  {id:"date", title:"Ke kterému dni to chceš řešit?", hint:"Je to datum, od kterého má změna platit. Předvyplnili jsme dnešek, můžeš zadat i budoucí datum. Žádosti lze podávat už od 1. 5., datum musí spadat do přestupního období.", type:"date", def:todayIso},
   {id:"zopQ", show:() => A.state==="bez" || ["trvale","vse"].includes(A.goal), title:"Pár otázek ke změně oddílové příslušnosti", hint:"Podle nich zjistíme, jestli můžeš změnit klub zdarma a kdykoliv v roce.", type:"multi",
     items:() => A.state==="bez" ? [["memberNow","Máš pořád aktivní členství v Českém florbalu? (Nezrušil(a) jsi ho?)"],["zop3m","Měl(a) jsi za poslední 3 měsíce změnu oddílové příslušnosti?"]] :
       [["member1y","Jsi členem Českého florbalu déle než 1 rok?"],["match1y","Uběhl od tvého posledního utkání v soutěžích ČF víc než 1 rok?"],["dodatek","Máš podepsaný evidenční dodatek?"],["zop3m","Měl(a) jsi za poslední 3 měsíce změnu oddílové příslušnosti?"]]},
   {id:"recent", show:() => A.state!=="bez" && A.goal!=="ukoncit", title:"Měl(a) jsi za poslední 3 měsíce přestup?", hint:"Po přestupu nelze 3 měsíce podat další žádost o přestup ani hostování.", type:"choice",
     options:() => YN.map(([v,l]) => [v,l])},
-  {id:"twoQ", show:() => ["dva","vse"].includes(A.goal) && sthAge() && A.state!=="bez", title:"Hraní za dva kluby", type:"multi",
+  {id:"twoQ", show:() => ["dva","vse"].includes(A.goal) && sthAge() && !["bez","hostuji","stst","sth"].includes(A.state), title:"Hraní za dva kluby", type:"multi",
     items:() => {
       const it = [];
       if (ststAge()) {
@@ -247,7 +270,9 @@ const STEPS = [
         }
         it.push(["ststUsed","Využil(a) jsi letos už střídavý start?"]);
       }
-      it.push(["sthHigher","Chceš hrát za druhý klub ve vyšší celostátní soutěži, ve které tvůj klub nemá družstvo?"]);
+      const lvOpts = CONFIG.levels.map(l => [l.id, `${l.label} (${l.eg})`]);
+      it.push(["sthHome","Na jaké úrovni hraje nejvyšší družstvo tvého klubu v tvé kategorii?","select", lvOpts.concat([["none","Klub nemá v mé kategorii žádné družstvo"],["nevim","Nevím"]])]);
+      it.push(["sthTarget","Na jaké úrovni je soutěž, do které chceš střídavě hostovat?","select", lvOpts.concat([["dor","Liga dorostenek (pro střídavé hostování se počítá jako celostátní)"],["nevim","Nevím"]])]);
       return it;
     }}
 ];
@@ -258,7 +283,7 @@ function evaluate(){
   const inPeriod = s.d >= s.start && s.d <= s.end;
   const R = {};
   const fee = id => !CONFIG.fees[id] ? memberFeeText() : CONFIG.fees[id][tier] === 0 ? "Zdarma" : CONFIG.fees[id][tier] + " Kč";
-  const nextNote = `Nejbližší možnost od ${fmt(s.d > s.end ? s.next : s.start)}.`;
+  const nextNote = s.d > s.end ? `Žádost můžeš podat od 1. 5., datum OD musí být nejdříve ${fmt(s.next)}.` : `Nejbližší možnost od ${fmt(s.start)}.`;
   const set = (id, status, deadline, reason, steps) => R[id] = {status, deadline, reason, steps, fee:fee(id)};
 
   // Změna oddílové příslušnosti
@@ -294,22 +319,34 @@ function evaluate(){
   const blockReason = A.state==="bez" ? "Nemáš žádný klub, stačí ti změna oddílové příslušnosti." :
     A.recent==="ano" ? "Po přestupu nelze 3 měsíce podat další žádost o přestup ani hostování." :
     !inPeriod ? "Datum je mimo přestupní období tvé kategorie. " + nextNote : "";
-  const unsureT = A.recent==="nevim" ? "Ověř, jestli jsi neměl(a) přestup v posledních 3 měsících." :
-    ["hostuji","stst","sth"].includes(A.state) ? "Právě máš hostování, střídavý start nebo střídavé hostování. Postup ověř u svého klubu nebo na sekretariátu ČF." : "";
+  const unsureT = A.recent==="nevim" ? "Ověř, jestli jsi neměl(a) přestup v posledních 3 měsících." : "";
+  // Vyjádření mateřského klubu (čl. 2.2, 3.3, 4.7, 5.5) a odstupné (čl. 14)
+  const ASK = ["Požádej mateřský klub o vyjádření. Má na něj 14 dnů.","Když se klub nevyjádří, nic se neděje automaticky. Řeš to aktivně s matrikou ČF před vypršením lhůty. Matrika může žádost posoudit, jako by klub souhlasil."];
+  const ODST = "Odstupné mezi kluby se řeší dohodou, platí ho nový klub. Ty neplatíš.";
+  const prestupSteps = [...ASK,"Žádost se podává v informačním systému ČF, datum přestupu musí být v přestupním období.",ODST,`Uhraď poplatek ${fee("prestup")}.`];
   if (blockReason) set("prestup","no",fmt(s.end),blockReason);
   else if (unsureT) set("prestup","maybe",fmt(s.end),unsureT);
-  else set("prestup","yes",fmt(s.end),"",["Domluv se s novým i mateřským klubem.","Žádost se podává v informačním systému ČF, datum přestupu musí být v přestupním období.",`Uhraď poplatek ${fee("prestup")}.`]);
+  else if (A.state==="hostuji") set("prestup","yes",fmt(s.end),"Přestup jde jen do klubu, kde právě hostuješ. Chceš-li přestoupit do jiného klubu, nejdřív musíš ukončit hostování (viz Ukončení hostování) a pak podat přestup.",prestupSteps);
+  else if (A.state==="sth") set("prestup","yes",fmt(s.end),"Přestup jde jen do klubu, kde střídavě hostuješ. Střídavé hostování nejde předčasně ukončit, do jiného klubu můžeš přestoupit až po jeho skončení.",prestupSteps);
+  else if (A.state==="stst") set("prestup","yes",fmt(s.end),"Střídavý start k datu přestupu automaticky zanikne a nic za to neplatíš.",prestupSteps);
+  else set("prestup","yes",fmt(s.end),"",prestupSteps);
 
   const hostLeft = daysBetween(s.d, s.seasonEnd);
+  const hostSteps = [...ASK,"Domluv se s klubem, kde chceš hostovat.",`Hostování může trvat 30 dnů až do ${fmt(s.seasonEnd)}.`,ODST,`Uhraď poplatek ${fee("host")}.`];
   if (blockReason) set("host","no",fmt(s.end),blockReason);
   else if (hostLeft < 30) set("host","no",fmt(s.end),"Hostování musí trvat alespoň 30 dnů a skončí nejpozději 30. 6.");
+  else if (A.state==="stst") set("host","no",fmt(s.end),"Po dobu střídavého startu nejde požádat o hostování.");
   else if (unsureT) set("host","maybe",fmt(s.end),unsureT);
-  else set("host","yes",fmt(s.end),"",["Domluv se s klubem, kde chceš hostovat, a se svým klubem.",`Hostování může trvat 30 dnů až do ${fmt(s.seasonEnd)}.`,`Uhraď poplatek ${fee("host")}.`]);
+  else if (A.state==="hostuji") set("host","maybe",fmt(s.end),"Právě hostuješ. Další hostování řád výslovně neřeší, ověř to u matriky ČF.");
+  else if (A.state==="sth") set("host","yes",fmt(s.end),"Hostovat můžeš jen do klubu, ve kterém střídavě hostuješ.",hostSteps);
+  else set("host","yes",fmt(s.end),"",hostSteps);
 
   // Střídavý start
   const inStst = s.d >= s.start && s.d <= s.ststEnd;
   if (!ststAge()) set("stst","no",fmt(s.ststEnd),`Střídavý start je jen pro muže a ženy ve věku 19–21 let (${yearsOf("dospeli21")}).`);
   else if (A.state==="bez") set("stst","no",fmt(s.ststEnd),"Nemáš mateřský klub.");
+  else if (A.state==="hostuji") set("stst","no",fmt(s.ststEnd),"Dokud hostuješ, nejde mít střídavý start.");
+  else if (A.state==="sth") set("stst","no",fmt(s.ststEnd),"Dokud střídavě hostuješ, nejde mít střídavý start.");
   else if (A.state==="stst") set("stst","no",fmt(s.ststEnd),"Střídavý start už máš. Lze ho využít jen jednou za sezónu.");
   else if (A.ststUsed==="ano") set("stst","no",fmt(s.ststEnd),"Střídavý start lze využít jen jednou za sezónu.");
   else if (!inStst) set("stst","no",fmt(s.ststEnd),"Střídavý start lze začít jen mezi 1. 7. a 31. 1. " + nextNote);
@@ -324,31 +361,34 @@ function evaluate(){
     else {
       const sec = parseLeague(A.ststSecond), d = sec.level - own.level;
       if (d < 1 || d > 2) set("stst","no",fmt(s.ststEnd),`Druhý klub musí hrát o 1–2 úrovně níže než ${leagueName(own.g,own.level)}, tedy: ${targets.join(" nebo ")}. Ty jsi zvolil(a): ${leagueName(sec.g,sec.level)}.`);
-      else set("stst","yes",fmt(s.ststEnd),"",[`Hrát můžeš jen za A-družstvo svého klubu (${leagueName(own.g,own.level)}) a za A-družstvo druhého klubu (${leagueName(sec.g,sec.level)}). Za žádná jiná družstva ne.`,"Pokud nenastoupíš aspoň k 30 % zápasů základní části, střídavý start automaticky skončí.",`Uhraď poplatek ${fee("stst")}.`]);
+      else set("stst","yes",fmt(s.ststEnd),"",[...ASK,`Hrát můžeš jen za A-družstvo svého klubu (${leagueName(own.g,own.level)}) a za A-družstvo druhého klubu (${leagueName(sec.g,sec.level)}). Za žádná jiná družstva ne.`,"Střídavý start se nevztahuje na pohárové soutěže a platí nejdéle do 30. 6.","Střídavý start automaticky skončí, pokud v základní části soutěže nenastoupíš aspoň k 30 % utkání družstva, ve kterém střídavě startuješ.",`Uhraď poplatek ${fee("stst")}.`]);
     }
   }
 
   // Střídavé hostování
   if (!sthAge()) set("sth","no",fmt(s.end),"Střídavé hostování je pro hráče od starších žáků po třetí sezónu v dospělých.");
   else if (A.state==="bez") set("sth","no",fmt(s.end),"Nemáš mateřský klub.");
+  else if (A.state==="hostuji") set("sth","no",fmt(s.end),"Dokud hostuješ, nejde střídavě hostovat.");
+  else if (A.state==="stst") set("sth","no",fmt(s.end),"Po dobu střídavého startu nejde požádat o střídavé hostování.");
   else if (A.state==="sth") set("sth","no",fmt(s.end),"Střídavé hostování už máš.");
   else if (!inPeriod) set("sth","no",fmt(s.end),"Datum je mimo přestupní období tvé kategorie. " + nextNote);
-  else if (!A.sthHigher) set("sth","maybe",fmt(s.end),"Záleží na soutěži, kam chceš hostovat. Zvol v průvodci „Hrát za dva kluby zároveň“.");
-  else if (A.sthHigher==="ne") set("sth","no",fmt(s.end),"Střídavě hostovat lze jen do vyšší celostátní soutěže, kde tvůj klub nemá družstvo.");
-  else if (A.sthHigher==="nevim") set("sth","maybe",fmt(s.end),"Ověř úroveň soutěží. Výjimky platí např. pro 1. ligu dorostenek a pro soutěž o úroveň nižší ve starší kategorii.");
-  else set("sth","yes",fmt(s.end),"",["Délku si zvolíš ve formuláři, nejvýše 105 dní.","Platí nejdéle do konce základní části soutěže, kam hostuješ.",`Uhraď poplatek ${fee("sth")}.`]);
+  else {
+    const r = sthLevelCheck();
+    if (r.status==="yes") set("sth","yes",fmt(s.end),"",[...ASK,"Střídavé hostování platí nejvýše 105 dnů, jen v základní části soutěže a jen v jednom konkrétním družstvu nového klubu.","Nelze ho předčasně ukončit. Do stejného klubu můžeš střídavě hostovat jen jednou za sezónu.","Za svůj mateřský klub můžeš dál nastupovat bez omezení.",`Uhraď poplatek ${fee("sth")}.`]);
+    else set("sth",r.status,fmt(s.end),r.reason);
+  }
 
   // Ukončení hostování
   if (A.state!=="hostuji") set("endHost","no",fmt(s.end),"Týká se jen hráčů, kteří právě hostují.");
   else if (s.d > s.end) set("endHost","no",fmt(s.end),"Hostování lze ukončit nejpozději ke konci přestupního období. Skončí samo 30. 6.");
-  else if (A.hostStart && daysBetween(parse(A.hostStart), s.d) < 30) set("endHost","no",fmt(s.end),`Hostování musí trvat alespoň 30 dnů. Ukončit ho můžeš nejdříve ${fmt(addDays(parse(A.hostStart),30))}.`);
-  else if (!A.hostStart) set("endHost","maybe",fmt(s.end),"Ověř, že hostování trvá alespoň 30 dnů.");
-  else set("endHost","yes",fmt(s.end),"",["Den ukončení je posledním dnem, kdy hostování platí.",`Uhraď poplatek ${fee("endHost")}.`]);
+  else if (A.hostStart && daysBetween(parse(A.hostStart), s.d) < 30) set("endHost","no",fmt(s.end),`Hostování lze předčasně ukončit nejdříve 30 dnů po schválení, tedy ${fmt(addDays(parse(A.hostStart),30))}.`);
+  else if (!A.hostStart) set("endHost","maybe",fmt(s.end),"Ověř, že od schválení hostování uplynulo alespoň 30 dnů.");
+  else set("endHost","yes",fmt(s.end),"",["Ukončení se dělá dohodou obou klubů a tebe, žádost „Ukončení hostování“ se podává ve FISu.","Den ukončení je posledním dnem, kdy hostování platí.",`Uhraď poplatek ${fee("endHost")}.`,"Potom můžeš podat přestup do jiného klubu."]);
 
   // Ukončení střídavého startu
   if (A.state!=="stst") set("endStst","no",fmt(s.ststEnd),"Týká se jen hráčů se střídavým startem.");
   else if (s.d > s.ststEnd) set("endStst","no",fmt(s.ststEnd),"Střídavý start lze ukončit nejpozději 31. 1.");
-  else set("endStst","yes",fmt(s.ststEnd),"",["Den ukončení je posledním dnem, kdy střídavý start platí.",`Uhraď poplatek ${fee("endStst")}.`]);
+  else set("endStst","yes",fmt(s.ststEnd),"",["Ukončení se dělá dohodou obou klubů a tebe, žádost „Ukončení střídavého startu“ se podává ve FISu.","Den ukončení je posledním dnem, kdy střídavý start platí.",`Poplatek ${fee("endStst")} se platí jen při ukončení dohodou.`,"Zdarma střídavý start zaniká sám, když přestoupíš do jiného klubu nebo když v základní části soutěže nenastoupíš aspoň k 30 % utkání družstva, ve kterém střídavě startuješ."]);
 
   return R;
 }
@@ -365,7 +405,7 @@ function stepDone(st){
 }
 
 // Při změně odpovědi smaž odpovědi z pozdějších kroků, aby nezůstaly neplatné (např. po změně kategorie).
-const MULTI_KEYS = {zopQ:["memberNow","member1y","match1y","dodatek","zop3m"], twoQ:["league","ststSecond","ststUsed","sthHigher"]};
+const MULTI_KEYS = {zopQ:["memberNow","member1y","match1y","dodatek","zop3m"], twoQ:["league","ststSecond","ststUsed","sthHome","sthTarget"]};
 function clearAfter(stepId){
   const i = STEPS.findIndex(s => s.id === stepId);
   STEPS.slice(i+1).forEach(s => (MULTI_KEYS[s.id] || [s.id]).forEach(k => delete A[k]));
@@ -470,7 +510,12 @@ function renderResult(){
     </div>
     <div class="cards">${now.map(o => card(o,R[o.id],isMatch(o))).join("") || `<p class="reason">Podívej se níže, proč to teď nejde a kdy to bude možné.</p>`}</div>
     ${later.length?`<details class="later" ${now.length?"":"open"}><summary>Teď nejde (${later.length})</summary><div class="cards">${later.map(o => card(o,R[o.id],isMatch(o))).join("")}</div></details>`:""}
-    ${A.state==="bez" ? "" : `<p class="note">Mateřský oddíl nesouhlasí s přestupem? <a href="${CONFIG.disputeUrl}" target="_blank" rel="noopener">Postup při neshodě u žádosti o přestup</a></p>`}
+    ${A.state==="bez" ? "" : `<details class="later"><summary>Dobré vědět z Přestupního řádu</summary><div class="cards">
+      <p class="note"><strong>Mateřský klub nesouhlasí s přestupem?</strong> Přestup se schválí i přes jeho nesouhlas (bez odstupného), pokud nejsi členem ČF déle než 12 měsíců, nebo ti ještě není 12 let (s tím musí souhlasit zákonný zástupce). <a href="${CONFIG.disputeUrl}" target="_blank" rel="noopener">Postup při neshodě u žádosti o přestup</a></p>
+      <p class="note"><strong>Klub se nevyjádřil?</strong> Po 14 dnech se nic neděje automaticky. Řeš to aktivně s matrikou ČF před vypršením lhůty. Matrika může žádost posoudit, jako by klub souhlasil.</p>
+      <p class="note"><strong>Máš s klubem evidenční dodatek (smlouvu)?</strong> Přestup, hostování, střídavé hostování i střídavý start pak jdou jen se souhlasem klubu.</p>
+      <p class="note"><strong>Vracíš se do klubu, ze kterého jsi přestoupil(a)?</strong> Opakovaný přestup do stejného klubu jde podat kdykoliv v roce, ale až 6 měsíců po podání předchozího přestupu a nejpozději do 14 dnů po uplynutí těch 6 měsíců. Mezitím nesmíš podat žádný jiný přestup ani hostování. Platí se odstupné podle čl. 14.3 řádu.</p>
+    </div></details>`}
     <div class="nav"><button class="btn" id="back">Upravit odpovědi</button><button class="btn primary" id="restart">Začít znovu</button></div>
   </div>`;
   document.getElementById("back").onclick = () => { idx = visible().length-1; render(); };
@@ -485,7 +530,7 @@ function renderAll(){
     ["prestup","V přestupním období","Po přestupu 3 měsíce nelze podat další přestup ani hostování"],
     ["host","Začátek 1. 7. až konec přestupního období, nejdéle do 30. 6.","Nejméně 30 dnů"],
     ["stst","Začátek 1. 7. – 31. 1., nejdéle do 30. 6.",`Jen v prvních třech sezónách v dospělých, tedy 19–21 let (${yearsOf("dospeli21")}); hraješ jen za A-družstvo mateřského klubu (v nejvyšší celostátní soutěži) a za A-družstvo druhého klubu, který hraje nejvýš o 2 úrovně níže (muži a ženy zvlášť, viz tabulka níže); jen 1× za sezónu`],
-    ["sth","Začátek 1. 7. až konec přestupního období, nejvýše 105 dní",`Od starších žáků po první tři sezóny v dospělých (${yearsFor(catById("starsi").minAge, catById("dospeli21").maxAge)}); jen do vyšší celostátní soutěže, kterou klub nemá`],
+    ["sth","Začátek 1. 7. až konec přestupního období, nejvýše 105 dní",`Od starších žáků po první tři sezóny v dospělých (${yearsFor(catById("starsi").minAge, catById("dospeli21").maxAge)}); jen do celostátní soutěže vyšší úrovně, než ve které hraje tvůj klub; jen v základní části soutěže; nelze předčasně ukončit; do stejného klubu 1× za sezónu`],
     ["endHost","Nejpozději konec přestupního období","Hostování trvá alespoň 30 dnů"],
     ["endStst","Nejpozději 31. 1.","—"],
     ["prihlaska","Kdykoliv, přes přihlášku ve FISu","Zrušené členství v ČF"]
@@ -500,6 +545,11 @@ function renderAll(){
     <p class="hint">Muži a ženy se porovnávají zvlášť. A-družstvo tvého klubu musí hrát nejvyšší celostátní soutěž (tučně), druhý klub o 1–2 úrovně níže.</p></div>
     <div class="tbl"><table><thead><tr><th>Úroveň</th><th>Muži</th><th>Ženy</th></tr></thead><tbody>
     ${Array.from({length:Math.max(...Object.values(LADDERS()).map(l=>l.length))}, (_,i) => `<tr><td>${i+1}</td>${["m","z"].map(g => { const n = LADDERS()[g][i]; return `<td>${n ? (i+1 <= CONFIG.ststHomeMax[g] ? `<strong>${n}</strong>` : n) : "—"}</td>`; }).join("")}</tr>`).join("")}
+    </tbody></table></div>
+    <div style="display:flex;flex-direction:column;gap:6px"><h3>Úrovně soutěží pro střídavé hostování</h3>
+    <p class="hint">Střídavě hostovat lze jen v celostátní soutěži (první tři úrovně), která je vyšší než nejvyšší soutěž tvého klubu v tvé kategorii. Podle Soutěžního řádu, čl. 3.1.</p></div>
+    <div class="tbl"><table><thead><tr><th>Úroveň</th><th>Soutěže</th></tr></thead><tbody>
+    ${CONFIG.levels.map(l => `<tr><td><strong>${l.label}</strong></td><td>${l.eg}</td></tr>`).join("")}
     </tbody></table></div></div>`;
 }
 
