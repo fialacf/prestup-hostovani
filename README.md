@@ -6,11 +6,16 @@ Web: https://fialacf.github.io/prestup-hostovani/
 
 ## Jak to funguje
 
-Celá aplikace je jeden statický soubor `index.html` bez závislostí a bez sestavování.
+Statická stránka bez sestavování:
+
+- `index.html` – průvodce a záložka Všechny možnosti,
+- `podklady.html` – všechna data a pravidla pro kontrolu (vykresluje se z `config.js`),
+- `config.js` – kategorie, termíny, poplatky, žebříčky soutěží a odkazy,
+- `style.css` – společný vzhled.
 
 ## Úpravy pro novou sezónu
 
-Termíny přestupních období, poplatky a seznam nejvyšších soutěží jsou na jednom místě v objektu `CONFIG` na začátku skriptu v `index.html`. Logika vyhodnocení je ve funkci `evaluate()`.
+Termíny přestupních období, poplatky, žebříčky soutěží a odkazy jsou v `config.js`. Po změně dat přepiš i `dataUpdated` (datum se zobrazuje na stránce Podklady). Pravidla a jejich zdroje na stránce Podklady (tabulka „Pravidla podle možností“) jsou v `podklady.html`, logika vyhodnocení je ve funkci `evaluate()` v `index.html`.
 
 ## Nasazení
 
