@@ -145,7 +145,7 @@ const STEPS = [
   {id:"zopQ", show:() => zopQShown(), title:() => A.state==="bez" ? "Pár otázek ke změně oddílové příslušnosti" : "Pár otázek před výsledkem",
     hint:() => A.state==="bez" ? "Podle nich zjistíme, jestli můžeš změnit klub zdarma a kdykoliv v roce." : "Dvě věci znějí podobně, ale jsou to různá pravidla. U každé je vysvětlení, co přesně myslíme.", type:"multi",
     items:() => {
-      const ZOP3M = ["zop3m","Měl(a) jsi za poslední 3 měsíce změnu oddílové příslušnosti?","", undefined, "Nemyslíme přestup. Myslíme novou registraci v klubu poté, co ti byla zrušena příslušnost nebo členství (obnova oddílové příslušnosti). Po ní nelze 3 měsíce znovu měnit klub bez přestupu."];
+      const ZOP3M = ["zop3m","Zaregistroval(a) ses v posledních 3 měsících znovu do klubu poté, co ti byla zrušena příslušnost?","", undefined, "Nejde o přestup. Jde o novou registraci v klubu po zrušení oddílové příslušnosti nebo členství (obnova oddílové příslušnosti). Po ní nelze 3 měsíce znovu měnit klub bez přestupu."];
       if (A.state==="bez") return [["memberNow","Máš pořád aktivní členství v Českém florbalu? (Nezrušil(a) jsi ho?)"], ZOP3M];
       return [
         ["_h1","Za poslední 3 měsíce (dvě různé věci)","heading"],
@@ -207,8 +207,8 @@ function evaluate(){
 
   if (A.state==="bez") {
     if (A.memberNow==="ne") set("zop","no","Kdykoliv v roce","Nejdřív si obnov členství přes přihlášku ve FISu. Obnovíš-li ho do roka od posledního zápasu, vrátíš se do původního klubu.");
-    else if (A.zop3m==="ano") set("zop","no","Kdykoliv v roce","Od poslední změny oddílové příslušnosti musí uběhnout alespoň 3 měsíce.");
-    else if (A.zop3m==="nevim" || A.memberNow==="nevim") set("zop","maybe","Kdykoliv v roce", A.memberNow==="nevim" ? "Ověř, jestli jsi pořád členem ČF." : "Ověř, jestli jsi v posledních 3 měsících neměl(a) změnu oddílové příslušnosti.");
+    else if (A.zop3m==="ano") set("zop","no","Kdykoliv v roce","Od poslední nové registrace v klubu (obnovy oddílové příslušnosti) musí uběhnout alespoň 3 měsíce.");
+    else if (A.zop3m==="nevim" || A.memberNow==="nevim") set("zop","maybe","Kdykoliv v roce", A.memberNow==="nevim" ? "Ověř, jestli jsi pořád členem ČF." : "Ověř, jestli ses v posledních 3 měsících znovu nezaregistroval(a) do klubu po zrušení příslušnosti.");
     else set("zop","yes","Kdykoliv v roce","",["Vyber si nový klub a domluv se s ním.",zopSubmit]);
   } else if (TEMP_STATES.includes(A.state)) {
     // Hráč s hostováním, střídavým startem nebo střídavým hostováním má mateřský klub, změna oddílové příslušnosti nejde.
@@ -224,7 +224,7 @@ function evaluate(){
     if (A.member1y==="ne") fails.push("jsi členem ČF kratší dobu než 1 rok");
     if (A.match1y==="ne") fails.push("od posledního utkání neuběhl 1 rok");
     if (A.dodatek==="ano") fails.push("máš podepsaný evidenční dodatek");
-    if (A.zop3m==="ano") fails.push("od poslední změny oddílové příslušnosti neuběhly 3 měsíce");
+    if (A.zop3m==="ano") fails.push("od poslední nové registrace v klubu neuběhly 3 měsíce");
     const unsure = ["member1y","match1y","dodatek","zop3m"].some(k => A[k]==="nevim");
     if (fails.length) set("zop","no","Kdykoliv v roce","Nesplňuješ podmínky: " + fails.join(", ") + ".");
     else if (unsure) set("zop","maybe","Kdykoliv v roce","Některé podmínky jsi nevěděl(a). Ověř je u svého klubu nebo v informačním systému ČF.");
@@ -430,7 +430,7 @@ function renderView(){
 document.addEventListener("click", ev => { const sm = ev.target.closest && ev.target.closest("details.answers > summary"); if (sm) answersOpen = !sm.parentElement.open; });
 const SHORT = {cat:"Kategorie", state:"Situace", hostStart:"Hostování začalo", goal:"Cíl", date:"K datu",
   memberNow:"Aktivní členství v ČF", member1y:"Člen ČF déle než 1 rok", match1y:"Rok od posledního utkání", dodatek:"Evidenční dodatek",
-  zop3m:"Změna příslušnosti za 3 měsíce", recent:"Přestup za 3 měsíce",
+  zop3m:"Nová registrace za 3 měsíce", recent:"Přestup za 3 měsíce",
   league:"Soutěž A-družstva", ststSecond:"Soutěž druhého klubu", ststUsed:"Střídavý start letos",
   sthG:"Druh kategorie", sthHome:"Úroveň klubu"};
 const escHtml = t => String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
@@ -627,7 +627,7 @@ function renderAll(){
   const ODSTUPNE = "Odstupné mezi kluby se řeší dohodou, platí ho nový klub. Hráč neplatí.";
   const groups = [
     ["Změna klubu", [
-      {id:"zop", short:"Nový klub bez přestupu a zdarma.", kdy:"Kdykoliv v roce. Nejdříve 3 měsíce od předchozí změny oddílové příslušnosti.", pod:["Nemáš žádný klub, nebo jsi členem ČF déle než 1 rok, rok jsi nehrál(a) a nemáš evidenční dodatek.","Evidenční dodatek lze uzavřít jen s hráčem starším 16 let, mladší hráči ho mít nemohou.","Nejde během hostování, střídavého startu ani střídavého hostování.","Při obnově po zrušení registrace klubem do 6 měsíců se platí přestupní poplatek (RegŘ čl. 5.2)."]},
+      {id:"zop", short:"Nový klub bez přestupu a zdarma.", kdy:"Kdykoliv v roce. Nejdříve 3 měsíce od poslední nové registrace v klubu (obnovy oddílové příslušnosti).", pod:["Nemáš žádný klub, nebo jsi členem ČF déle než 1 rok, rok jsi nehrál(a) a nemáš evidenční dodatek.","Evidenční dodatek lze uzavřít jen s hráčem starším 16 let, mladší hráči ho mít nemohou.","Nejde během hostování, střídavého startu ani střídavého hostování.","Při obnově po zrušení registrace klubem do 6 měsíců se platí přestupní poplatek (RegŘ čl. 5.2)."]},
       {id:"prestup", short:"Přejdeš do nového klubu natrvalo.", kdy:REQ, pod:["Po přestupu 3 měsíce nelze podat další přestup ani hostování.",CLUB14,"Přestup se schválí i přes nesouhlas klubu, pokud nejsi členem ČF déle než 12 měsíců, nebo ti ještě není 12 let (se souhlasem zákonného zástupce).",DODATEK,"Hráč, který hostuje, může přestoupit jen do klubu, kde hostuje. Do jiného klubu nejdřív ukončí hostování.",ODSTUPNE]},
       {id:"host", short:"Dočasně hraješ za jiný klub, nejdéle do 30. 6.", kdy:REQ+" Hostování končí nejpozději 30. 6.", pod:["Hostování trvá nejméně 30 dnů.","Jen jedno hostování najednou. Do jiného klubu až po ukončení současného.",CLUB14,DODATEK,"Během střídavého startu nejde hostovat. Při střídavém hostování jen do klubu, kde střídavě hostuješ.",ODSTUPNE]}
     ]],
