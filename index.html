@@ -142,7 +142,7 @@ const CONFIG = {
   },
   // Úrovně soutěží pro střídavý start (Soutěžní řád, čl. 3.1). Muži a ženy se porovnávají zvlášť; 1 = nejvyšší.
   ladders: {
-    m: ["Superliga","1. liga mužů","Národní liga","Divize mužů","Regionální liga mužů"],
+    m: ["Superliga","1. liga mužů","Národní liga","Divize","Regionální liga mužů"],
     z: ["Extraliga žen","1. liga žen","2. liga žen","3. liga žen"]
   },
   // nejnižší úroveň, kde smí hrát A-družstvo mateřského klubu (nejvyšší celostátní soutěže)
@@ -324,7 +324,7 @@ function evaluate(){
     else {
       const sec = parseLeague(A.ststSecond), d = sec.level - own.level;
       if (d < 1 || d > 2) set("stst","no",fmt(s.ststEnd),`Druhý klub musí hrát o 1–2 úrovně níže než ${leagueName(own.g,own.level)}, tedy: ${targets.join(" nebo ")}. Ty jsi zvolil(a): ${leagueName(sec.g,sec.level)}.`);
-      else set("stst","yes",fmt(s.ststEnd),"",[`Hraješ za A-družstvo svého klubu (${leagueName(own.g,own.level)}) a za A-družstvo druhého klubu (${leagueName(sec.g,sec.level)}).`,"Pokud nenastoupíš aspoň k 30 % zápasů základní části, střídavý start automaticky skončí.",`Uhraď poplatek ${fee("stst")}.`]);
+      else set("stst","yes",fmt(s.ststEnd),"",[`Hrát můžeš jen za A-družstvo svého klubu (${leagueName(own.g,own.level)}) a za A-družstvo druhého klubu (${leagueName(sec.g,sec.level)}). Za žádná jiná družstva ne.`,"Pokud nenastoupíš aspoň k 30 % zápasů základní části, střídavý start automaticky skončí.",`Uhraď poplatek ${fee("stst")}.`]);
     }
   }
 
@@ -484,7 +484,7 @@ function renderAll(){
     ["zop","Kdykoliv, nejdříve 3 měsíce od předchozí změny oddílové příslušnosti","Bez klubu, nebo členem ČF déle než 1 rok, 1 rok bez utkání a bez evidenčního dodatku"],
     ["prestup","V přestupním období","Po přestupu 3 měsíce nelze podat další přestup ani hostování"],
     ["host","Začátek 1. 7. až konec přestupního období, nejdéle do 30. 6.","Nejméně 30 dnů"],
-    ["stst","Začátek 1. 7. – 31. 1., nejdéle do 30. 6.",`Jen muži a ženy 19–21 let (${yearsOf("dospeli21")}); A-družstvo klubu v nejvyšší celostátní soutěži; druhý klub o 1–2 úrovně níže (muži a ženy zvlášť, viz tabulka níže); jen 1× za sezónu`],
+    ["stst","Začátek 1. 7. – 31. 1., nejdéle do 30. 6.",`Jen v prvních třech sezónách v dospělých, tedy 19–21 let (${yearsOf("dospeli21")}); hraješ jen za A-družstvo mateřského klubu (v nejvyšší celostátní soutěži) a za A-družstvo druhého klubu, který hraje nejvýš o 2 úrovně níže (muži a ženy zvlášť, viz tabulka níže); jen 1× za sezónu`],
     ["sth","Začátek 1. 7. až konec přestupního období, nejvýše 105 dní",`Od starších žáků po první tři sezóny v dospělých (${yearsFor(catById("starsi").minAge, catById("dospeli21").maxAge)}); jen do vyšší celostátní soutěže, kterou klub nemá`],
     ["endHost","Nejpozději konec přestupního období","Hostování trvá alespoň 30 dnů"],
     ["endStst","Nejpozději 31. 1.","—"],
