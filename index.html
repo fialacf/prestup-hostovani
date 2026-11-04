@@ -476,10 +476,43 @@ function hostEndInfo(){
 function hostEndNotice(){
   const h = hostEndInfo();
   if (!h) return "";
+  const s0 = season(A.date, cat().group);
+  if (s0.d > s0.end) return ""; // přestupní období skončilo, vysvětluje to upozornění o přestupním období
   const tail = h.afterEnd
     ? ` To je ale už po konci přestupního období (${fmt(h.end)}), takže hostování letos skončí samo 30. 6.`
     : ` <button type="button" class="btn small" data-setdate="${iso(h.earliest)}">Zobrazit k datu ${fmt(h.earliest)}</button>`;
   return `<div class="notice"><strong>Hostování zatím nejde ukončit.</strong> Musí trvat minimálně 30 dnů od začátku (${fmt(h.start)}), ukončit ho můžeš nejdříve ${fmt(h.earliest)}. Do té doby můžeš přestoupit jen do klubu, kde hostuješ, a hostovat v jiném klubu nejde.${tail}</div>`;
+}
+// Upozornění nad výsledky: proč něco zatím nejde a od kdy to půjde. Tlačítko přepočítá výsledek k danému datu.
+const setDateBtn = d => `<button type="button" class="btn small" data-setdate="${iso(d)}">Zobrazit k datu ${fmt(d)}</button>`;
+function periodNotice(R){
+  if (["bez","novy"].includes(A.state) || !A.date || !cat()) return "";
+  const s = season(A.date, cat().group);
+  if (s.d <= s.end) return "";
+  const may1 = D(s.next.getUTCFullYear(), 5, 1);
+  const apply = s.d >= may1 ? "Žádost už můžeš podat (od 1. 5.)" : `Žádost můžeš podat od ${fmt(may1)}`;
+  let extra = "";
+  if (A.state==="hostuji") extra += " Současné hostování skončí samo 30. 6.";
+  if (A.state==="stst") extra += " Střídavý start skončí nejpozději 30. 6.";
+  if (R.zop && R.zop.status!=="no") extra += " Změna oddílové příslušnosti bez přestupu jde kdykoliv.";
+  const btn = A.state==="oddil" ? " " + setDateBtn(s.next) : "";
+  return `<div class="notice"><strong>Přestupní období tvé kategorie skončilo (${fmt(s.end)}).</strong> Přestup, hostování, střídavý start ani střídavé hostování zatím nejdou. ${apply}, ale datum OD musí být nejdříve ${fmt(s.next)}.${extra}${btn}</div>`;
+}
+function ststUsedNotice(){
+  if (A.ststUsed!=="ano" || !A.date || !cat()) return "";
+  const s = season(A.date, cat().group);
+  if (s.d > s.end) return ""; // přestupní období skončilo, vysvětluje to jiné upozornění
+  return `<div class="notice"><strong>Střídavý start už letos máš využitý.</strong> Lze ho využít jen jednou za sezónu. Další je možný v nové sezóně: žádost od 1. 5., datum OD nejdříve ${fmt(s.next)}. ${setDateBtn(s.next)}</div>`;
+}
+function noOptionNotice(R, sorted, isMatch){
+  const no = sorted.filter(o => R[o.id].status==="no");
+  const pick = no.find(isMatch) || no[0];
+  return pick ? `<div class="notice"><strong>Teď nemáš žádnou možnost.</strong> Hlavní důvod u možnosti „${pick.name}“: ${R[pick.id].reason}</div>` : "";
+}
+function resultNotices(R, now, sorted, isMatch){
+  const n = [periodNotice(R), hostEndNotice(), ststUsedNotice()].filter(Boolean);
+  if (!now.length && !n.length) { const f = noOptionNotice(R, sorted, isMatch); if (f) n.push(f); }
+  return n.join("");
 }
 function renderResult(){
   if (A.state==="novy") return renderNewPlayer();
@@ -500,7 +533,7 @@ function renderResult(){
       <h2>${now.length ? `Máš ${now.length} ${now.length===1?"možnost":now.length<5?"možnosti":"možností"}` : "Teď nemáš žádnou možnost"}</h2>
       ${answersBlock()}
     </div>
-    ${hostEndNotice()}
+    ${resultNotices(R, now, sorted, isMatch)}
     <div class="cards">${now.map(o => card(o,R[o.id],isMatch(o))).join("") || `<p class="reason">Podívej se níže, proč to teď nejde a kdy to bude možné.</p>`}</div>
     ${later.length?`<details class="later" ${now.length?"":"open"}><summary>Teď nejde (${later.length})</summary><div class="cards">${later.map(o => card(o,R[o.id],isMatch(o))).join("")}</div></details>`:""}
     ${A.state==="bez" ? "" : `<details class="later"><summary>Dobré vědět z Přestupního řádu</summary><div class="cards">
@@ -596,7 +629,13 @@ document.getElementById("all").addEventListener("click", ev => {
 // kliknutí na odpověď v přehledu vrátí hráče k otázce
 document.addEventListener("click", ev => {
   const d = ev.target.closest && ev.target.closest("button[data-setdate]");
-  if (d) { A.date = d.dataset.setdate; render(); window.scrollTo({top:0, behavior:"smooth"}); return; }
+  if (d) {
+    const oldD = parse(A.date), newD = parse(d.dataset.setdate), g = cat().group;
+    // Odpovědi vázané na čas po přesunu data přestanou platit: po 3 měsících už není „přestup za poslední 3 měsíce“, v nové sezóně není využitý střídavý start.
+    if (daysBetween(oldD, newD) >= 92) { if (A.recent==="ano") A.recent = "ne"; if (A.zop3m==="ano") A.zop3m = "ne"; }
+    if (A.ststUsed==="ano" && season(iso(oldD), g).start.getTime() !== season(iso(newD), g).start.getTime()) A.ststUsed = "ne";
+    A.date = d.dataset.setdate; render(); window.scrollTo({top:0, behavior:"smooth"}); return;
+  }
   const c = ev.target.closest && ev.target.closest("button.chip");
   if (!c) return;
   const i = visible().findIndex(x => x.id === c.dataset.step);
