@@ -74,7 +74,8 @@ const f = (x, tier) => x ? (x[tier]===0 ? "Zdarma" : x[tier]+" Kč") : "—";
 const y0 = (() => { const n = new Date(); return n.getMonth() >= 6 ? n.getFullYear() : n.getFullYear()-1; })();
 const sezona = `${y0}/${String(y0+1).slice(2)}`;
 const [m1,d1] = CONFIG.periodEnd.A, [m2,d2] = CONFIG.periodEnd.B;
-const fmtD = d => new Date(d+"T00:00:00Z").toLocaleDateString("cs-CZ",{day:"numeric",month:"numeric",year:"numeric",timeZone:"UTC"});
+// "2026-11-04 20:39" -> "4. 11. 2026 v 20:39" (čas je pražský; bez času se ukáže jen datum)
+const fmtD = v => { const [d, t] = String(v).split(" "); const [y, m, day] = d.split("-").map(Number); return `${day}. ${m}. ${y}` + (t ? ` v ${t}` : ""); };
 $("lead").textContent = `Všechna data a pravidla, ze kterých průvodce vychází, na jednom místě. Slouží ke kontrole a hledání chyb. Stav dat: ${fmtD(CONFIG.dataUpdated)}.`;
 
 // ---- 1) Kategorie a ročníky ----

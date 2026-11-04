@@ -15,7 +15,7 @@ Statická stránka bez sestavování:
 
 ## Úpravy pro novou sezónu
 
-Termíny přestupních období, poplatky, žebříčky soutěží a odkazy jsou v `config.js`. Po změně dat přepiš i `dataUpdated` (datum se zobrazuje na stránce Podklady). Pravidla a jejich zdroje na stránce Podklady (tabulka „Pravidla podle možností“) jsou v `podklady.html`, logika vyhodnocení je ve funkci `evaluate()` v `index.html`.
+Termíny přestupních období, poplatky, žebříčky soutěží a odkazy jsou v `config.js`. Po změně dat nebo pravidel přepiš i `dataUpdated` ve tvaru `RRRR-MM-DD HH:MM` (pražský čas, zobrazuje se na stránce Podklady). Pravidla a jejich zdroje na stránce Podklady (tabulka „Pravidla podle možností“) jsou v `podklady.html`, logika vyhodnocení je ve funkci `evaluate()` v `index.html`.
 
 ## Nasazení
 
