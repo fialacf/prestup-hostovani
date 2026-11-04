@@ -112,6 +112,8 @@ const ststAge = () => A.cat === "dospeli21";
 const sthAge = () => ["starsi","dorost","junior"].includes(A.cat) || ststAge();
 
 // otázky ke změně oddílové příslušnosti (bez přestupu); obě skupiny s „3 měsíci“ se ptají v jednom kroku, aby se nepletly
+// Evidenční dodatek lze uzavřít jen s hráčem starším 16 let (PŘ čl. 6.5), proto se na něj ptáme až od U17.
+const canHaveDodatek = () => !!cat() && cat().minAge >= CONFIG.dodatekFromCategoryAge;
 const zopQShown = () => A.state==="bez" || (["trvale","vse"].includes(A.goal) && !["hostuji","stst","sth"].includes(A.state));
 const STEPS = [
   {id:"cat", title:"V jaké jsi kategorii?", hint:() => `Ročníky narození platí pro sezónu ${seasonLabel()}. Podle kategorie se řídí přestupní období a výše poplatků.`, type:"choice",
@@ -147,7 +149,7 @@ const STEPS = [
         ["_h2","Další podmínky změny oddílové příslušnosti bez přestupu","heading"],
         ["member1y","Jsi členem Českého florbalu déle než 1 rok?"],
         ["match1y","Uběhl od tvého posledního utkání v soutěžích ČF víc než 1 rok?",undefined,undefined,"Tedy rok neaktivity."],
-        ["dodatek","Máš podepsaný evidenční dodatek?",undefined,undefined,"Smlouva s klubem zaregistrovaná u matriky ČF."]
+        ...(canHaveDodatek() ? [["dodatek","Máš podepsaný evidenční dodatek?",undefined,undefined,"Smlouva s klubem zaregistrovaná u matriky ČF. Lze ji uzavřít jen s hráčem starším 16 let."]] : [])
       ];
     }},
   {id:"recent", show:() => A.state!=="bez" && A.goal!=="ukoncit" && !zopQShown(), title:"Měl(a) jsi za poslední 3 měsíce přestup?", hint:"Přestup je trvalá změna klubu schválená matrikou. Po něm nelze 3 měsíce podat další přestup ani hostování.", type:"choice",
@@ -485,7 +487,7 @@ function renderResult(){
     ${A.state==="bez" ? "" : `<details class="later"><summary>Dobré vědět z Přestupního řádu</summary><div class="cards">
       <p class="note"><strong>Mateřský klub nesouhlasí s přestupem?</strong> Přestup se schválí i přes jeho nesouhlas (bez odstupného), pokud nejsi členem ČF déle než 12 měsíců, nebo ti ještě není 12 let (s tím musí souhlasit zákonný zástupce). <a href="${CONFIG.disputeUrl}" target="_blank" rel="noopener">Postup při neshodě u žádosti o přestup</a></p>
       <p class="note"><strong>Klub se nevyjádřil?</strong> Po 14 dnech se nic neděje automaticky. Řeš to aktivně s matrikou ČF před vypršením lhůty. Matrika může žádost posoudit, jako by klub souhlasil.</p>
-      <p class="note"><strong>Máš s klubem evidenční dodatek (smlouvu)?</strong> Přestup, hostování, střídavé hostování i střídavý start pak jdou jen se souhlasem klubu.</p>
+      ${canHaveDodatek() ? `<p class="note"><strong>Máš s klubem evidenční dodatek (smlouvu)?</strong> Smlouvu lze uzavřít jen s hráčem starším 16 let. Přestup, hostování, střídavé hostování i střídavý start pak jdou jen se souhlasem klubu.</p>` : ""}
     </div></details>`}
     <div class="nav"><button class="btn" id="back">Upravit odpovědi</button><button class="btn primary" id="restart">Začít znovu</button></div>
   </div>`;

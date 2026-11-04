@@ -46,6 +46,8 @@ const CONFIG = {
     kids:  {url:"https://mickoni.cz/", label:"mickoni.cz"},
     older: {url:"https://www.ceskyflorbal.cz/hraj", label:"ceskyflorbal.cz/hraj", fromAge:15}
   },
+  // Evidenční dodatek: smlouvu lze uzavřít jen s hráčem starším 16 let (PŘ čl. 6.5). Od jaké kategorie (minimální věk v kategorii) se na něj ptáme: U17 dorost a starší.
+  dodatekFromCategoryAge: 15,
   matrikaEmail: "matrika@ceskyflorbal.cz", // zrušení a obnova oddílové příslušnosti se řeší papírovou žádostí přes matriku
   membershipFee: 200, // členský příspěvek ČF za sezónu (Kč)
   fisLoginUrl: "https://login.ceskyflorbal.cz/osoba/",
