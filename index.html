@@ -147,14 +147,20 @@ const CONFIG = {
   },
   // nejnižší úroveň, kde smí hrát A-družstvo mateřského klubu (nejvyšší celostátní soutěže)
   ststHomeMax: {m:3, z:2},
-  // Úrovně soutěží podle Soutěžního řádu, čl. 3.1 (pro střídavé hostování). Pořadí = od nejvyšší.
-  levels: [
-    {id:"a", label:"Nejvyšší celostátní", eg:"Superliga mužů, Extraliga žen, 1. liga mužů, Národní liga, 1. liga žen", national:true},
-    {id:"b", label:"Vyšší celostátní", eg:"CE soutěž juniorů, Divize, 1. liga juniorek, play-off 1. ligy dorostenců", national:true},
-    {id:"c", label:"Ostatní celostátní", eg:"pohárové soutěže mužů a žen, 1. liga dorostenců, celostátní finále žákovských soutěží, nadstavba dorostenek, nadstavba soutěže veteránů a soutěže veteránek", national:true},
-    {id:"d", label:"Nejvyšší regionální", eg:"soutěže mužů, juniorů a veteránů", national:false},
-    {id:"e", label:"Ostatní regionální", eg:"všechny další soutěže", national:false}
-  ],
+  // Střídavé hostování: žebříčky vlastních soutěží kategorií (1 = nejvyšší).
+  // nat = kolik nejvyšších úrovní se pro střídavé hostování počítá jako celostátní
+  // (1. liga dorostenek je regionální, ale pro střídavé hostování se počítá jako celostátní).
+  sthLadders: {
+    junior: {m:{names:["1. liga juniorů","2. liga juniorů","3. liga juniorů","4. liga juniorů"], nat:1},
+             z:{names:["1. liga juniorek","2. liga juniorek"], nat:1}},
+    dorost: {m:{names:["1. liga dorostenců","2. liga dorostenců","3. liga dorostenců"], nat:1},
+             z:{names:["1. liga dorostenek","2. liga dorostenek"], nat:1}},
+    starsi: {m:{names:[], nat:0}, z:{names:[], nat:0}}
+  },
+  // první liga dorostu ve 4. pádě (do vět typu „klub hraje …“)
+  topDorostAcc: {m:"1. ligu dorostenců", z:"1. ligu dorostenek"},
+  // celostátní soutěže dospělých pro střídavé hostování (počet nejvyšších úrovní ze žebříčku výše)
+  adultNational: {m:4, z:2},
   disputeUrl: "https://www.ceskyflorbal.cz/neshoda-u-zadosti-o-prestup",
   // hledání klubu: pro děti Míčkoni, od dorostenců (od 15 let) web Českého florbalu
   findClub: {
@@ -198,20 +204,31 @@ const leagueName = (g,l) => LADDERS()[g][l-1];
 const leagueOpts = g => LADDERS()[g].map((n,i) => [g+(i+1), n]);
 const ststTargets = own => [1,2].map(d => own.level+d).filter(l => l <= LADDERS()[own.g].length).map(l => leagueName(own.g,l));
 const ststHomeNames = () => Object.keys(LADDERS()).flatMap(g => LADDERS()[g].slice(0, CONFIG.ststHomeMax[g]));
-// Střídavé hostování: porovnání úrovní soutěží (Přestupní řád čl. 4.1, 4.3, 4.4)
-function sthLevelCheck(){
-  const lv = id => CONFIG.levels.findIndex(l => l.id===id)+1;
-  const home = A.sthHome, tgt = A.sthTarget;
-  if (!home || !tgt) return {status:"maybe", reason:"Záleží na soutěži, kam chceš hostovat, a na soutěžích tvého klubu. Zvol v průvodci „Hrát za dva kluby zároveň“."};
-  if (home==="nevim" || tgt==="nevim") return {status:"maybe", reason:"Ověř úrovně soutěží u svého klubu nebo u matriky ČF."};
-  const dor = tgt==="dor";
-  const t = dor ? 3 : lv(tgt); // Liga dorostenek je celostátní, ale její přesná úroveň v řádu není: počítáme nejnižší celostátní (ostatní)
-  if (!dor && !CONFIG.levels[t-1].national) return {status:"no", reason:`Střídavě hostovat lze jen v celostátní soutěži. Zvolená soutěž (${CONFIG.levels[t-1].label.toLowerCase()}) celostátní není.`};
-  const h = home==="none" ? 99 : lv(home);
-  if (t < h) return {status:"yes"};
-  if (dor) return {status:"maybe", reason:"Liga dorostenek se pro střídavé hostování počítá jako celostátní soutěž, její úroveň ale řád neuvádí. Ověř u matriky ČF, jestli je vyšší než soutěž tvého klubu."};
-  if (t === h+1) return {status:"maybe", reason:"Tvůj klub má družstvo na vyšší úrovni. Projde jen soutěž o úroveň nižší ve starší věkové kategorii (čl. 4.3). Ověř to u matriky ČF."};
-  return {status:"no", reason:`Tvůj klub už má družstvo na stejné nebo vyšší úrovni (${CONFIG.levels[h-1].label.toLowerCase()}). Střídavě hostovat lze jen do soutěže vyšší úrovně (čl. 4.4).`};
+// Střídavé hostování (Přestupní řád čl. 4): kam smí hráč podle úrovně soutěže svého klubu.
+// Vlastní kategorie: jen celostátní soutěž vyšší než družstvo klubu. Nejbližší starší kategorie:
+// celostátní soutěže do úrovně (úroveň družstva klubu + 1). Starší žáci: jen první liga dorostu.
+const OLDER_OF = {starsi:"dorost", dorost:"junior", junior:"dospeli21"};
+const sthOwn = (catId,g) => catId==="dospeli21" ? {names:CONFIG.ladders[g], nat:CONFIG.adultNational[g]} : CONFIG.sthLadders[catId][g];
+function sthCheck(){
+  const dospeli = A.cat==="dospeli21";
+  const own0 = dospeli ? parseLeague(A.league) : null;
+  const unknown = {status:"maybe", reason:"Záleží na soutěži tvého klubu. Zvol v průvodci „Hrát za dva kluby zároveň“."};
+  if (dospeli) { if (A.league==="nevim") return {status:"maybe", reason:"Ověř, v jaké soutěži hraje A-družstvo tvého klubu."}; if (!own0) return unknown; }
+  else if (!A.sthG || !A.sthHome) return unknown;
+  if (A.sthHome==="nevim") return {status:"maybe", reason:"Ověř, na jaké úrovni hraje tvůj klub ve tvé kategorii."};
+  const g = dospeli ? own0.g : A.sthG;
+  if (A.cat==="starsi") {
+    const target = CONFIG.sthLadders.dorost[g].names[0];
+    if (A.sthHome==="ano") return {status:"no", reason:`Tvůj klub sám hraje ${CONFIG.topDorostAcc[g]}. Střídavě hostovat lze jen do soutěže vyšší úrovně, než jakou klub hraje (čl. 4.4).`};
+    return {status:"yes", reason:`Starší žáci nemají celostátní soutěž. Střídavě hostovat smíš jen do: ${target}.`};
+  }
+  const own = sthOwn(A.cat,g), older = OLDER_OF[A.cat] ? sthOwn(OLDER_OF[A.cat],g) : null;
+  const L = dospeli ? own0.level : (A.sthHome==="none" ? Infinity : +A.sthHome);
+  const out = [];
+  for (let i=1; i<=own.nat; i++) if (i < L) out.push(own.names[i-1]);
+  if (older) for (let i=1; i<=older.nat; i++) if (i <= L+1) out.push(older.names[i-1]);
+  if (!out.length) return {status:"no", reason:"Tvůj klub už hraje na stejné nebo vyšší úrovni, než jaké smíš střídavě hostovat (čl. 4.4)."};
+  return {status:"yes", reason:`Můžeš střídavě hostovat do: ${out.join(", ")}.`};
 }
 const todayIso = () => { const n = new Date(); return iso(D(n.getFullYear(), n.getMonth()+1, n.getDate())); };
 
@@ -270,9 +287,14 @@ const STEPS = [
         }
         it.push(["ststUsed","Využil(a) jsi letos už střídavý start?"]);
       }
-      const lvOpts = CONFIG.levels.map(l => [l.id, `${l.label} (${l.eg})`]);
-      it.push(["sthHome","Na jaké úrovni hraje nejvyšší družstvo tvého klubu v tvé kategorii?","select", lvOpts.concat([["none","Klub nemá v mé kategorii žádné družstvo"],["nevim","Nevím"]])]);
-      it.push(["sthTarget","Na jaké úrovni je soutěž, do které chceš střídavě hostovat?","select", lvOpts.concat([["dor","Liga dorostenek (pro střídavé hostování se počítá jako celostátní)"],["nevim","Nevím"]])]);
+      // Muži a ženy 19–21 let použijí soutěž A-družstva z otázky výše, ostatní zvolí pohlaví a úroveň klubu v kategorii.
+      if (!ststAge()) {
+        it.push(["sthG","Hraješ v chlapecké, nebo dívčí kategorii?",undefined,[["m","Chlapecké (junioři, dorostenci, starší žáci)"],["z","Dívčí (juniorky, dorostenky, starší žákyně)"]]]);
+        if (A.sthG) {
+          if (A.cat==="starsi") it.push(["sthHome",`Hraje tvůj klub sám ${CONFIG.topDorostAcc[A.sthG]}?`]);
+          else it.push(["sthHome","Na jaké úrovni hraje nejvyšší družstvo tvého klubu ve tvé kategorii?","select",CONFIG.sthLadders[A.cat][A.sthG].names.map((n,i) => [String(i+1),n]).concat([["none","Klub nemá v mé kategorii žádné družstvo"],["nevim","Nevím"]])]);
+        }
+      }
       return it;
     }}
 ];
@@ -373,8 +395,8 @@ function evaluate(){
   else if (A.state==="sth") set("sth","no",fmt(s.end),"Střídavé hostování už máš.");
   else if (!inPeriod) set("sth","no",fmt(s.end),"Datum je mimo přestupní období tvé kategorie. " + nextNote);
   else {
-    const r = sthLevelCheck();
-    if (r.status==="yes") set("sth","yes",fmt(s.end),"",[...ASK,"Střídavé hostování platí nejvýše 105 dnů, jen v základní části soutěže a jen v jednom konkrétním družstvu nového klubu.","Nelze ho předčasně ukončit. Do stejného klubu můžeš střídavě hostovat jen jednou za sezónu.","Za svůj mateřský klub můžeš dál nastupovat bez omezení.",`Uhraď poplatek ${fee("sth")}.`]);
+    const r = sthCheck();
+    if (r.status==="yes") set("sth","yes",fmt(s.end),r.reason,[...ASK,"Střídavé hostování platí nejvýše 105 dnů, jen v základní části soutěže a jen v jednom konkrétním družstvu nového klubu.","Nelze ho předčasně ukončit. Do stejného klubu můžeš střídavě hostovat jen jednou za sezónu.","Za svůj mateřský klub můžeš dál nastupovat bez omezení.",`Uhraď poplatek ${fee("sth")}.`]);
     else set("sth",r.status,fmt(s.end),r.reason);
   }
 
@@ -405,7 +427,7 @@ function stepDone(st){
 }
 
 // Při změně odpovědi smaž odpovědi z pozdějších kroků, aby nezůstaly neplatné (např. po změně kategorie).
-const MULTI_KEYS = {zopQ:["memberNow","member1y","match1y","dodatek","zop3m"], twoQ:["league","ststSecond","ststUsed","sthHome","sthTarget"]};
+const MULTI_KEYS = {zopQ:["memberNow","member1y","match1y","dodatek","zop3m"], twoQ:["league","ststSecond","ststUsed","sthG","sthHome"]};
 function clearAfter(stepId){
   const i = STEPS.findIndex(s => s.id === stepId);
   STEPS.slice(i+1).forEach(s => (MULTI_KEYS[s.id] || [s.id]).forEach(k => delete A[k]));
@@ -429,7 +451,7 @@ function render(){
       if (kind==="select") {
         return `<div class="yn"><label class="lbl" for="in-${k}">${q}</label><select id="in-${k}" data-k="${k}"><option value="">Vyber soutěž…</option>${o.map(([v,l]) => `<option value="${v}" ${A[k]===v?"selected":""}>${l}</option>`).join("")}</select></div>`;
       }
-      return `<div class="yn"><span class="lbl">${q}</span><div class="seg">${YN.map(([v,l]) => `<button data-k="${k}" data-v="${v}" aria-pressed="${A[k]===v}">${l}</button>`).join("")}</div></div>`;
+      return `<div class="yn"><span class="lbl">${q}</span><div class="seg">${(o||YN).map(([v,l]) => `<button data-k="${k}" data-v="${v}" aria-pressed="${A[k]===v}">${l}</button>`).join("")}</div></div>`;
     }).join("") + `</div>`;
   }
   W.innerHTML = `<div class="panel">
@@ -440,6 +462,7 @@ function render(){
   </div>`;
   W.querySelectorAll("button[data-k]").forEach(b => b.onclick = () => {
     if (st.type==="choice" && A[st.id] !== b.dataset.v) clearAfter(st.id);
+    if (b.dataset.k==="sthG" && A.sthG !== b.dataset.v) delete A.sthHome; // úrovně se liší podle pohlaví
     A[b.dataset.k] = b.dataset.v;
     if (st.type==="choice") { idx++; render(); } else render();
   });
@@ -530,7 +553,7 @@ function renderAll(){
     ["prestup","V přestupním období","Po přestupu 3 měsíce nelze podat další přestup ani hostování"],
     ["host","Začátek 1. 7. až konec přestupního období, nejdéle do 30. 6.","Nejméně 30 dnů"],
     ["stst","Začátek 1. 7. – 31. 1., nejdéle do 30. 6.",`Jen v prvních třech sezónách v dospělých, tedy 19–21 let (${yearsOf("dospeli21")}); hraješ jen za A-družstvo mateřského klubu (v nejvyšší celostátní soutěži) a za A-družstvo druhého klubu, který hraje nejvýš o 2 úrovně níže (muži a ženy zvlášť, viz tabulka níže); jen 1× za sezónu`],
-    ["sth","Začátek 1. 7. až konec přestupního období, nejvýše 105 dní",`Od starších žáků po první tři sezóny v dospělých (${yearsFor(catById("starsi").minAge, catById("dospeli21").maxAge)}); jen do celostátní soutěže vyšší úrovně, než ve které hraje tvůj klub; jen v základní části soutěže; nelze předčasně ukončit; do stejného klubu 1× za sezónu`],
+    ["sth","Začátek 1. 7. až konec přestupního období, nejvýše 105 dní",`Od starších žáků po první tři sezóny v dospělých (${yearsFor(catById("starsi").minAge, catById("dospeli21").maxAge)}); jen do celostátní soutěže podle úrovně soutěže tvého klubu (viz tabulky níže); jen v základní části soutěže; nelze předčasně ukončit; do stejného klubu 1× za sezónu`],
     ["endHost","Nejpozději konec přestupního období","Hostování trvá alespoň 30 dnů"],
     ["endStst","Nejpozději 31. 1.","—"],
     ["prihlaska","Kdykoliv, přes přihlášku ve FISu","Zrušené členství v ČF"]
@@ -546,10 +569,24 @@ function renderAll(){
     <div class="tbl"><table><thead><tr><th>Úroveň</th><th>Muži</th><th>Ženy</th></tr></thead><tbody>
     ${Array.from({length:Math.max(...Object.values(LADDERS()).map(l=>l.length))}, (_,i) => `<tr><td>${i+1}</td>${["m","z"].map(g => { const n = LADDERS()[g][i]; return `<td>${n ? (i+1 <= CONFIG.ststHomeMax[g] ? `<strong>${n}</strong>` : n) : "—"}</td>`; }).join("")}</tr>`).join("")}
     </tbody></table></div>
-    <div style="display:flex;flex-direction:column;gap:6px"><h3>Úrovně soutěží pro střídavé hostování</h3>
-    <p class="hint">Střídavě hostovat lze jen v celostátní soutěži (první tři úrovně), která je vyšší než nejvyšší soutěž tvého klubu v tvé kategorii. Podle Soutěžního řádu, čl. 3.1.</p></div>
-    <div class="tbl"><table><thead><tr><th>Úroveň</th><th>Soutěže</th></tr></thead><tbody>
-    ${CONFIG.levels.map(l => `<tr><td><strong>${l.label}</strong></td><td>${l.eg}</td></tr>`).join("")}
+    <div style="display:flex;flex-direction:column;gap:6px"><h3>Kam smíš střídavě hostovat</h3>
+    <p class="hint">Rozhoduje úroveň (1 = nejvyšší), na které hraje nejvyšší družstvo tvého klubu ve tvé kategorii. Střídavě hostovat lze jen do celostátní soutěže.</p></div>
+    <div class="tbl"><table><thead><tr><th>Kategorie</th><th>Smíš do</th></tr></thead><tbody>
+    ${(() => { const L = CONFIG.sthLadders, n = (c,g,i=0) => L[c][g].names[i];
+      return [
+        ["U15 starší žáci", `${n("dorost","m")}, ale jen když ji klub sám nehraje`],
+        ["U15 starší žákyně", `${n("dorost","z")}, ale jen když ji klub sám nehraje`],
+        ["U17 dorostenci", `${n("dorost","m")} (jen když klub hraje nižší úroveň) a ${n("junior","m")}`],
+        ["U17 dorostenky", `${n("dorost","z")} (jen když klub hraje nižší úroveň) a ${n("junior","z")}`],
+        ["U19 junioři", `${n("junior","m")} (jen když klub hraje nižší úroveň) a celostátní soutěže mužů (Superliga až Divize) do úrovně o 1 nižší, než hraje klub v juniorech`],
+        ["U19 juniorky", `${n("junior","z")} (jen když klub hraje nižší úroveň) a Extraliga a 1. liga žen do úrovně o 1 nižší, než hraje klub v juniorkách`],
+        ["Muži / ženy 19–21 let", "celostátní soutěž vyšší úrovně, než ve které hraje A-družstvo klubu"]
+      ].map(([k,v]) => `<tr><td><strong>${k}</strong></td><td>${v}</td></tr>`).join(""); })()}
+    </tbody></table></div>
+    <div style="display:flex;flex-direction:column;gap:6px"><h3>Úrovně soutěží kategorií</h3>
+    <p class="hint">Tučně jsou celostátní soutěže. 1. liga dorostenek je regionální, pro střídavé hostování se počítá jako celostátní. Starší žáci a žákyně celostátní soutěž nemají.</p></div>
+    <div class="tbl"><table><thead><tr><th>Kategorie</th><th>Úrovně</th></tr></thead><tbody>
+    ${[["junior","m","U19 junioři"],["junior","z","U19 juniorky"],["dorost","m","U17 dorostenci"],["dorost","z","U17 dorostenky"]].map(([c,g,l]) => { const d = CONFIG.sthLadders[c][g]; return `<tr><td><strong>${l}</strong></td><td>${d.names.map((x,i) => i < d.nat ? `<strong>${x}</strong>` : x).join(" · ")}</td></tr>`; }).join("")}
     </tbody></table></div></div>`;
 }
 
