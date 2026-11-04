@@ -275,7 +275,7 @@ await S('21', async () => {
   ok('záložka bez undefined', !/undefined|NaN/.test(await p.evaluate(() => document.getElementById('all').innerText))); await p.close();
   const q = await open(1000, 'podklady.html'); const t = await q.evaluate(() => document.body.innerText);
   ok('podklady: stav dat s datem a časem', /Stav dat: \d{1,2}\. \d{1,2}\. \d{4} v \d{2}:\d{2}\./.test(t), t.match(/Stav dat[^\n]*/));
-  for (const w of ['Přechod mezi sezónami a ročníky', 'Cíl nejde splnit', 'Termín „Podat nejpozději“', 'Uložení odpovědí', 'Záložka Všechny možnosti', 'konec příští sezóny', 'sessionStorage']) ok(`podklady obsahují „${w}“`, t.includes(w));
+  for (const w of ['Otevřené body a co se ještě musí udělat', 'Ověření výkladů matrikou', 'Postup na novou sezónu', 'Kontakt na správce', 'Ochrana osobních údajů', 'Sdílení výsledku', 'Start v jiné věkové kategorii', 'hráčské licenci', 'Přechod mezi sezónami a ročníky', 'Cíl nejde splnit', 'Termín „Podat nejpozději“', 'Uložení odpovědí', 'Záložka Všechny možnosti', 'konec příští sezóny', 'sessionStorage']) ok(`podklady obsahují „${w}“`, t.includes(w));
   await q.close();
 });
 

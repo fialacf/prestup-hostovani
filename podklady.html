@@ -189,8 +189,8 @@ $("s-behav").innerHTML = `<h2>Upozornění a chování průvodce</h2><p class="h
 // ---- 5) Otevřené body ----
 const O = [
   ["Přechod mezi sezónami a ročníky","Není vyřešen. Kategorie a ročníky narození se dnes přepínají 1. 7. (začátek sezóny), ale žádosti na novou sezónu se podávají už od 1. 5. V květnu a červnu tak hráč vybírá ročník ze staré sezóny, i když řeší novou. Návrh: přepnout kategorie a ročníky vždy k 1. 5. Ještě je potřeba dořešit, co dělat s hráčem, který má v květnu a červnu ještě běžící sezónu (například ukončení hostování nebo střídavého startu)."],
-  ["Nový hráč","Průvodce říká, že registraci do ČF za hráče vyřídí klub. Registrační řád (čl. 2.1) říká, že Přihlášku člena do ČF vyplňuje hráč (u dětí zákonný zástupce) a klub s ní souhlasí. Zatím ponecháno."],
-  ["Hráč bez klubu","Průvodce se neptá, proč hráč klub nemá (klub mu zrušil registraci, zrušil si ji sám, klub zanikl). Podle RegŘ čl. 4.1, 4.2, 4.4 a 5.1–5.5 se podmínky liší, včetně poplatku ve výši přestupního poplatku při obnově do 6 měsíců po zrušení klubem. Odloženo."],
+  ["Nový hráč","Průvodce říká, že registraci do ČF za hráče vyřídí klub. Registrační řád (čl. 2.1) říká, že Přihlášku člena do ČF vyplňuje hráč (u dětí zákonný zástupce) a klub s ní souhlasí. Je potřeba upravit kroky podle tohoto článku a doplnit informaci o hráčské licenci: start v soutěžích je možný jen s platnou licencí (RegŘ čl. 1.3, podrobnosti v Licenčním řádu), o které průvodce nemluví. Zatím ponecháno."],
+  ["Hráč bez klubu","Průvodce se neptá, proč hráč klub nemá (klub mu zrušil registraci, zrušil si ji sám, klub zanikl). Podle RegŘ čl. 4.1, 4.2, 4.4 a 5.1–5.5 se podmínky liší, včetně poplatku ve výši přestupního poplatku při obnově do 6 měsíců po zrušení klubem (čl. 5.2). Je potřeba rozhodnout, jak se na důvod a datum ztráty klubu zeptat, a vyřešit výklad období 16. 1.–30. 6. (viz níže). Zadavatelka to zatím odložila."],
   ["Období 16. 1.–30. 6.","RegŘ čl. 5.1 zakazuje obnovu v tomto období „roku zrušení registrace“. Výklad není jasný (zrušení v říjnu 2026: platí zákaz v roce 2026, nebo 2027?). Průvodce to zatím neřeší."],
   ["Úrovně lig mládeže","Žebříčky (1.–4. liga juniorů, 1.–2. liga juniorek, 1.–3. liga dorostenců, 1.–2. liga dorostenek) a to, že jen první liga je celostátní, zadala ČF. Řády je neuvádějí."],
   ["Opakovaný přestup","Přestup do téhož klubu po 6 měsících od předchozího přestupu (PŘ čl. 1.4 b, 8.3 b) jde podat kdykoliv a platí se odstupné. Průvodce to záměrně neřeší, takže tvrzení „přestup jde jen v přestupním období“ pro tento případ neplatí."],
@@ -201,9 +201,15 @@ const O = [
   ["Ukončení hostování","30 dnů od začátku hostování (upřesnění ČF), čl. 3.5 mluví o 30 dnech od schválení."],
   ["Hostování při hostování","Průvodce říká „Teď ne“ (dvě hostování najednou nejdou). Řád to výslovně neříká."],
   ["Členem ČF déle než 1 rok","Podmínka u změny oddílové příslušnosti je výklad ČF, v řádech není."],
-  ["Názvy lig","„Divize“ a „Regionální liga mužů“ jsme zvolili podle zadání. Ověřit oficiální názvy."]
+  ["Názvy lig","„Divize“ a „Regionální liga mužů“ jsme zvolili podle zadání. Ověřit oficiální názvy."],
+  ["Start v jiné věkové kategorii","Podle informací ČF umožňuje Soutěžní řád za určitých podmínek start v jiné věkové kategorii. Průvodce předpokládá, že hráč hraje ve své kategorii. Není vyřešen ani případ dívky hrající v chlapecké soutěži (u střídavého hostování se ptáme na chlapeckou nebo dívčí kategorii). Je potřeba rozhodnout, jak to v průvodci zachytit."],
+  ["Ověření výkladů matrikou","Všechna pravidla označená „Upřesnění ČF“ a „Předpoklad“ má projít matrika ČF a potvrdit je, nejlépe s datem a jménem toho, kdo je potvrdil. Zejména střídavé hostování 19–21 let, družstva klubu jen ve vlastní kategorii, „lhůtu“ 14 dnů, názvy lig, ukončení hostování po 30 dnech od začátku a hostování, když už hráč hostuje.","ukol"],
+  ["Postup na novou sezónu","Sepsat krátký roční postup: kontrola nové Edice řádů, poplatků, termínů, ročníků a odkazů, aktualizace data a času stavu dat, spuštění testů, kdo změny schvaluje. Dosud je jen v hlavě a v souboru CLAUDE.md pro vývoj.","ukol"],
+  ["Kontakt na správce","Na webu není uvedeno, komu hlásit chybu nebo nejasnost. Je potřeba určit e-mail nebo odkaz a umístit ho do patičky průvodce i na tuto stránku.","ukol"],
+  ["Ochrana osobních údajů","Písma se načítají z Google Fonts, takže se jejich serverům předá IP adresa návštěvníka. Doporučeno mít písma přímo v repozitáři (soubory musí stáhnout zadavatelka) a doplnit krátkou poznámku, že odpovědi hráče zůstávají jen v jeho prohlížeči a nikam se neposílají.","ukol"],
+  ["Sdílení výsledku","Přidat možnost sdílet výsledek odkazem nebo uložit do PDF, například pro rodiče nebo klub. Nyní jde jen o e-mail matrice u karet „Možná – ověř“.","ukol"]
 ];
-$("s-open").innerHTML = `<h2>Otevřené body a předpoklady</h2><p class="hint">Místa, která stojí za kontrolu.</p><ol class="open-list">${O.map(([a,b]) => `<li><strong>${esc(a)}.</strong> ${esc(b)}</li>`).join("")}</ol>`;
+$("s-open").innerHTML = `<h2>Otevřené body a co se ještě musí udělat</h2><p class="hint">Místa, která stojí za kontrolu nebo rozhodnutí. Položky se štítkem <span class="tag up">Úkol</span> jsou práce, které zbývá udělat.</p><ol class="open-list">${O.map(([a,b,k]) => `<li>${k==="ukol" ? '<span class="tag up">Úkol</span> ' : ""}<strong>${esc(a)}.</strong> ${esc(b)}</li>`).join("")}</ol>`;
 
 // ---- 6) Odkazy ----
 const link = (u,t) => `<a href="${u}" target="_blank" rel="noopener">${esc(t||u)}</a>`;
