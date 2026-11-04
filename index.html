@@ -57,16 +57,17 @@ const seasonStartYear = () => { const n = new Date(); return n.getMonth() >= 6 ?
 const seasonLabel = () => { const y = seasonStartYear(); return `${y}/${String(y+1).slice(2)}`; };
 const yearsFor = (minAge, maxAge) => { const y = seasonStartYear();
   return maxAge === undefined ? `ročník ${y-minAge} a starší` : `ročníky ${y-maxAge}–${y-minAge}`; };
+// text přestupního období kategorie, např. „1. 7. – 31. 1.“ (z periodEnd v config.js)
+const periodText = g => `1. 7. – ${CONFIG.periodEnd[g][1]}. ${CONFIG.periodEnd[g][0]}.`;
 const catById = id => CONFIG.categories.find(c => c.id === id);
 const yearsOf = id => { const c = catById(id); return yearsFor(c.minAge, c.maxAge); };
 const memberFeeText = () => `Zdarma, pak členský příspěvek ${CONFIG.membershipFee} Kč na sezónu`;
 const findClub = () => { const f = CONFIG.findClub, c = cat(); return c && c.minAge >= f.older.fromAge ? f.older : f.kids; };
-const LADDERS = () => CONFIG.ladders;
 const parseLeague = v => /^[mz]\d$/.test(v||"") ? {g:v[0], level:+v.slice(1)} : null;
-const leagueName = (g,l) => LADDERS()[g][l-1];
-const leagueOpts = g => LADDERS()[g].map((n,i) => [g+(i+1), n]);
-const ststTargets = own => [1,2].map(d => own.level+d).filter(l => l <= LADDERS()[own.g].length).map(l => leagueName(own.g,l));
-const ststHomeNames = () => Object.keys(LADDERS()).flatMap(g => LADDERS()[g].slice(0, CONFIG.ststHomeMax[g]));
+const leagueName = (g,l) => CONFIG.ladders[g][l-1];
+const leagueOpts = g => CONFIG.ladders[g].map((n,i) => [g+(i+1), n]);
+const ststTargets = own => [1,2].map(d => own.level+d).filter(l => l <= CONFIG.ladders[own.g].length).map(l => leagueName(own.g,l));
+const ststHomeNames = () => Object.keys(CONFIG.ladders).flatMap(g => CONFIG.ladders[g].slice(0, CONFIG.ststHomeMax[g]));
 // Střídavé hostování (Přestupní řád čl. 4): kam smí hráč podle úrovně soutěže svého klubu.
 // Vlastní kategorie: jen celostátní soutěž vyšší než družstvo klubu. Nejbližší starší kategorie:
 // celostátní soutěže do úrovně (úroveň družstva klubu + 1). Starší žáci: jen první liga dorostu.
@@ -114,10 +115,12 @@ const sthAge = () => ["starsi","dorost","junior"].includes(A.cat) || ststAge();
 // otázky ke změně oddílové příslušnosti (bez přestupu); obě skupiny s „3 měsíci“ se ptají v jednom kroku, aby se nepletly
 // Evidenční dodatek lze uzavřít jen s hráčem starším 16 let (PŘ čl. 6.5), proto se na něj ptáme až od U17.
 const canHaveDodatek = () => !!cat() && cat().minAge >= CONFIG.dodatekFromCategoryAge;
-const zopQShown = () => A.state==="bez" || (["trvale","vse"].includes(A.goal) && !["hostuji","stst","sth"].includes(A.state));
+// hráč má hostování, střídavý start nebo střídavé hostování (má mateřský klub, ale dočasně hraje jinde)
+const TEMP_STATES = ["hostuji","stst","sth"];
+const zopQShown = () => A.state==="bez" || (["trvale","vse"].includes(A.goal) && !TEMP_STATES.includes(A.state));
 const STEPS = [
   {id:"cat", title:"V jaké jsi kategorii?", hint:() => `Ročníky narození platí pro sezónu ${seasonLabel()}. Podle kategorie se řídí přestupní období a výše poplatků.`, type:"choice",
-    options:() => CONFIG.categories.map(c => [c.id, `${c.label} (${yearsFor(c.minAge, c.maxAge)})`, (c.note ? c.note + " " : "") + (c.group==="A" ? "Přestupní období 1. 7. – 31. 1." : "Přestupní období 1. 7. – 31. 3.")])},
+    options:() => CONFIG.categories.map(c => [c.id, `${c.label} (${yearsFor(c.minAge, c.maxAge)})`, (c.note ? c.note + " " : "") + "Přestupní období " + periodText(c.group)])},
   {id:"state", title:"Jaká je tvoje situace teď?", type:"choice",
     options:() => [["oddil","Mám svůj (mateřský) klub","Jsem registrovaný v klubu a hraju za něj."],["bez","Nemám žádný klub","Byl(a) jsem registrovaný v Českém florbalu, ale teď nepatřím k žádnému klubu."],["novy","Jsem nový hráč","Ještě jsem nikdy nebyl(a) registrovaný v Českém florbalu."],["hostuji","Právě hostuji v jiném klubu",""]]
       .concat(ststAge() ? [["stst","Mám střídavý start",""]] : [])
@@ -127,10 +130,12 @@ const STEPS = [
     options:() => {
       // 4. položka = důvod, proč je možnost zašedlá (nelze vybrat)
       const bez = A.state==="bez";
+      const NO_CLUB = "Bez klubu to nejde. Nejdřív se musíš přihlásit do nového klubu.";
+      const lockDva = {hostuji:"Dokud hostuješ, nejde hrát za dva kluby. Nejdřív ukonči hostování.", stst:"Střídavý start už máš.", sth:"Střídavé hostování už máš."}[A.state];
       const o = [
         bez ? ["trvale","Přihlásit se do nového klubu","Přes změnu oddílové příslušnosti."] : ["trvale","Hrát natrvalo za jiný klub",""],
-        ["docasne","Hrát dočasně za jiný klub","Třeba na půl sezóny.", bez ? "Bez klubu to nejde. Nejdřív se musíš přihlásit do nového klubu." : A.state==="stst" ? "Po dobu střídavého startu nejde hostovat." : ""],
-        ["dva","Hrát za dva kluby zároveň","", bez ? "Bez klubu to nejde. Nejdřív se musíš přihlásit do nového klubu." : {hostuji:"Dokud hostuješ, nejde hrát za dva kluby. Nejdřív ukonči hostování.", stst:"Střídavý start už máš.", sth:"Střídavé hostování už máš."}[A.state] ? {hostuji:"Dokud hostuješ, nejde hrát za dva kluby. Nejdřív ukonči hostování.", stst:"Střídavý start už máš.", sth:"Střídavé hostování už máš."}[A.state] : !sthAge() ? "Za dva kluby můžou hrát jen kategorie od U15 starších žáků po muže a ženy 19–21 let." : ""]
+        ["docasne","Hrát dočasně za jiný klub","Třeba na půl sezóny.", bez ? NO_CLUB : A.state==="stst" ? "Po dobu střídavého startu nejde hostovat." : ""],
+        ["dva","Hrát za dva kluby zároveň","", bez ? NO_CLUB : lockDva || (!sthAge() ? "Za dva kluby můžou hrát jen kategorie od U15 starších žáků po muže a ženy 19–21 let." : "")]
       ];
       if (["hostuji","stst"].includes(A.state)) o.push(["ukoncit", A.state==="hostuji" ? "Ukončit hostování" : "Ukončit střídavý start",""]);
       o.push(["vse","Nevím, ukaž mi všechno",""]);
@@ -154,11 +159,11 @@ const STEPS = [
     }},
   {id:"recent", show:() => A.state!=="bez" && A.goal!=="ukoncit" && !zopQShown(), title:"Měl(a) jsi za poslední 3 měsíce přestup?", hint:"Přestup je trvalá změna klubu schválená matrikou. Po něm nelze 3 měsíce podat další přestup ani hostování.", type:"choice",
     options:() => YN.map(([v,l]) => [v,l])},
-  {id:"twoQ", show:() => ["dva","vse"].includes(A.goal) && sthAge() && !["bez","hostuji","stst","sth"].includes(A.state), title:"Hraní za dva kluby", type:"multi",
+  {id:"twoQ", show:() => ["dva","vse"].includes(A.goal) && sthAge() && A.state!=="bez" && !TEMP_STATES.includes(A.state), title:"Hraní za dva kluby", type:"multi",
     items:() => {
       const it = [];
       if (ststAge()) {
-        const homeOpts = Object.keys(LADDERS()).flatMap(leagueOpts).concat([["nevim","Nevím"]]);
+        const homeOpts = Object.keys(CONFIG.ladders).flatMap(leagueOpts).concat([["nevim","Nevím"]]);
         it.push(["league","V jaké soutěži hraje A-družstvo tvého klubu?","select",homeOpts]);
         const own = parseLeague(A.league);
         if (own && own.level <= CONFIG.ststHomeMax[own.g]) {
@@ -204,7 +209,7 @@ function evaluate(){
     else if (A.zop3m==="ano") set("zop","no","Kdykoliv v roce","Od poslední změny oddílové příslušnosti musí uběhnout alespoň 3 měsíce.");
     else if (A.zop3m==="nevim" || A.memberNow==="nevim") set("zop","maybe","Kdykoliv v roce", A.memberNow==="nevim" ? "Ověř, jestli jsi pořád členem ČF." : "Ověř, jestli jsi v posledních 3 měsících neměl(a) změnu oddílové příslušnosti.");
     else set("zop","yes","Kdykoliv v roce","",["Vyber si nový klub a domluv se s ním.",zopSubmit]);
-  } else if (["hostuji","stst","sth"].includes(A.state)) {
+  } else if (TEMP_STATES.includes(A.state)) {
     // Hráč s hostováním, střídavým startem nebo střídavým hostováním má mateřský klub, změna oddílové příslušnosti nejde.
     set("zop","no","Kdykoliv v roce",{
       hostuji:"Dokud hostuješ, nejde změnit oddílovou příslušnost, protože některý klub je tvůj mateřský. Nejdřív musíš hostování ukončit (viz Ukončení hostování).",
@@ -243,10 +248,8 @@ function evaluate(){
   else if (A.state==="stst") set("prestup","yes",fmt(s.end),"Střídavý start k datu přestupu automaticky zanikne a nic za to neplatíš.",prestupSteps);
   else set("prestup","yes",fmt(s.end),"",prestupSteps);
 
-  const hostLeft = daysBetween(s.d, s.seasonEnd);
   const hostSteps = [...ASK,"Domluv se s klubem, kde chceš hostovat.",`Hostování může trvat 30 dnů až do ${fmt(s.seasonEnd)}.`,ODST,`Uhraď poplatek ${fee("host")}.`];
   if (blockReason) set("host","no",fmt(s.end),blockReason);
-  else if (hostLeft < 30) set("host","no",fmt(s.end),"Hostování musí trvat alespoň 30 dnů a skončí nejpozději 30. 6.");
   else if (A.state==="stst") set("host","no",fmt(s.end),"Po dobu střídavého startu nejde požádat o hostování.");
   else if (A.state==="hostuji") set("host","no",fmt(s.end),"Dvě hostování najednou mít nemůžeš. Chceš-li hostovat v jiném klubu, nejdřív musíš současné hostování ukončit (viz Ukončení hostování) a pak, pokud je přestupní období, podat nové hostování."+endHint);
   else if (unsureT) set("host","maybe",fmt(s.end),unsureT);
@@ -426,8 +429,10 @@ function answersBlock(limit){
 }
 
 const LABEL = {yes:"Můžeš využít", maybe:"Možná – ověř", no:"Teď ne"};
+let mailLines = null; // odpovědi pro e-mail matrice, skládají se jednou při vykreslení výsledku
 function matrikaMail(o, r){
-  const lines = answerPairs().map(([q,a]) => `- ${q}: ${a}`).join("\n");
+  if (mailLines === null) mailLines = answerPairs().map(([q,a]) => `- ${q}: ${a}`).join("\n");
+  const lines = mailLines;
   const body = `Dobrý den,\n\nprosím o ověření možnosti: ${o.name}.\nCo potřebuji ověřit: ${r.reason}\n\nMoje odpovědi v průvodci přestupem:\n${lines}\n\nJméno a příjmení:\nKlub:\n\nDěkuji`;
   return `mailto:${CONFIG.matrikaEmail}?subject=${encodeURIComponent("Dotaz k přestupnímu řádu – "+o.name)}&body=${encodeURIComponent(body)}`;
 }
@@ -441,6 +446,12 @@ function card(o, r, match){
     ${r.steps&&r.status!=="no"?`<ol class="steps">${r.steps.map(x=>`<li>${x}</li>`).join("")}</ol>`:""}
     ${r.status==="maybe"?`<a class="btn mailbtn" href="${matrikaMail(o,r)}">Zeptat se matriky e-mailem</a>`:""}
   </article>`;
+}
+
+// tlačítka „Upravit odpovědi“ a „Začít znovu“ pod výsledkem
+function bindResultNav(){
+  document.getElementById("back").onclick = () => { idx = visible().length-1; render(); };
+  document.getElementById("restart").onclick = () => { for (const k in A) delete A[k]; idx = 0; answersOpen = null; render(); };
 }
 
 function renderNewPlayer(){
@@ -461,8 +472,7 @@ function renderNewPlayer(){
     </article>
     <div class="nav"><button class="btn" id="back">Upravit odpovědi</button><button class="btn primary" id="restart">Začít znovu</button></div>
   </div>`;
-  document.getElementById("back").onclick = () => { idx = visible().length-1; render(); };
-  document.getElementById("restart").onclick = () => { for (const k in A) delete A[k]; idx = 0; answersOpen = null; render(); };
+  bindResultNav();
 }
 
 // Hostování lze ukončit nejdříve 30 dnů od začátku. Vrací null, když to už jde (nebo hráč nehostuje).
@@ -516,6 +526,7 @@ function resultNotices(R, now, sorted, isMatch){
 }
 function renderResult(){
   if (A.state==="novy") return renderNewPlayer();
+  mailLines = null;
   const R = evaluate(), rank = {yes:0, maybe:1, no:2};
   const isMatch = o => o.goal.includes(A.goal);
   // Karty, které pro hráče nemají smysl, vůbec nezobrazujeme.
@@ -543,8 +554,7 @@ function renderResult(){
     </div></details>`}
     <div class="nav"><button class="btn" id="back">Upravit odpovědi</button><button class="btn primary" id="restart">Začít znovu</button></div>
   </div>`;
-  document.getElementById("back").onclick = () => { idx = visible().length-1; render(); };
-  document.getElementById("restart").onclick = () => { for (const k in A) delete A[k]; idx = 0; answersOpen = null; render(); };
+  bindResultNav();
 }
 
 /* ===== Přehled všech možností ===== */
@@ -557,7 +567,7 @@ function renderAll(){
   const tbl = (head, rows) => `<div class="tbl"><table><thead><tr>${head.map(h => `<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.map(r => `<tr>${r.join("")}</tr>`).join("")}</tbody></table></div>`;
   const ststLevels = `<details class="sub"><summary>Úrovně soutěží pro střídavý start</summary>
     <p class="hint">Muži a ženy se porovnávají zvlášť. A-družstvo tvého klubu musí hrát nejvyšší celostátní soutěž (tučně), druhý klub o 1–2 úrovně níže.</p>
-    ${tbl(["Úroveň","Muži","Ženy"], Array.from({length:Math.max(...Object.values(LADDERS()).map(l=>l.length))}, (_,i) => [`<td>${i+1}</td>`, ...["m","z"].map(g => { const nm = LADDERS()[g][i]; return `<td>${nm ? (i+1 <= CONFIG.ststHomeMax[g] ? `<strong>${nm}</strong>` : nm) : "—"}</td>`; })]))}</details>`;
+    ${tbl(["Úroveň","Muži","Ženy"], Array.from({length:Math.max(...Object.values(CONFIG.ladders).map(l=>l.length))}, (_,i) => [`<td>${i+1}</td>`, ...["m","z"].map(g => { const nm = CONFIG.ladders[g][i]; return `<td>${nm ? (i+1 <= CONFIG.ststHomeMax[g] ? `<strong>${nm}</strong>` : nm) : "—"}</td>`; })]))}</details>`;
   const sthWhere = `<details class="sub"><summary>Kam smíš střídavě hostovat</summary>
     <p class="hint">Rozhoduje úroveň (1 = nejvyšší), na které hraje nejvyšší družstvo tvého klubu ve tvé kategorii. Střídavě hostovat lze jen do celostátní soutěže.</p>
     ${tbl(["Kategorie","Smíš do"], [
@@ -605,7 +615,7 @@ function renderAll(){
     </div></details>`; };
   document.getElementById("all").innerHTML = `<div class="panel">
     <div style="display:flex;flex-direction:column;gap:6px"><h2>Všechny možnosti</h2>
-    <p class="hint">Přestupní období: 1. 7. – 31. 1. pro dorost, juniory a dospělé; 1. 7. – 31. 3. pro žáky, elévy a přípravky. Žádost lze podat už od 1. 5.</p></div>
+    <p class="hint">Přestupní období: ${periodText("A")} pro dorost, juniory a dospělé; ${periodText("B")} pro žáky, elévy a přípravky. Žádost lze podat už od 1. 5.</p></div>
     <div style="display:flex;flex-direction:column;gap:6px"><span class="lbl-s" style="font-size:13px;color:var(--muted);font-weight:600">Cena podle kategorie</span>
       <div class="seg" role="group" aria-label="Cena podle kategorie"><button type="button" data-tier="hi" aria-pressed="${tier==="hi"}">Muži, ženy a junioři</button><button type="button" data-tier="lo" aria-pressed="${tier==="lo"}">Dorost a mladší</button></div></div>
     ${groups.map(([name, items]) => `<h3 class="grp">${name}</h3><div style="display:flex;flex-direction:column;gap:8px">${items.map(card).join("")}</div>`).join("")}
@@ -648,7 +658,7 @@ window.addEventListener("popstate", ev => {
   window.scrollTo({top:0});
 });
 try { const sv = JSON.parse(sessionStorage.getItem("prestup") || "null"); if (sv && sv.A) { Object.assign(A, sv.A); idx = sv.idx || 0; } } catch(e) {}
-renderAll(); render();
+render();
 </script>
 </body>
 </html>

@@ -65,7 +65,7 @@ tr[hidden],li[hidden]{display:none}
 
 <script src="config.js"></script>
 <script>
-const esc = t => String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;");
+const esc = t => String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
 const $ = id => document.getElementById(id);
 const tag = k => ({rad:'<span class="tag rad">Z řádu</span>', up:'<span class="tag up">Upřesnění ČF</span>', pred:'<span class="tag pred">Předpoklad</span>'}[k]);
 const table = (head, rows) => `<div class="tbl"><table><thead><tr>${head.map(h => `<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.map(r => `<tr>${r.join("")}</tr>`).join("")}</tbody></table></div>`;
