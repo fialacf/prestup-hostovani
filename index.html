@@ -85,7 +85,11 @@ label.lbl{font-weight:600}
 .reason{font-size:15px;padding:8px 12px;border-radius:8px;background:var(--bg)}
 .steps{margin:0;padding-left:20px;font-size:15px}
 .summary{display:flex;flex-wrap:wrap;gap:8px;font-size:14px;color:var(--muted)}
-.summary span{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px 10px}
+.summary{gap:6px;font-size:13px}
+.summary span{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:2px 9px;line-height:1.4}
+.summary b{color:var(--fg);font-weight:600}
+details.answers summary{cursor:pointer;font-size:14px;font-weight:600;color:var(--muted)}
+details.answers .summary{margin-top:8px}
 details.later{border-top:1px solid var(--line);padding-top:12px}
 details.later summary{cursor:pointer;font-weight:700}
 details.later .cards{margin-top:12px}
@@ -487,6 +491,35 @@ function render(){
   document.getElementById("next").onclick = () => { idx++; render(); };
 }
 
+// Přehled všech odpovědí hráče (krátký název otázky: odpověď) nad výsledkem
+const SHORT = {cat:"Kategorie", state:"Situace", hostStart:"Hostování začalo", goal:"Cíl", date:"K datu",
+  memberNow:"Aktivní členství v ČF", member1y:"Člen ČF déle než 1 rok", match1y:"Rok od posledního utkání", dodatek:"Evidenční dodatek",
+  zop3m:"Změna příslušnosti za 3 měsíce", recent:"Přestup za 3 měsíce",
+  league:"Soutěž A-družstva", ststSecond:"Soutěž druhého klubu", ststUsed:"Střídavý start letos",
+  sthG:"Druh kategorie", sthHome:"Úroveň klubu"};
+function answerChips(){
+  const esc = t => String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;");
+  const out = [];
+  for (const st of visible()) {
+    if (st.type==="multi") {
+      for (const [k,q,kind,o] of st.items()) {
+        if (!A[k]) continue;
+        const opt = (o||YN).find(x => x[0]===A[k]);
+        out.push([SHORT[k]||q, opt ? opt[1].split(" (")[0] : A[k]]);
+      }
+    } else if (A[st.id]) {
+      const a = st.type==="date" ? fmt(parse(A[st.id])) : st.id==="cat" ? cat().label : (st.options().find(x => x[0]===A[st.id]) || [,A[st.id]])[1];
+      out.push([SHORT[st.id]||st.id, a]);
+    }
+  }
+  return out.map(([q,a]) => `<span><b>${esc(q)}:</b> ${esc(a.replace(" (mateřský)",""))}</span>`);
+}
+// Do 4 odpovědí se ukážou rovnou, víc se sbalí do jednoho řádku, aby přehled nezabíral místo.
+function answersBlock(){
+  const c = answerChips();
+  return `<details class="answers" ${c.length<=4?"open":""}><summary>Moje odpovědi (${c.length})</summary><div class="summary">${c.join("")}</div></details>`;
+}
+
 const LABEL = {yes:"Můžeš využít", maybe:"Možná – ověř", no:"Teď ne"};
 function card(o, r, match){
   return `<article class="card">
@@ -503,7 +536,7 @@ function renderNewPlayer(){
   W.innerHTML = `<div style="display:flex;flex-direction:column;gap:16px">
     <div style="display:flex;flex-direction:column;gap:8px">
       <h2>Jako nový hráč přestup neřešíš</h2>
-      <div class="summary"><span>${cat().label}</span><span>Nový hráč</span></div>
+      ${answersBlock()}
     </div>
     <article class="card">
       <div class="card-head"><div><div class="code">Nový hráč</div><h3>Vyber si klub a přihlas se</h3></div><span class="pill yes">Můžeš hned</span></div>
@@ -535,11 +568,10 @@ function renderResult(){
     o.id==="sth" ? sthAge() : true;
   const sorted = OPTIONS.filter(applicable).sort((a,b) => rank[R[a.id].status]-rank[R[b.id].status] || isMatch(b)-isMatch(a));
   const now = sorted.filter(o => R[o.id].status!=="no"), later = sorted.filter(o => R[o.id].status==="no");
-  const goalLabel = {trvale:"natrvalo jinam",docasne:"dočasně jinam",dva:"za dva kluby",ukoncit:"ukončit",vse:"vše"}[A.goal];
   W.innerHTML = `<div style="display:flex;flex-direction:column;gap:16px">
     <div style="display:flex;flex-direction:column;gap:8px">
       <h2>${now.length ? `Máš ${now.length} ${now.length===1?"možnost":now.length<5?"možnosti":"možností"}` : "Teď nemáš žádnou možnost"}</h2>
-      <div class="summary"><span>${cat().label}</span><span>Cíl: ${goalLabel}</span><span>K datu ${fmt(parse(A.date))}</span></div>
+      ${answersBlock()}
     </div>
     <div class="cards">${now.map(o => card(o,R[o.id],isMatch(o))).join("") || `<p class="reason">Podívej se níže, proč to teď nejde a kdy to bude možné.</p>`}</div>
     ${later.length?`<details class="later" ${now.length?"":"open"}><summary>Teď nejde (${later.length})</summary><div class="cards">${later.map(o => card(o,R[o.id],isMatch(o))).join("")}</div></details>`:""}
