@@ -496,7 +496,7 @@ function render(){
   }
   W.innerHTML = `<div class="panel">
     <div class="progress"><span>Krok ${idx+1} z ${steps.length}</span><div class="bar"><i style="width:${pct}%"></i></div></div>
-    ${answersBlock(st.id)}
+    ${answersBlock(idx)}
     <div style="display:flex;flex-direction:column;gap:6px"><h2>${val(st.title)}</h2>${st.hint?`<p class="hint">${val(st.hint)}</p>`:""}</div>
     ${body}
     <div class="nav"><button class="btn" id="back" ${idx===0?"disabled":""}>Zpět</button><button class="btn primary" id="next" ${stepDone(st)?"":"disabled"}>${idx===steps.length-1?"Zobrazit možnosti":"Pokračovat"}</button></div>
@@ -528,10 +528,13 @@ const SHORT = {cat:"Kategorie", state:"Situace", hostStart:"Hostování začalo"
   sthG:"Druh kategorie", sthHome:"Úroveň klubu"};
 const escHtml = t => String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
 // [krátký název otázky, odpověď, id kroku]; podle id kroku se po kliknutí na odpověď vrátíme k otázce
-function answerPairs(skipId){
+// limit = index aktuálního kroku: během odpovídání ukazujeme jen odpovědi z předchozích kroků, ne z těch, které hráč teprve bude vyplňovat
+function answerPairs(limit){
   const out = [];
-  for (const st of visible()) {
-    if (st.id===skipId) continue; // během odpovídání neukazujeme právě zobrazenou otázku
+  const steps = visible();
+  for (let i = 0; i < steps.length; i++) {
+    const st = steps[i];
+    if (limit !== undefined && i >= limit) break;
     if (st.type==="multi") {
       for (const [k,q,kind,o] of st.items()) {
         if (!A[k]) continue;
@@ -545,12 +548,12 @@ function answerPairs(skipId){
   }
   return out;
 }
-const answerChips = skipId => answerPairs(skipId).map(([q,a,id]) =>
+const answerChips = limit => answerPairs(limit).map(([q,a,id]) =>
   `<button type="button" class="chip" data-step="${id}" title="Změnit odpověď"><b>${escHtml(q)}:</b> ${escHtml(a)}</button>`);
 // Do 4 odpovědí se ukážou rovnou, víc se sbalí do jednoho řádku, aby přehled nezabíral místo.
 let answersOpen = null; // null = automaticky (do 4 odpovědí rozbaleno); jinak volba hráče
-function answersBlock(skipId){
-  const c = answerChips(skipId);
+function answersBlock(limit){
+  const c = answerChips(limit);
   if (!c.length) return "";
   return `<details class="answers" ${(answersOpen===null ? c.length<=4 : answersOpen)?"open":""}><summary>Moje odpovědi (${c.length})</summary><div class="summary">${c.join("")}</div></details>`;
 }
