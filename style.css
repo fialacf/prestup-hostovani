@@ -109,3 +109,7 @@ th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);verti
 th{font-size:13px;color:var(--muted);font-weight:600}
 @media (max-width:420px){h1{font-size:34px}.facts{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+
+/* Nadpisy skupin otázek uvnitř jednoho kroku */
+.qgrp{font-family:var(--body);font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:14px 0 2px;padding-top:12px;border-top:1px solid var(--line)}
+.qgrp:first-child{margin-top:0;padding-top:0;border-top:0}

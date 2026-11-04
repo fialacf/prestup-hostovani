@@ -111,6 +111,8 @@ const ststAge = () => A.cat === "dospeli21";
 // střídavé hostování: od starších žáků po první tři sezóny v dospělých
 const sthAge = () => ["starsi","dorost","junior"].includes(A.cat) || ststAge();
 
+// otázky ke změně oddílové příslušnosti (bez přestupu); obě skupiny s „3 měsíci“ se ptají v jednom kroku, aby se nepletly
+const zopQShown = () => A.state==="bez" || (["trvale","vse"].includes(A.goal) && !["hostuji","stst","sth"].includes(A.state));
 const STEPS = [
   {id:"cat", title:"V jaké jsi kategorii?", hint:() => `Ročníky narození platí pro sezónu ${seasonLabel()}. Podle kategorie se řídí přestupní období a výše poplatků.`, type:"choice",
     options:() => CONFIG.categories.map(c => [c.id, `${c.label} (${yearsFor(c.minAge, c.maxAge)})`, (c.note ? c.note + " " : "") + (c.group==="A" ? "Přestupní období 1. 7. – 31. 1." : "Přestupní období 1. 7. – 31. 3.")])},
@@ -133,10 +135,22 @@ const STEPS = [
       return o;
     }},
   {id:"date", title:"Ke kterému dni to chceš řešit?", hint:"Je to datum, od kterého má změna platit. Předvyplnili jsme dnešek, můžeš zadat i budoucí datum. Žádosti lze podávat už od 1. 5., datum musí spadat do přestupního období.", type:"date", def:todayIso},
-  {id:"zopQ", show:() => A.state==="bez" || (["trvale","vse"].includes(A.goal) && !["hostuji","stst","sth"].includes(A.state)), title:"Pár otázek ke změně oddílové příslušnosti", hint:"Podle nich zjistíme, jestli můžeš změnit klub zdarma a kdykoliv v roce.", type:"multi",
-    items:() => A.state==="bez" ? [["memberNow","Máš pořád aktivní členství v Českém florbalu? (Nezrušil(a) jsi ho?)"],["zop3m","Měl(a) jsi za poslední 3 měsíce změnu oddílové příslušnosti?"]] :
-      [["member1y","Jsi členem Českého florbalu déle než 1 rok?"],["match1y","Uběhl od tvého posledního utkání v soutěžích ČF víc než 1 rok?"],["dodatek","Máš podepsaný evidenční dodatek?"],["zop3m","Měl(a) jsi za poslední 3 měsíce změnu oddílové příslušnosti?"]]},
-  {id:"recent", show:() => A.state!=="bez" && A.goal!=="ukoncit", title:"Měl(a) jsi za poslední 3 měsíce přestup?", hint:"Po přestupu nelze 3 měsíce podat další žádost o přestup ani hostování.", type:"choice",
+  {id:"zopQ", show:() => zopQShown(), title:() => A.state==="bez" ? "Pár otázek ke změně oddílové příslušnosti" : "Pár otázek před výsledkem",
+    hint:() => A.state==="bez" ? "Podle nich zjistíme, jestli můžeš změnit klub zdarma a kdykoliv v roce." : "Dvě věci znějí podobně, ale jsou to různá pravidla. U každé je vysvětlení, co přesně myslíme.", type:"multi",
+    items:() => {
+      const ZOP3M = ["zop3m","Měl(a) jsi za poslední 3 měsíce změnu oddílové příslušnosti?","", undefined, "Nemyslíme přestup. Myslíme novou registraci v klubu poté, co ti byla zrušena příslušnost nebo členství (obnova oddílové příslušnosti). Po ní nelze 3 měsíce znovu měnit klub bez přestupu."];
+      if (A.state==="bez") return [["memberNow","Máš pořád aktivní členství v Českém florbalu? (Nezrušil(a) jsi ho?)"], ZOP3M];
+      return [
+        ["_h1","Přestup (trvalá změna klubu)","heading"],
+        ["recent","Měl(a) jsi za poslední 3 měsíce přestup?",undefined,undefined,"Přestup je trvalá změna klubu schválená matrikou. Po něm nelze 3 měsíce podat další přestup ani hostování."],
+        ["_h2","Změna oddílové příslušnosti bez přestupu","heading"],
+        ["member1y","Jsi členem Českého florbalu déle než 1 rok?"],
+        ["match1y","Uběhl od tvého posledního utkání v soutěžích ČF víc než 1 rok?",undefined,undefined,"Tedy rok neaktivity."],
+        ["dodatek","Máš podepsaný evidenční dodatek?",undefined,undefined,"Smlouva s klubem zaregistrovaná u matriky ČF."],
+        ZOP3M
+      ];
+    }},
+  {id:"recent", show:() => A.state!=="bez" && A.goal!=="ukoncit" && !zopQShown(), title:"Měl(a) jsi za poslední 3 měsíce přestup?", hint:"Přestup je trvalá změna klubu schválená matrikou. Po něm nelze 3 měsíce podat další přestup ani hostování.", type:"choice",
     options:() => YN.map(([v,l]) => [v,l])},
   {id:"twoQ", show:() => ["dva","vse"].includes(A.goal) && sthAge() && !["bez","hostuji","stst","sth"].includes(A.state), title:"Hraní za dva kluby", type:"multi",
     items:() => {
@@ -294,12 +308,12 @@ const visible = () => STEPS.filter((s,i) =>
   !(A.state==="novy" && i > STEPS.findIndex(x => x.id==="state")) && (!s.show || s.show()));
 
 function stepDone(st){
-  if (st.type==="multi") return st.items().every(([k]) => A[k]);
+  if (st.type==="multi") return st.items().filter(i => i[2]!=="heading").every(([k]) => A[k]);
   return !!A[st.id];
 }
 
 // Při změně odpovědi smaž odpovědi z pozdějších kroků, aby nezůstaly neplatné (např. po změně kategorie).
-const MULTI_KEYS = {zopQ:["memberNow","member1y","match1y","dodatek","zop3m"], twoQ:["league","ststSecond","ststUsed","sthG","sthHome"]};
+const MULTI_KEYS = {zopQ:["memberNow","recent","member1y","match1y","dodatek","zop3m"], twoQ:["league","ststSecond","ststUsed","sthG","sthHome"]};
 function clearAfter(stepId){
   const i = STEPS.findIndex(s => s.id === stepId);
   STEPS.slice(i+1).forEach(s => (MULTI_KEYS[s.id] || [s.id]).forEach(k => delete A[k]));
@@ -334,11 +348,13 @@ function render(){
   } else if (st.type==="date") {
     body = `<label class="lbl" for="in-${st.id}">Datum</label><input type="date" id="in-${st.id}" value="${A[st.id]||""}">`;
   } else {
-    body = `<div>` + st.items().map(([k,q,kind,o]) => {
+    body = `<div>` + st.items().map(([k,q,kind,o,hint]) => {
+      if (kind==="heading") return `<h3 class="qgrp">${q}</h3>`;
+      const h = hint ? `<p class="hint">${hint}</p>` : "";
       if (kind==="select") {
-        return `<div class="yn"><label class="lbl" for="in-${k}">${q}</label><select id="in-${k}" data-k="${k}"><option value="">Vyber soutěž…</option>${o.map(([v,l]) => `<option value="${v}" ${A[k]===v?"selected":""}>${l}</option>`).join("")}</select></div>`;
+        return `<div class="yn"><label class="lbl" for="in-${k}">${q}</label>${h}<select id="in-${k}" data-k="${k}"><option value="">Vyber soutěž…</option>${o.map(([v,l]) => `<option value="${v}" ${A[k]===v?"selected":""}>${l}</option>`).join("")}</select></div>`;
       }
-      return `<div class="yn"><span class="lbl">${q}</span><div class="seg">${(o||YN).map(([v,l]) => `<button data-k="${k}" data-v="${v}" aria-pressed="${A[k]===v}">${l}</button>`).join("")}</div></div>`;
+      return `<div class="yn"><span class="lbl">${q}</span>${h}<div class="seg">${(o||YN).map(([v,l]) => `<button data-k="${k}" data-v="${v}" aria-pressed="${A[k]===v}">${l}</button>`).join("")}</div></div>`;
     }).join("") + `</div>`;
   }
   W.innerHTML = `<div class="panel">
