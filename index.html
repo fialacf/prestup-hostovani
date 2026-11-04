@@ -271,7 +271,7 @@ const STEPS = [
       return o;
     }},
   {id:"date", title:"Ke kterému dni to chceš řešit?", hint:"Je to datum, od kterého má změna platit. Předvyplnili jsme dnešek, můžeš zadat i budoucí datum. Žádosti lze podávat už od 1. 5., datum musí spadat do přestupního období.", type:"date", def:todayIso},
-  {id:"zopQ", show:() => A.state==="bez" || ["trvale","vse"].includes(A.goal), title:"Pár otázek ke změně oddílové příslušnosti", hint:"Podle nich zjistíme, jestli můžeš změnit klub zdarma a kdykoliv v roce.", type:"multi",
+  {id:"zopQ", show:() => A.state==="bez" || (["trvale","vse"].includes(A.goal) && !["hostuji","stst","sth"].includes(A.state)), title:"Pár otázek ke změně oddílové příslušnosti", hint:"Podle nich zjistíme, jestli můžeš změnit klub zdarma a kdykoliv v roce.", type:"multi",
     items:() => A.state==="bez" ? [["memberNow","Máš pořád aktivní členství v Českém florbalu? (Nezrušil(a) jsi ho?)"],["zop3m","Měl(a) jsi za poslední 3 měsíce změnu oddílové příslušnosti?"]] :
       [["member1y","Jsi členem Českého florbalu déle než 1 rok?"],["match1y","Uběhl od tvého posledního utkání v soutěžích ČF víc než 1 rok?"],["dodatek","Máš podepsaný evidenční dodatek?"],["zop3m","Měl(a) jsi za poslední 3 měsíce změnu oddílové příslušnosti?"]]},
   {id:"recent", show:() => A.state!=="bez" && A.goal!=="ukoncit", title:"Měl(a) jsi za poslední 3 měsíce přestup?", hint:"Po přestupu nelze 3 měsíce podat další žádost o přestup ani hostování.", type:"choice",
@@ -326,6 +326,13 @@ function evaluate(){
     else if (A.zop3m==="ano") set("zop","no","Kdykoliv v roce","Od poslední změny oddílové příslušnosti musí uběhnout alespoň 3 měsíce.");
     else if (A.zop3m==="nevim" || A.memberNow==="nevim") set("zop","maybe","Kdykoliv v roce", A.memberNow==="nevim" ? "Ověř, jestli jsi pořád členem ČF." : "Ověř, jestli jsi v posledních 3 měsících neměl(a) změnu oddílové příslušnosti.");
     else set("zop","yes","Kdykoliv v roce","",["Vyber si nový klub a domluv se s ním.",zopSubmit]);
+  } else if (["hostuji","stst","sth"].includes(A.state)) {
+    // Hráč s hostováním, střídavým startem nebo střídavým hostováním má mateřský klub, změna oddílové příslušnosti nejde.
+    set("zop","no","Kdykoliv v roce",{
+      hostuji:"Dokud hostuješ, nejde změnit oddílovou příslušnost, protože některý klub je tvůj mateřský. Nejdřív musíš hostování ukončit (viz Ukončení hostování).",
+      stst:"Dokud máš střídavý start, nejde změnit oddílovou příslušnost. Nejdřív musí střídavý start skončit (viz Ukončení střídavého startu).",
+      sth:"Dokud máš střídavé hostování, nejde změnit oddílovou příslušnost. Střídavé hostování nejde předčasně ukončit, musí skončit samo."
+    }[A.state]);
   } else if (A.member1y===undefined) {
     set("zop","maybe","Kdykoliv v roce","Změna oddílové příslušnosti je jen pro hráče bez klubu nebo pro ty, kdo rok nehráli a nemají evidenční dodatek.");
   } else {
