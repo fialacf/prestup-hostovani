@@ -622,24 +622,27 @@ function renderAll(){
     <p class="hint">Tučně jsou celostátní soutěže. 1. liga dorostenek je regionální, pro střídavé hostování se počítá jako celostátní. Starší žáci a žákyně celostátní soutěž nemají.</p>
     ${tbl(["Kategorie","Úrovně"], [["junior","m","U19 junioři"],["junior","z","U19 juniorky"],["dorost","m","U17 dorostenci"],["dorost","z","U17 dorostenky"]].map(([c,g,l]) => { const d = L[c][g]; return [`<td><strong>${l}</strong></td>`, `<td>${d.names.map((x,i) => i < d.nat ? `<strong>${x}</strong>` : x).join(" · ")}</td>`]; }))}</details>`;
   const REQ = "Žádost lze podat od 1. 5. do konce přestupního období. Datum OD musí být v přestupním období.";
+  const CLUB14 = "Mateřský klub se má vyjádřit do 14 dnů. Když se nevyjádří, nic se neděje automaticky. Řeš to s matrikou ČF před vypršením lhůty.";
+  const DODATEK = "S evidenčním dodatkem (smlouvou) jde jen se souhlasem klubu. Smlouvu lze uzavřít jen s hráčem starším 16 let.";
+  const ODSTUPNE = "Odstupné mezi kluby se řeší dohodou, platí ho nový klub. Hráč neplatí.";
   const groups = [
     ["Změna klubu", [
-      {id:"zop", short:"Nový klub bez přestupu a zdarma.", kdy:"Kdykoliv v roce. Nejdříve 3 měsíce od předchozí změny oddílové příslušnosti.", pod:["Nemáš žádný klub, nebo jsi členem ČF déle než 1 rok, rok jsi nehrál(a) a nemáš evidenční dodatek."]},
-      {id:"prestup", short:"Přejdeš do nového klubu natrvalo.", kdy:REQ, pod:["Po přestupu 3 měsíce nelze podat další přestup ani hostování."]},
-      {id:"host", short:"Dočasně hraješ za jiný klub, nejdéle do 30. 6.", kdy:REQ+" Hostování končí nejpozději 30. 6.", pod:["Hostování trvá nejméně 30 dnů.","Jen jedno hostování najednou. Do jiného klubu až po ukončení současného."]}
+      {id:"zop", short:"Nový klub bez přestupu a zdarma.", kdy:"Kdykoliv v roce. Nejdříve 3 měsíce od předchozí změny oddílové příslušnosti.", pod:["Nemáš žádný klub, nebo jsi členem ČF déle než 1 rok, rok jsi nehrál(a) a nemáš evidenční dodatek.","Evidenční dodatek lze uzavřít jen s hráčem starším 16 let, mladší hráči ho mít nemohou.","Nejde během hostování, střídavého startu ani střídavého hostování.","Při obnově po zrušení registrace klubem do 6 měsíců se platí přestupní poplatek (RegŘ čl. 5.2)."]},
+      {id:"prestup", short:"Přejdeš do nového klubu natrvalo.", kdy:REQ, pod:["Po přestupu 3 měsíce nelze podat další přestup ani hostování.",CLUB14,"Přestup se schválí i přes nesouhlas klubu, pokud nejsi členem ČF déle než 12 měsíců, nebo ti ještě není 12 let (se souhlasem zákonného zástupce).",DODATEK,"Hráč, který hostuje, může přestoupit jen do klubu, kde hostuje. Do jiného klubu nejdřív ukončí hostování.",ODSTUPNE]},
+      {id:"host", short:"Dočasně hraješ za jiný klub, nejdéle do 30. 6.", kdy:REQ+" Hostování končí nejpozději 30. 6.", pod:["Hostování trvá nejméně 30 dnů.","Jen jedno hostování najednou. Do jiného klubu až po ukončení současného.",CLUB14,DODATEK,"Během střídavého startu nejde hostovat. Při střídavém hostování jen do klubu, kde střídavě hostuješ.",ODSTUPNE]}
     ]],
     ["Hrát za dva kluby", [
       {id:"stst", short:"Hraješ za svůj klub a za A-družstvo druhého klubu.", kdy:"Žádost lze podat od 1. 5. do 31. 1. Platí nejdéle do 30. 6.",
-        pod:[`Jen v prvních třech sezónách v dospělých, tedy 19–21 let (${yearsOf("dospeli21")}).`,"Hraješ jen za A-družstvo mateřského klubu a za A-družstvo druhého klubu.","A-družstvo mateřského klubu hraje nejvyšší celostátní soutěž.","Druhý klub hraje nejvýš o 2 úrovně níže (muži a ženy zvlášť).","Jen 1× za sezónu. Netýká se pohárových soutěží."], extra:ststLevels},
+        pod:[`Jen v prvních třech sezónách v dospělých, tedy 19–21 let (${yearsOf("dospeli21")}).`,"Hraješ jen za A-družstvo mateřského klubu a za A-družstvo druhého klubu.","A-družstvo mateřského klubu hraje nejvyšší celostátní soutěž.","Druhý klub hraje nejvýš o 2 úrovně níže (muži a ženy zvlášť).","Jen 1× za sezónu. Netýká se pohárových soutěží.",CLUB14,"Zaniká sám při přestupu, nebo když v základní části soutěže nenastoupíš aspoň k 30 % utkání družstva."], extra:ststLevels},
       {id:"sth", short:"Hraješ za svůj klub a za jedno družstvo jiného klubu.", kdy:REQ+" Trvá nejvýše 105 dní.",
-        pod:[`Od starších žáků po první tři sezóny v dospělých (${yearsFor(catById("starsi").minAge, catById("dospeli21").maxAge)}).`,"Jen do celostátní soutěže podle úrovně soutěže tvého klubu.","Jen v základní části soutěže. Nelze předčasně ukončit.","Do stejného klubu jen 1× za sezónu."], extra:sthWhere+sthLevels}
+        pod:[`Od starších žáků po první tři sezóny v dospělých (${yearsFor(catById("starsi").minAge, catById("dospeli21").maxAge)}).`,"Jen do celostátní soutěže podle úrovně soutěže tvého klubu.","Jen v základní části soutěže. Nelze předčasně ukončit.","Do stejného klubu jen 1× za sezónu.",CLUB14], extra:sthWhere+sthLevels}
     ]],
     ["Ukončení", [
-      {id:"endHost", short:"Předčasně ukončíš hostování.", kdy:"Nejpozději do konce přestupního období.", pod:["Hostování trvá alespoň 30 dnů."]},
+      {id:"endHost", short:"Předčasně ukončíš hostování.", kdy:"Nejpozději do konce přestupního období.", pod:["Hostování trvá alespoň 30 dnů od začátku, dřív ukončit nejde.","Ukončuje se dohodou obou klubů a hráče.","Po ukončení můžeš podat přestup do jiného klubu."]},
       {id:"endStst", short:"Předčasně ukončíš střídavý start.", kdy:"Nejpozději 31. 1.", pod:["Ukončuje se dohodou obou klubů a hráče. Tehdy se platí poplatek.","Zdarma zaniká sám při přestupu nebo když hráč v základní části soutěže nenastoupí aspoň k 30 % utkání družstva."]}
     ]],
     ["Členství", [
-      {id:"prihlaska", short:"Obnovíš zrušené členství v ČF.", kdy:"Kdykoliv v roce, přes přihlášku ve FISu.", pod:["Máš zrušené členství v ČF."]}
+      {id:"prihlaska", short:"Obnovíš zrušené členství v ČF.", kdy:"Kdykoliv v roce, přes přihlášku ve FISu.", pod:["Máš zrušené členství v ČF.","Obnovíš-li ho do roka od posledního zápasu, vrátíš se do původního klubu. Zrušení členství není způsob, jak změnit klub.",`Členský příspěvek ${CONFIG.membershipFee} Kč na sezónu se platí ve FISu, nebo přes klub.`]}
     ]]
   ];
   const keep = new Set([...document.querySelectorAll("#all details.acc[open]")].map(d => d.dataset.id));
@@ -654,7 +657,7 @@ function renderAll(){
     </div></details>`; };
   document.getElementById("all").innerHTML = `<div class="panel">
     <div style="display:flex;flex-direction:column;gap:6px"><h2>Všechny možnosti</h2>
-    <p class="hint">Přestupní období: ${periodText("A")} pro dorost, juniory a dospělé; ${periodText("B")} pro žáky, elévy a přípravky. Žádost lze podat už od 1. 5.</p></div>
+    <p class="hint">Přestupní období: ${periodText("A")} pro dorost, juniory a dospělé; ${periodText("B")} pro žáky, elévy a přípravky. Žádost lze podat už od 1. 5. Zdroje pravidel a otevřené body jsou na stránce <a href="podklady.html">Podklady a pravidla</a>.</p></div>
     <div style="display:flex;flex-direction:column;gap:6px"><span class="lbl-s" style="font-size:13px;color:var(--muted);font-weight:600">Cena podle kategorie</span>
       <div class="seg" role="group" aria-label="Cena podle kategorie"><button type="button" data-tier="hi" aria-pressed="${tier==="hi"}">Muži, ženy a junioři</button><button type="button" data-tier="lo" aria-pressed="${tier==="lo"}">Dorost a mladší</button></div></div>
     ${groups.map(([name, items]) => `<h3 class="grp">${name}</h3><div style="display:flex;flex-direction:column;gap:8px">${items.map(card).join("")}</div>`).join("")}
