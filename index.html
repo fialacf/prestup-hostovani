@@ -141,13 +141,13 @@ const STEPS = [
       const ZOP3M = ["zop3m","Měl(a) jsi za poslední 3 měsíce změnu oddílové příslušnosti?","", undefined, "Nemyslíme přestup. Myslíme novou registraci v klubu poté, co ti byla zrušena příslušnost nebo členství (obnova oddílové příslušnosti). Po ní nelze 3 měsíce znovu měnit klub bez přestupu."];
       if (A.state==="bez") return [["memberNow","Máš pořád aktivní členství v Českém florbalu? (Nezrušil(a) jsi ho?)"], ZOP3M];
       return [
-        ["_h1","Přestup (trvalá změna klubu)","heading"],
+        ["_h1","Za poslední 3 měsíce (dvě různé věci)","heading"],
         ["recent","Měl(a) jsi za poslední 3 měsíce přestup?",undefined,undefined,"Přestup je trvalá změna klubu schválená matrikou. Po něm nelze 3 měsíce podat další přestup ani hostování."],
-        ["_h2","Změna oddílové příslušnosti bez přestupu","heading"],
+        ZOP3M,
+        ["_h2","Další podmínky změny oddílové příslušnosti bez přestupu","heading"],
         ["member1y","Jsi členem Českého florbalu déle než 1 rok?"],
         ["match1y","Uběhl od tvého posledního utkání v soutěžích ČF víc než 1 rok?",undefined,undefined,"Tedy rok neaktivity."],
-        ["dodatek","Máš podepsaný evidenční dodatek?",undefined,undefined,"Smlouva s klubem zaregistrovaná u matriky ČF."],
-        ZOP3M
+        ["dodatek","Máš podepsaný evidenční dodatek?",undefined,undefined,"Smlouva s klubem zaregistrovaná u matriky ČF."]
       ];
     }},
   {id:"recent", show:() => A.state!=="bez" && A.goal!=="ukoncit" && !zopQShown(), title:"Měl(a) jsi za poslední 3 měsíce přestup?", hint:"Přestup je trvalá změna klubu schválená matrikou. Po něm nelze 3 měsíce podat další přestup ani hostování.", type:"choice",
