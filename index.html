@@ -86,7 +86,18 @@ label.lbl{font-weight:600}
 .steps{margin:0;padding-left:20px;font-size:15px}
 .summary{display:flex;flex-wrap:wrap;gap:8px;font-size:14px;color:var(--muted)}
 .summary{gap:6px;font-size:13px}
-.summary span{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:2px 9px;line-height:1.4}
+.summary span,.summary .chip{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:2px 9px;line-height:1.4}
+.summary .chip{font:inherit;color:inherit;cursor:pointer;text-align:left}
+.summary .chip:hover{border-color:var(--accent)}
+.mailbtn{align-self:flex-start;text-decoration:none;font-size:15px;padding:9px 14px}
+/* Na úzkém displeji se hlavní tabulka změní na karty, aby nebyl sloupec s cenou useknutý */
+@media (max-width:600px){
+  table.stack thead{display:none}
+  table.stack,table.stack tbody,table.stack tr,table.stack td{display:block;width:100%}
+  table.stack tr{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:10px;background:var(--bg)}
+  table.stack td{border:0;padding:4px 0}
+  table.stack td[data-label]::before{content:attr(data-label);display:block;font-size:13px;color:var(--muted);font-weight:600}
+}
 .summary b{color:var(--fg);font-weight:600}
 details.answers summary{cursor:pointer;font-size:14px;font-weight:600;color:var(--muted)}
 details.answers .summary{margin-top:8px}
@@ -447,8 +458,23 @@ function clearAfter(stepId){
   STEPS.slice(i+1).forEach(s => (MULTI_KEYS[s.id] || [s.id]).forEach(k => delete A[k]));
 }
 const val = x => typeof x === "function" ? x() : x;
+// Každý krok je vlastní položka historie prohlížeče (tlačítko Zpět), odpovědi přežijí obnovení stránky.
+let navFromPop = false;
+function syncHistory(){
+  try { sessionStorage.setItem("prestup", JSON.stringify({A, idx})); } catch(e) {}
+  if (navFromPop) return;
+  try {
+    const cur = history.state ? history.state.idx : undefined;
+    if (cur === idx) return;
+    const hash = "#" + (idx >= visible().length ? "vysledek" : "krok-" + (idx+1));
+    if (cur === undefined) history.replaceState({idx}, "", hash); else history.pushState({idx}, "", hash);
+  } catch(e) {}
+}
 function render(){
   const steps = visible();
+  // Neukazuj výsledek, když chybí odpověď (např. po návratu v historii): vrať se k první nezodpovězené otázce.
+  if (idx >= steps.length) { const bad = steps.findIndex(x => !stepDone(x)); if (bad >= 0) idx = bad; }
+  syncHistory();
   if (idx >= steps.length) return renderResult();
   const st = steps[idx];
   if (st.type==="date" && !A[st.id] && st.def) A[st.id] = st.def();
@@ -500,8 +526,9 @@ const SHORT = {cat:"Kategorie", state:"Situace", hostStart:"Hostování začalo"
   zop3m:"Změna příslušnosti za 3 měsíce", recent:"Přestup za 3 měsíce",
   league:"Soutěž A-družstva", ststSecond:"Soutěž druhého klubu", ststUsed:"Střídavý start letos",
   sthG:"Druh kategorie", sthHome:"Úroveň klubu"};
-function answerChips(skipId){
-  const esc = t => String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;");
+const escHtml = t => String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
+// [krátký název otázky, odpověď, id kroku]; podle id kroku se po kliknutí na odpověď vrátíme k otázce
+function answerPairs(skipId){
   const out = [];
   for (const st of visible()) {
     if (st.id===skipId) continue; // během odpovídání neukazujeme právě zobrazenou otázku
@@ -509,15 +536,17 @@ function answerChips(skipId){
       for (const [k,q,kind,o] of st.items()) {
         if (!A[k]) continue;
         const opt = (o||YN).find(x => x[0]===A[k]);
-        out.push([SHORT[k]||q, opt ? opt[1].split(" (")[0] : A[k]]);
+        out.push([SHORT[k]||q, (opt ? opt[1].split(" (")[0] : A[k]).replace(" (mateřský)",""), st.id]);
       }
     } else if (A[st.id]) {
       const a = st.type==="date" ? fmt(parse(A[st.id])) : st.id==="cat" ? cat().label : (st.options().find(x => x[0]===A[st.id]) || [,A[st.id]])[1];
-      out.push([SHORT[st.id]||st.id, a]);
+      out.push([SHORT[st.id]||st.id, String(a).replace(" (mateřský)",""), st.id]);
     }
   }
-  return out.map(([q,a]) => `<span><b>${esc(q)}:</b> ${esc(a.replace(" (mateřský)",""))}</span>`);
+  return out;
 }
+const answerChips = skipId => answerPairs(skipId).map(([q,a,id]) =>
+  `<button type="button" class="chip" data-step="${id}" title="Změnit odpověď"><b>${escHtml(q)}:</b> ${escHtml(a)}</button>`);
 // Do 4 odpovědí se ukážou rovnou, víc se sbalí do jednoho řádku, aby přehled nezabíral místo.
 let answersOpen = null; // null = automaticky (do 4 odpovědí rozbaleno); jinak volba hráče
 function answersBlock(skipId){
@@ -527,6 +556,11 @@ function answersBlock(skipId){
 }
 
 const LABEL = {yes:"Můžeš využít", maybe:"Možná – ověř", no:"Teď ne"};
+function matrikaMail(o, r){
+  const lines = answerPairs().map(([q,a]) => `- ${q}: ${a}`).join("\n");
+  const body = `Dobrý den,\n\nprosím o ověření možnosti: ${o.name}.\nCo potřebuji ověřit: ${r.reason}\n\nMoje odpovědi v průvodci přestupem:\n${lines}\n\nJméno a příjmení:\nKlub:\n\nDěkuji`;
+  return `mailto:${CONFIG.matrikaEmail}?subject=${encodeURIComponent("Dotaz k přestupnímu řádu – "+o.name)}&body=${encodeURIComponent(body)}`;
+}
 function card(o, r, match){
   return `<article class="card">
     <div class="card-head"><div><div class="code">${o.code}</div><h3>${o.name}</h3></div>
@@ -535,6 +569,7 @@ function card(o, r, match){
     <dl class="facts"><div><dt>Poplatek</dt><dd>${r.fee}</dd></div><div><dt>Podat nejpozději</dt><dd>${r.deadline}</dd></div></dl>
     ${r.reason?`<p class="reason">${r.reason}</p>`:""}
     ${r.steps&&r.status!=="no"?`<ol class="steps">${r.steps.map(x=>`<li>${x}</li>`).join("")}</ol>`:""}
+    ${r.status==="maybe"?`<a class="btn mailbtn" href="${matrikaMail(o,r)}">Zeptat se matriky e-mailem</a>`:""}
   </article>`;
 }
 
@@ -608,8 +643,8 @@ function renderAll(){
   document.getElementById("all").innerHTML = `<div class="panel">
     <div style="display:flex;flex-direction:column;gap:6px"><h2>Všechny možnosti</h2>
     <p class="hint">Přestupní období: 1. 7. – 31. 1. pro dorost, juniory a dospělé; 1. 7. – 31. 3. pro žáky, elévy a přípravky. U dvou cen platí vyšší pro muže, ženy a juniory, nižší pro mladší kategorie.</p></div>
-    <div class="tbl"><table><thead><tr><th>Možnost</th><th>Kdy</th><th>Podmínky</th><th>Cena</th></tr></thead><tbody>
-    ${rows.map(([id,kdy,pod]) => { const o = OPTIONS.find(x=>x.id===id); return `<tr><td><strong>${o.name}</strong><br><span class="hint">${o.what}</span></td><td>${kdy}</td><td>${pod}</td><td style="white-space:nowrap">${f(id)}</td></tr>`; }).join("")}
+    <div class="tbl"><table class="stack"><thead><tr><th>Možnost</th><th>Kdy</th><th>Podmínky</th><th>Cena</th></tr></thead><tbody>
+    ${rows.map(([id,kdy,pod]) => { const o = OPTIONS.find(x=>x.id===id); return `<tr><td><strong>${o.name}</strong><br><span class="hint">${o.what}</span></td><td data-label="Kdy">${kdy}</td><td data-label="Podmínky">${pod}</td><td data-label="Cena" style="white-space:nowrap">${f(id)}</td></tr>`; }).join("")}
     </tbody></table></div>
     <div style="display:flex;flex-direction:column;gap:6px"><h3>Úrovně soutěží pro střídavý start</h3>
     <p class="hint">Muži a ženy se porovnávají zvlášť. A-družstvo tvého klubu musí hrát nejvyšší celostátní soutěž (tučně), druhý klub o 1–2 úrovně níže.</p></div>
@@ -646,6 +681,20 @@ function show(which){
 }
 tabW.onclick = () => show("wizard"); tabA.onclick = () => show("all");
 
+// kliknutí na odpověď v přehledu vrátí hráče k otázce
+document.addEventListener("click", ev => {
+  const c = ev.target.closest && ev.target.closest("button.chip");
+  if (!c) return;
+  const i = visible().findIndex(x => x.id === c.dataset.step);
+  if (i >= 0) { idx = i; render(); window.scrollTo({top:0, behavior:"smooth"}); }
+});
+window.addEventListener("popstate", ev => {
+  const i = ev.state && ev.state.idx;
+  if (typeof i !== "number") return;
+  navFromPop = true; idx = i; render(); navFromPop = false;
+  window.scrollTo({top:0});
+});
+try { const sv = JSON.parse(sessionStorage.getItem("prestup") || "null"); if (sv && sv.A) { Object.assign(A, sv.A); idx = sv.idx || 0; } } catch(e) {}
 renderAll(); render();
 </script>
 </body>
