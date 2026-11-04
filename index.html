@@ -470,6 +470,7 @@ function render(){
   }
   W.innerHTML = `<div class="panel">
     <div class="progress"><span>Krok ${idx+1} z ${steps.length}</span><div class="bar"><i style="width:${pct}%"></i></div></div>
+    ${answersBlock(st.id)}
     <div style="display:flex;flex-direction:column;gap:6px"><h2>${val(st.title)}</h2>${st.hint?`<p class="hint">${val(st.hint)}</p>`:""}</div>
     ${body}
     <div class="nav"><button class="btn" id="back" ${idx===0?"disabled":""}>Zpět</button><button class="btn primary" id="next" ${stepDone(st)?"":"disabled"}>${idx===steps.length-1?"Zobrazit možnosti":"Pokračovat"}</button></div>
@@ -492,15 +493,18 @@ function render(){
 }
 
 // Přehled všech odpovědí hráče (krátký název otázky: odpověď) nad výsledkem
+// zapamatuje, jestli hráč přehled rozbalil nebo sbalil (render ho jinak při každém kroku vytváří znovu)
+document.addEventListener("click", ev => { const sm = ev.target.closest && ev.target.closest("details.answers > summary"); if (sm) answersOpen = !sm.parentElement.open; });
 const SHORT = {cat:"Kategorie", state:"Situace", hostStart:"Hostování začalo", goal:"Cíl", date:"K datu",
   memberNow:"Aktivní členství v ČF", member1y:"Člen ČF déle než 1 rok", match1y:"Rok od posledního utkání", dodatek:"Evidenční dodatek",
   zop3m:"Změna příslušnosti za 3 měsíce", recent:"Přestup za 3 měsíce",
   league:"Soutěž A-družstva", ststSecond:"Soutěž druhého klubu", ststUsed:"Střídavý start letos",
   sthG:"Druh kategorie", sthHome:"Úroveň klubu"};
-function answerChips(){
+function answerChips(skipId){
   const esc = t => String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;");
   const out = [];
   for (const st of visible()) {
+    if (st.id===skipId) continue; // během odpovídání neukazujeme právě zobrazenou otázku
     if (st.type==="multi") {
       for (const [k,q,kind,o] of st.items()) {
         if (!A[k]) continue;
@@ -515,9 +519,11 @@ function answerChips(){
   return out.map(([q,a]) => `<span><b>${esc(q)}:</b> ${esc(a.replace(" (mateřský)",""))}</span>`);
 }
 // Do 4 odpovědí se ukážou rovnou, víc se sbalí do jednoho řádku, aby přehled nezabíral místo.
-function answersBlock(){
-  const c = answerChips();
-  return `<details class="answers" ${c.length<=4?"open":""}><summary>Moje odpovědi (${c.length})</summary><div class="summary">${c.join("")}</div></details>`;
+let answersOpen = null; // null = automaticky (do 4 odpovědí rozbaleno); jinak volba hráče
+function answersBlock(skipId){
+  const c = answerChips(skipId);
+  if (!c.length) return "";
+  return `<details class="answers" ${(answersOpen===null ? c.length<=4 : answersOpen)?"open":""}><summary>Moje odpovědi (${c.length})</summary><div class="summary">${c.join("")}</div></details>`;
 }
 
 const LABEL = {yes:"Můžeš využít", maybe:"Možná – ověř", no:"Teď ne"};
@@ -551,7 +557,7 @@ function renderNewPlayer(){
     <div class="nav"><button class="btn" id="back">Upravit odpovědi</button><button class="btn primary" id="restart">Začít znovu</button></div>
   </div>`;
   document.getElementById("back").onclick = () => { idx = visible().length-1; render(); };
-  document.getElementById("restart").onclick = () => { for (const k in A) delete A[k]; idx = 0; render(); };
+  document.getElementById("restart").onclick = () => { for (const k in A) delete A[k]; idx = 0; answersOpen = null; render(); };
 }
 
 function renderResult(){
@@ -583,7 +589,7 @@ function renderResult(){
     <div class="nav"><button class="btn" id="back">Upravit odpovědi</button><button class="btn primary" id="restart">Začít znovu</button></div>
   </div>`;
   document.getElementById("back").onclick = () => { idx = visible().length-1; render(); };
-  document.getElementById("restart").onclick = () => { for (const k in A) delete A[k]; idx = 0; render(); };
+  document.getElementById("restart").onclick = () => { for (const k in A) delete A[k]; idx = 0; answersOpen = null; render(); };
 }
 
 /* ===== Přehled všech možností ===== */
