@@ -1,0 +1,11 @@
+{
+  "name": "prestup-hostovani-testy",
+  "private": true,
+  "description": "Testy průvodce přestupem (Playwright). Web sám žádné závislosti nemá.",
+  "scripts": {
+    "test": "node suite.js && node fuzz.js 3000"
+  },
+  "devDependencies": {
+    "playwright": "^1.63.0"
+  }
+}

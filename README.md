@@ -12,6 +12,8 @@ Statická stránka bez sestavování:
 - `podklady.html` – všechna data a pravidla pro kontrolu (vykresluje se z `config.js`),
 - `config.js` – kategorie, termíny, poplatky, žebříčky soutěží a odkazy,
 - `style.css` – společný vzhled.
+- `tests/` – testy průvodce (Playwright), spuštění viz níže,
+- `CLAUDE.md` – popis projektu a pravidla práce pro Claude Code.
 
 ## Úpravy pro novou sezónu
 
@@ -22,3 +24,14 @@ Termíny přestupních období, poplatky, žebříčky soutěží a odkazy jsou 
 GitHub Pages: **Settings → Pages → Source: Deploy from a branch → `main` / `(root)`**.
 
 > Průvodce je orientační, závazný je Přestupní řád Českého florbalu.
+
+## Testy
+
+```bash
+cd tests
+npm install
+npx playwright install chromium
+npm test
+```
+
+`suite.js` jsou kontroly od začátku do konce (poplatky, pravidla, upozornění, historie, mobilní šířky, přístupnost, podklady), `fuzz.js` náhodně projde průvodce tisíci kombinací odpovědí a hlásí chyby.
