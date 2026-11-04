@@ -90,14 +90,22 @@ label.lbl{font-weight:600}
 .summary .chip{font:inherit;color:inherit;cursor:pointer;text-align:left}
 .summary .chip:hover{border-color:var(--accent)}
 .mailbtn{align-self:flex-start;text-decoration:none;font-size:15px;padding:9px 14px}
-/* Na úzkém displeji se hlavní tabulka změní na karty, aby nebyl sloupec s cenou useknutý */
-@media (max-width:600px){
-  table.stack thead{display:none}
-  table.stack,table.stack tbody,table.stack tr,table.stack td{display:block;width:100%}
-  table.stack tr{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:10px;background:var(--bg)}
-  table.stack td{border:0;padding:4px 0}
-  table.stack td[data-label]::before{content:attr(data-label);display:block;font-size:13px;color:var(--muted);font-weight:600}
-}
+/* Záložka Všechny možnosti: rozbalovací karty ve skupinách */
+.grp{font-family:var(--body);font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:6px 0 0}
+details.acc{border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+details.acc>summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:12px 14px}
+details.acc>summary::-webkit-details-marker{display:none}
+details.acc>summary::after{content:"▾";color:var(--muted);margin-left:4px;transition:transform .15s}
+details.acc[open]>summary::after{transform:rotate(180deg)}
+.acc-main{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+.acc-fee{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.acc-body{display:flex;flex-direction:column;gap:12px;padding:0 14px 14px}
+.acc-body ul{margin:4px 0 0;padding-left:20px;font-size:15px}
+.acc-body .lbl-s{font-size:13px;color:var(--muted);font-weight:600}
+details.sub{border-top:1px solid var(--line);padding-top:8px}
+details.sub>summary{cursor:pointer;font-weight:600;font-size:15px}
+details.sub .tbl,details.sub p{margin-top:8px}
+
 .summary b{color:var(--fg);font-weight:600}
 details.answers summary{cursor:pointer;font-size:14px;font-weight:600;color:var(--muted)}
 details.answers .summary{margin-top:8px}
@@ -631,48 +639,68 @@ function renderResult(){
 }
 
 /* ===== Přehled všech možností ===== */
+let priceTier = null; // "hi" / "lo"; null = podle kategorie z průvodce (jinak "hi")
 function renderAll(){
-  const f = (id) => { const x = CONFIG.fees[id]; if (!x) return memberFeeText(); return x.hi===x.lo ? (x.hi? x.hi+" Kč":"Zdarma") : `${x.hi} / ${x.lo} Kč`; };
-  const rows = [
-    ["zop","Kdykoliv, nejdříve 3 měsíce od předchozí změny oddílové příslušnosti","Bez klubu, nebo členem ČF déle než 1 rok, 1 rok bez utkání a bez evidenčního dodatku"],
-    ["prestup","V přestupním období","Po přestupu 3 měsíce nelze podat další přestup ani hostování"],
-    ["host","Začátek 1. 7. až konec přestupního období, nejdéle do 30. 6.","Nejméně 30 dnů; jen jedno hostování najednou (do jiného klubu až po ukončení současného)"],
-    ["stst","Začátek 1. 7. – 31. 1., nejdéle do 30. 6.",`Jen v prvních třech sezónách v dospělých, tedy 19–21 let (${yearsOf("dospeli21")}); hraješ jen za A-družstvo mateřského klubu (v nejvyšší celostátní soutěži) a za A-družstvo druhého klubu, který hraje nejvýš o 2 úrovně níže (muži a ženy zvlášť, viz tabulka níže); jen 1× za sezónu`],
-    ["sth","Začátek 1. 7. až konec přestupního období, nejvýše 105 dní",`Od starších žáků po první tři sezóny v dospělých (${yearsFor(catById("starsi").minAge, catById("dospeli21").maxAge)}); jen do celostátní soutěže podle úrovně soutěže tvého klubu (viz tabulky níže); jen v základní části soutěže; nelze předčasně ukončit; do stejného klubu 1× za sezónu`],
-    ["endHost","Nejpozději konec přestupního období","Hostování trvá alespoň 30 dnů"],
-    ["endStst","Nejpozději 31. 1.","—"],
-    ["prihlaska","Kdykoliv, přes přihlášku ve FISu","Zrušené členství v ČF"]
+  const tier = priceTier || (cat() && !cat().high ? "lo" : "hi");
+  const feeFor = id => !CONFIG.fees[id] ? memberFeeText() : CONFIG.fees[id][tier]===0 ? "Zdarma" : CONFIG.fees[id][tier]+" Kč";
+  const feeShort = id => !CONFIG.fees[id] ? "Zdarma" : feeFor(id);
+  const L = CONFIG.sthLadders, n = (c,g,i=0) => L[c][g].names[i];
+  const tbl = (head, rows) => `<div class="tbl"><table><thead><tr>${head.map(h => `<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.map(r => `<tr>${r.join("")}</tr>`).join("")}</tbody></table></div>`;
+  const ststLevels = `<details class="sub"><summary>Úrovně soutěží pro střídavý start</summary>
+    <p class="hint">Muži a ženy se porovnávají zvlášť. A-družstvo tvého klubu musí hrát nejvyšší celostátní soutěž (tučně), druhý klub o 1–2 úrovně níže.</p>
+    ${tbl(["Úroveň","Muži","Ženy"], Array.from({length:Math.max(...Object.values(LADDERS()).map(l=>l.length))}, (_,i) => [`<td>${i+1}</td>`, ...["m","z"].map(g => { const nm = LADDERS()[g][i]; return `<td>${nm ? (i+1 <= CONFIG.ststHomeMax[g] ? `<strong>${nm}</strong>` : nm) : "—"}</td>`; })]))}</details>`;
+  const sthWhere = `<details class="sub"><summary>Kam smíš střídavě hostovat</summary>
+    <p class="hint">Rozhoduje úroveň (1 = nejvyšší), na které hraje nejvyšší družstvo tvého klubu ve tvé kategorii. Střídavě hostovat lze jen do celostátní soutěže.</p>
+    ${tbl(["Kategorie","Smíš do"], [
+      ["U15 starší žáci", `${n("dorost","m")}, ale jen když ji klub sám nehraje`],
+      ["U15 starší žákyně", `${n("dorost","z")}, ale jen když ji klub sám nehraje`],
+      ["U17 dorostenci", `${n("dorost","m")} (jen když klub hraje nižší úroveň) a ${n("junior","m")}`],
+      ["U17 dorostenky", `${n("dorost","z")} (jen když klub hraje nižší úroveň) a ${n("junior","z")}`],
+      ["U19 junioři", `${n("junior","m")} (jen když klub hraje nižší úroveň) a celostátní soutěže mužů (Superliga až Divize) do úrovně o 1 nižší, než hraje klub v juniorech`],
+      ["U19 juniorky", `${n("junior","z")} (jen když klub hraje nižší úroveň) a Extraliga a 1. liga žen do úrovně o 1 nižší, než hraje klub v juniorkách`],
+      ["Muži / ženy 19–21 let", "celostátní soutěž vyšší úrovně, než ve které hraje A-družstvo klubu"]
+    ].map(([k,v]) => [`<td><strong>${k}</strong></td>`, `<td>${v}</td>`]))}</details>`;
+  const sthLevels = `<details class="sub"><summary>Úrovně soutěží kategorií</summary>
+    <p class="hint">Tučně jsou celostátní soutěže. 1. liga dorostenek je regionální, pro střídavé hostování se počítá jako celostátní. Starší žáci a žákyně celostátní soutěž nemají.</p>
+    ${tbl(["Kategorie","Úrovně"], [["junior","m","U19 junioři"],["junior","z","U19 juniorky"],["dorost","m","U17 dorostenci"],["dorost","z","U17 dorostenky"]].map(([c,g,l]) => { const d = L[c][g]; return [`<td><strong>${l}</strong></td>`, `<td>${d.names.map((x,i) => i < d.nat ? `<strong>${x}</strong>` : x).join(" · ")}</td>`]; }))}</details>`;
+  const REQ = "Žádost lze podat od 1. 5. do konce přestupního období. Datum OD musí být v přestupním období.";
+  const groups = [
+    ["Změna klubu", [
+      {id:"zop", short:"Nový klub bez přestupu a zdarma.", kdy:"Kdykoliv v roce. Nejdříve 3 měsíce od předchozí změny oddílové příslušnosti.", pod:["Nemáš žádný klub, nebo jsi členem ČF déle než 1 rok, rok jsi nehrál(a) a nemáš evidenční dodatek."]},
+      {id:"prestup", short:"Přejdeš do nového klubu natrvalo.", kdy:REQ, pod:["Po přestupu 3 měsíce nelze podat další přestup ani hostování."]},
+      {id:"host", short:"Dočasně hraješ za jiný klub, nejdéle do 30. 6.", kdy:REQ+" Hostování končí nejpozději 30. 6.", pod:["Hostování trvá nejméně 30 dnů.","Jen jedno hostování najednou. Do jiného klubu až po ukončení současného."]}
+    ]],
+    ["Hrát za dva kluby", [
+      {id:"stst", short:"Hraješ za svůj klub a za A-družstvo druhého klubu.", kdy:"Žádost lze podat od 1. 5. do 31. 1. Platí nejdéle do 30. 6.",
+        pod:[`Jen v prvních třech sezónách v dospělých, tedy 19–21 let (${yearsOf("dospeli21")}).`,"Hraješ jen za A-družstvo mateřského klubu a za A-družstvo druhého klubu.","A-družstvo mateřského klubu hraje nejvyšší celostátní soutěž.","Druhý klub hraje nejvýš o 2 úrovně níže (muži a ženy zvlášť).","Jen 1× za sezónu. Netýká se pohárových soutěží."], extra:ststLevels},
+      {id:"sth", short:"Hraješ za svůj klub a za jedno družstvo jiného klubu.", kdy:REQ+" Trvá nejvýše 105 dní.",
+        pod:[`Od starších žáků po první tři sezóny v dospělých (${yearsFor(catById("starsi").minAge, catById("dospeli21").maxAge)}).`,"Jen do celostátní soutěže podle úrovně soutěže tvého klubu.","Jen v základní části soutěže. Nelze předčasně ukončit.","Do stejného klubu jen 1× za sezónu."], extra:sthWhere+sthLevels}
+    ]],
+    ["Ukončení", [
+      {id:"endHost", short:"Předčasně ukončíš hostování.", kdy:"Nejpozději do konce přestupního období.", pod:["Hostování trvá alespoň 30 dnů."]},
+      {id:"endStst", short:"Předčasně ukončíš střídavý start.", kdy:"Nejpozději 31. 1.", pod:["Ukončuje se dohodou obou klubů a hráče. Tehdy se platí poplatek.","Zdarma zaniká sám při přestupu nebo když hráč v základní části soutěže nenastoupí aspoň k 30 % utkání družstva."]}
+    ]],
+    ["Členství", [
+      {id:"prihlaska", short:"Obnovíš zrušené členství v ČF.", kdy:"Kdykoliv v roce, přes přihlášku ve FISu.", pod:["Máš zrušené členství v ČF."]}
+    ]]
   ];
+  const keep = new Set([...document.querySelectorAll("#all details.acc[open]")].map(d => d.dataset.id));
+  const card = it => { const o = OPTIONS.find(x => x.id===it.id); return `<details class="acc" data-id="${it.id}" ${keep.has(it.id)?"open":""}>
+    <summary><span class="acc-main"><strong>${o.name}</strong><span class="hint">${it.short}</span></span><span class="acc-fee">${feeShort(it.id)}</span></summary>
+    <div class="acc-body">
+      <p>${o.what}</p>
+      <dl class="facts"><div><dt>Kdy</dt><dd>${it.kdy}</dd></div><div><dt>Cena</dt><dd>${feeFor(it.id)}</dd></div></dl>
+      <div><div class="lbl-s">Podmínky</div><ul>${it.pod.map(x => `<li>${x}</li>`).join("")}</ul></div>
+      ${it.extra||""}
+      <button type="button" class="btn primary" data-go>Zjistit, jestli to můžu využít</button>
+    </div></details>`; };
   document.getElementById("all").innerHTML = `<div class="panel">
     <div style="display:flex;flex-direction:column;gap:6px"><h2>Všechny možnosti</h2>
-    <p class="hint">Přestupní období: 1. 7. – 31. 1. pro dorost, juniory a dospělé; 1. 7. – 31. 3. pro žáky, elévy a přípravky. U dvou cen platí vyšší pro muže, ženy a juniory, nižší pro mladší kategorie.</p></div>
-    <div class="tbl"><table class="stack"><thead><tr><th>Možnost</th><th>Kdy</th><th>Podmínky</th><th>Cena</th></tr></thead><tbody>
-    ${rows.map(([id,kdy,pod]) => { const o = OPTIONS.find(x=>x.id===id); return `<tr><td><strong>${o.name}</strong><br><span class="hint">${o.what}</span></td><td data-label="Kdy">${kdy}</td><td data-label="Podmínky">${pod}</td><td data-label="Cena" style="white-space:nowrap">${f(id)}</td></tr>`; }).join("")}
-    </tbody></table></div>
-    <div style="display:flex;flex-direction:column;gap:6px"><h3>Úrovně soutěží pro střídavý start</h3>
-    <p class="hint">Muži a ženy se porovnávají zvlášť. A-družstvo tvého klubu musí hrát nejvyšší celostátní soutěž (tučně), druhý klub o 1–2 úrovně níže.</p></div>
-    <div class="tbl"><table><thead><tr><th>Úroveň</th><th>Muži</th><th>Ženy</th></tr></thead><tbody>
-    ${Array.from({length:Math.max(...Object.values(LADDERS()).map(l=>l.length))}, (_,i) => `<tr><td>${i+1}</td>${["m","z"].map(g => { const n = LADDERS()[g][i]; return `<td>${n ? (i+1 <= CONFIG.ststHomeMax[g] ? `<strong>${n}</strong>` : n) : "—"}</td>`; }).join("")}</tr>`).join("")}
-    </tbody></table></div>
-    <div style="display:flex;flex-direction:column;gap:6px"><h3>Kam smíš střídavě hostovat</h3>
-    <p class="hint">Rozhoduje úroveň (1 = nejvyšší), na které hraje nejvyšší družstvo tvého klubu ve tvé kategorii. Střídavě hostovat lze jen do celostátní soutěže.</p></div>
-    <div class="tbl"><table><thead><tr><th>Kategorie</th><th>Smíš do</th></tr></thead><tbody>
-    ${(() => { const L = CONFIG.sthLadders, n = (c,g,i=0) => L[c][g].names[i];
-      return [
-        ["U15 starší žáci", `${n("dorost","m")}, ale jen když ji klub sám nehraje`],
-        ["U15 starší žákyně", `${n("dorost","z")}, ale jen když ji klub sám nehraje`],
-        ["U17 dorostenci", `${n("dorost","m")} (jen když klub hraje nižší úroveň) a ${n("junior","m")}`],
-        ["U17 dorostenky", `${n("dorost","z")} (jen když klub hraje nižší úroveň) a ${n("junior","z")}`],
-        ["U19 junioři", `${n("junior","m")} (jen když klub hraje nižší úroveň) a celostátní soutěže mužů (Superliga až Divize) do úrovně o 1 nižší, než hraje klub v juniorech`],
-        ["U19 juniorky", `${n("junior","z")} (jen když klub hraje nižší úroveň) a Extraliga a 1. liga žen do úrovně o 1 nižší, než hraje klub v juniorkách`],
-        ["Muži / ženy 19–21 let", "celostátní soutěž vyšší úrovně, než ve které hraje A-družstvo klubu"]
-      ].map(([k,v]) => `<tr><td><strong>${k}</strong></td><td>${v}</td></tr>`).join(""); })()}
-    </tbody></table></div>
-    <div style="display:flex;flex-direction:column;gap:6px"><h3>Úrovně soutěží kategorií</h3>
-    <p class="hint">Tučně jsou celostátní soutěže. 1. liga dorostenek je regionální, pro střídavé hostování se počítá jako celostátní. Starší žáci a žákyně celostátní soutěž nemají.</p></div>
-    <div class="tbl"><table><thead><tr><th>Kategorie</th><th>Úrovně</th></tr></thead><tbody>
-    ${[["junior","m","U19 junioři"],["junior","z","U19 juniorky"],["dorost","m","U17 dorostenci"],["dorost","z","U17 dorostenky"]].map(([c,g,l]) => { const d = CONFIG.sthLadders[c][g]; return `<tr><td><strong>${l}</strong></td><td>${d.names.map((x,i) => i < d.nat ? `<strong>${x}</strong>` : x).join(" · ")}</td></tr>`; }).join("")}
-    </tbody></table></div></div>`;
+    <p class="hint">Přestupní období: 1. 7. – 31. 1. pro dorost, juniory a dospělé; 1. 7. – 31. 3. pro žáky, elévy a přípravky. Žádost lze podat už od 1. 5.</p></div>
+    <div style="display:flex;flex-direction:column;gap:6px"><span class="lbl-s" style="font-size:13px;color:var(--muted);font-weight:600">Cena podle kategorie</span>
+      <div class="seg" role="group" aria-label="Cena podle kategorie"><button type="button" data-tier="hi" aria-pressed="${tier==="hi"}">Muži, ženy a junioři</button><button type="button" data-tier="lo" aria-pressed="${tier==="lo"}">Dorost a mladší</button></div></div>
+    ${groups.map(([name, items]) => `<h3 class="grp">${name}</h3><div style="display:flex;flex-direction:column;gap:8px">${items.map(card).join("")}</div>`).join("")}
+  </div>`;
 }
 
 /* ===== Záložky ===== */
@@ -682,7 +710,12 @@ function show(which){
   tabW.setAttribute("aria-selected", w); tabA.setAttribute("aria-selected", !w);
   document.getElementById("wizard").hidden = !w; document.getElementById("all").hidden = w;
 }
-tabW.onclick = () => show("wizard"); tabA.onclick = () => show("all");
+tabW.onclick = () => show("wizard"); tabA.onclick = () => { renderAll(); show("all"); };
+document.getElementById("all").addEventListener("click", ev => {
+  const t = ev.target.closest("button[data-tier]");
+  if (t) { priceTier = t.dataset.tier; renderAll(); return; }
+  if (ev.target.closest("button[data-go]")) { show("wizard"); window.scrollTo({top:0, behavior:"smooth"}); }
+});
 
 // kliknutí na odpověď v přehledu vrátí hráče k otázce
 document.addEventListener("click", ev => {
