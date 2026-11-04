@@ -256,7 +256,7 @@ const STEPS = [
     options:() => [["oddil","Mám svůj (mateřský) klub","Jsem registrovaný v klubu a hraju za něj."],["bez","Nemám žádný klub","Byl(a) jsem registrovaný v Českém florbalu, ale teď nepatřím k žádnému klubu."],["novy","Jsem nový hráč","Ještě jsem nikdy nebyl(a) registrovaný v Českém florbalu."],["hostuji","Právě hostuji v jiném klubu",""]]
       .concat(ststAge() ? [["stst","Mám střídavý start",""]] : [])
       .concat(sthAge() ? [["sth","Mám střídavé hostování",""]] : [])},
-  {id:"hostStart", show:() => A.state==="hostuji", title:"Kdy ti bylo hostování schváleno?", hint:"Hostování lze předčasně ukončit nejdříve 30 dnů po schválení (rozhodnutí matriky), ne po jeho začátku.", type:"date"},
+  {id:"hostStart", show:() => A.state==="hostuji", title:"Kdy tvoje hostování začalo?", hint:"Hostování musí trvat minimálně 30 dnů. Dřív než 30 dnů od začátku ho ukončit nejde.", type:"date"},
   {id:"goal", title:"Co chceš udělat?", type:"choice",
     options:() => {
       // 4. položka = důvod, proč je možnost zašedlá (nelze vybrat)
@@ -406,8 +406,8 @@ function evaluate(){
   // Ukončení hostování
   if (A.state!=="hostuji") set("endHost","no",fmt(s.end),"Týká se jen hráčů, kteří právě hostují.");
   else if (s.d > s.end) set("endHost","no",fmt(s.end),"Hostování lze ukončit nejpozději ke konci přestupního období. Skončí samo 30. 6.");
-  else if (A.hostStart && daysBetween(parse(A.hostStart), s.d) < 30) set("endHost","no",fmt(s.end),`Hostování lze předčasně ukončit nejdříve 30 dnů po schválení, tedy ${fmt(addDays(parse(A.hostStart),30))}.`);
-  else if (!A.hostStart) set("endHost","maybe",fmt(s.end),"Ověř, že od schválení hostování uplynulo alespoň 30 dnů.");
+  else if (A.hostStart && daysBetween(parse(A.hostStart), s.d) < 30) set("endHost","no",fmt(s.end),`Hostování musí trvat minimálně 30 dnů. Ukončit ho můžeš nejdříve ${fmt(addDays(parse(A.hostStart),30))}.`);
+  else if (!A.hostStart) set("endHost","maybe",fmt(s.end),"Ověř, že hostování trvá alespoň 30 dnů.");
   else set("endHost","yes",fmt(s.end),"",["Ukončení se dělá dohodou obou klubů a tebe, žádost „Ukončení hostování“ se podává ve FISu.","Den ukončení je posledním dnem, kdy hostování platí.",`Uhraď poplatek ${fee("endHost")}.`,"Potom můžeš podat přestup do jiného klubu."]);
 
   // Ukončení střídavého startu
