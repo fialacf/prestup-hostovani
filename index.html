@@ -175,7 +175,7 @@ const STEPS = [
       if (!ststAge()) {
         it.push(["sthG","Hraješ v chlapecké, nebo dívčí kategorii?",undefined,[["m","Chlapecké (junioři, dorostenci, starší žáci)"],["z","Dívčí (juniorky, dorostenky, starší žákyně)"]]]);
         if (A.sthG) {
-          if (A.cat==="starsi") it.push(["sthHome",`Hraje tvůj klub sám ${CONFIG.topDorostAcc[A.sthG]}?`]);
+          if (A.cat==="starsi") it.push(["sthHome",`Hraje tvůj klub sám ${CONFIG.topDorostAcc[A.sthG]}?`,undefined,undefined,"Pokud ano, střídavě hostovat tam nelze, protože klub má družstvo ve stejné soutěži."]);
           else it.push(["sthHome","Na jaké úrovni hraje nejvyšší družstvo tvého klubu ve tvé kategorii?","select",CONFIG.sthLadders[A.cat][A.sthG].names.map((n,i) => [String(i+1),n]).concat([["none","Klub nemá v mé kategorii žádné družstvo"],["nevim","Nevím"]])]);
         }
       }
@@ -432,7 +432,10 @@ const SHORT = {cat:"Kategorie", state:"Situace", hostStart:"Hostování začalo"
   memberNow:"Aktivní členství v ČF", member1y:"Člen ČF déle než 1 rok", match1y:"Rok od posledního utkání", dodatek:"Evidenční dodatek",
   zop3m:"Nová registrace za 3 měsíce", recent:"Přestup za 3 měsíce",
   league:"Soutěž A-družstva", ststSecond:"Soutěž druhého klubu", ststUsed:"Střídavý start letos",
-  sthG:"Druh kategorie", sthHome:"Úroveň klubu"};
+  sthG:"Druh kategorie",
+  // starší žáci odpovídají ano/ne na „Hraje klub sám 1. ligu dorostenců?“, proto štítek nese otázku, ne jen „Ano“
+  sthHome:() => A.cat==="starsi" && A.sthG ? "Klub hraje " + CONFIG.topDorostAcc[A.sthG] : "Úroveň klubu"};
+const shortLabel = k => { const v = SHORT[k]; return typeof v === "function" ? v() : v; };
 const escHtml = t => String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
 // [krátký název otázky, odpověď, id kroku]; podle id kroku se po kliknutí na odpověď vrátíme k otázce
 // limit = index aktuálního kroku: během odpovídání ukazujeme jen odpovědi z předchozích kroků, ne z těch, které hráč teprve bude vyplňovat
@@ -446,11 +449,11 @@ function answerPairs(limit){
       for (const [k,q,kind,o] of st.items()) {
         if (!A[k]) continue;
         const opt = (o||YN).find(x => x[0]===A[k]);
-        out.push([SHORT[k]||q, (opt ? opt[1].split(" (")[0] : A[k]).replace(" (mateřský)",""), st.id]);
+        out.push([shortLabel(k)||q, (opt ? opt[1].split(" (")[0] : A[k]).replace(" (mateřský)",""), st.id]);
       }
     } else if (A[st.id]) {
       const a = st.type==="date" ? fmt(parse(A[st.id])) : st.id==="cat" ? cat().label : (st.options().find(x => x[0]===A[st.id]) || [,A[st.id]])[1];
-      out.push([SHORT[st.id]||st.id, String(a).replace(" (mateřský)",""), st.id]);
+      out.push([shortLabel(st.id)||st.id, String(a).replace(" (mateřský)",""), st.id]);
     }
   }
   return out;
@@ -473,10 +476,10 @@ function matrikaMail(o, r){
   const body = `Dobrý den,\n\nprosím o ověření možnosti: ${o.name}.\nCo potřebuji ověřit: ${r.reason}\n\nMoje odpovědi v průvodci přestupem:\n${lines}\n\nJméno a příjmení:\nKlub:\n\nDěkuji`;
   return `mailto:${CONFIG.matrikaEmail}?subject=${encodeURIComponent("Dotaz k přestupnímu řádu – "+o.name)}&body=${encodeURIComponent(body)}`;
 }
-function card(o, r, match){
+function card(o, r, match, alt){
   return `<article class="card">
     <div class="card-head"><div><div class="code">${o.code}</div><h3>${o.name}</h3></div>
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><span class="pill ${r.status}">${LABEL[r.status]}</span>${match?'<span class="match">Odpovídá tvému cíli</span>':""}</div></div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><span class="pill ${r.status}">${LABEL[r.status]}</span>${match?'<span class="match">Odpovídá tvému cíli</span>':alt?`<span class="match alt">${alt}</span>`:""}</div></div>
     <p>${o.what}</p>
     <dl class="facts"><div><dt>Poplatek</dt><dd>${r.fee}</dd></div><div><dt>Podat nejpozději</dt><dd>${r.deadline}</dd></div></dl>
     ${r.reason?`<p class="reason">${r.reason}</p>`:""}
@@ -556,9 +559,33 @@ function noOptionNotice(R, sorted, isMatch){
   const pick = no.find(isMatch) || no[0];
   return pick ? `<div class="notice"><strong>Teď nemáš žádnou možnost.</strong> Hlavní důvod u možnosti „${pick.name}“: ${R[pick.id].reason}</div>` : "";
 }
-function resultNotices(R, now, sorted, isMatch){
+// Co hráč chtěl (krátce, do nadpisu a upozornění)
+function goalPhrase(){
+  return {trvale: A.state==="bez" ? "Přihlásit se do nového klubu" : "Změnit klub natrvalo", docasne:"Hrát dočasně za jiný klub", dva:"Hrát za dva kluby zároveň",
+    ukoncit: A.state==="stst" ? "Ukončit střídavý start" : "Ukončit hostování"}[A.goal] || "";
+}
+// Karta jiné možnosti, než jakou hráč chtěl: stručně, v čem se liší
+const altLabel = id => {
+  if (A.goal==="dva" && ["prestup","host","zop","prihlaska"].includes(id)) return "Jiná možnost: jen jeden klub";
+  if (A.goal==="docasne" && ["prestup","zop","prihlaska"].includes(id)) return "Jiná možnost: trvalá změna klubu";
+  if (A.goal==="trvale" && ["host","stst","sth"].includes(id)) return "Jiná možnost: jen dočasně";
+  return "Jiná možnost";
+};
+// Cíl hráče nejde splnit, ale nabízejí se jiné možnosti: řekni to a vysvětli rozdíl.
+function goalNotice(R, sorted, now, isMatch){
+  const reasons = sorted.filter(o => isMatch(o) && R[o.id].status==="no").map(o => `<span><b>${o.name}:</b> ${R[o.id].reason}</span>`).join("");
+  const how = {prestup:"přestupem natrvalo", host:"hostováním dočasně", zop:"změnou oddílové příslušnosti bez přestupu", prihlaska:"obnovením členství"};
+  const alts = now.map(o => how[o.id]).filter(Boolean);
+  const caveat = {dva:"Budeš ale hrát jen za jeden klub.", docasne:"Půjde ale o trvalou změnu klubu.", trvale:"Půjde ale jen o dočasné hraní za jiný klub."}[A.goal] || "";
+  const instead = alts.length && caveat ? `<span>Místo toho můžeš klub změnit ${alts.join(", nebo ")}. ${caveat}</span>` : "";
+  return `<div class="notice"><strong>${goalPhrase()} teď nejde.</strong>${reasons}${instead}</div>`;
+}
+function resultNotices(R, now, sorted, isMatch, goalUnmet){
   const n = [periodNotice(R), hostEndNotice(), ststUsedNotice()].filter(Boolean);
-  if (!now.length && !n.length) { const f = noOptionNotice(R, sorted, isMatch); if (f) n.push(f); }
+  if (!n.length) {
+    if (!now.length) { const f = noOptionNotice(R, sorted, isMatch); if (f) n.push(f); }
+    else if (goalUnmet) n.push(goalNotice(R, sorted, now, isMatch));
+  }
   return n.join("");
 }
 function renderResult(){
@@ -578,13 +605,18 @@ function renderResult(){
     o.id==="sth" ? sthAge() && (twoGoal || TEMP_STATES.includes(A.state)) : true;
   const sorted = OPTIONS.filter(applicable).sort((a,b) => rank[R[a.id].status]-rank[R[b.id].status] || isMatch(b)-isMatch(a));
   const now = sorted.filter(o => R[o.id].status!=="no"), later = sorted.filter(o => R[o.id].status==="no");
+  const word = n => n===1 ? "možnost" : n<5 ? "možnosti" : "možností";
+  // Hráč zvolil konkrétní cíl a žádná dostupná možnost mu ho nesplní
+  const goalUnmet = !!goalPhrase() && !sorted.filter(isMatch).some(o => R[o.id].status!=="no");
+  const showAlt = goalUnmet && now.length > 0;
   W.innerHTML = `<div style="display:flex;flex-direction:column;gap:16px">
     <div style="display:flex;flex-direction:column;gap:8px">
-      <h2>${now.length ? `Máš ${now.length} ${now.length===1?"možnost":now.length<5?"možnosti":"možností"}` : "Teď nemáš žádnou možnost"}</h2>
+      <h2>${!now.length ? "Teď nemáš žádnou možnost" : showAlt ? `${goalPhrase()} teď nejde` : `Máš ${now.length} ${word(now.length)}`}</h2>
+      ${showAlt ? `<p class="hint">Jako jinou cestu máš ${now.length} ${word(now.length)}.</p>` : ""}
       ${answersBlock()}
     </div>
-    ${resultNotices(R, now, sorted, isMatch)}
-    <div class="cards">${now.map(o => card(o,R[o.id],isMatch(o))).join("") || `<p class="reason">Podívej se níže, proč to teď nejde a kdy to bude možné.</p>`}</div>
+    ${resultNotices(R, now, sorted, isMatch, goalUnmet)}
+    <div class="cards">${now.map(o => card(o,R[o.id],isMatch(o),showAlt && !isMatch(o) ? altLabel(o.id) : "")).join("") || `<p class="reason">Podívej se níže, proč to teď nejde a kdy to bude možné.</p>`}</div>
     ${later.length?`<details class="later" ${now.length?"":"open"}><summary>Teď nejde (${later.length})</summary><div class="cards">${later.map(o => card(o,R[o.id],isMatch(o))).join("")}</div></details>`:""}
     ${A.state==="bez" ? "" : `<details class="later"><summary>Dobré vědět z Přestupního řádu</summary><div class="cards">
       <p class="note"><strong>Mateřský klub nesouhlasí s přestupem?</strong> Přestup se schválí i přes jeho nesouhlas (bez odstupného), pokud nejsi členem ČF déle než 12 měsíců, nebo ti ještě není 12 let (s tím musí souhlasit zákonný zástupce). <a href="${CONFIG.disputeUrl}" target="_blank" rel="noopener">Postup při neshodě u žádosti o přestup</a></p>
