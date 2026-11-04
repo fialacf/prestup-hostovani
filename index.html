@@ -361,8 +361,8 @@ function evaluate(){
   if (blockReason) set("host","no",fmt(s.end),blockReason);
   else if (hostLeft < 30) set("host","no",fmt(s.end),"Hostování musí trvat alespoň 30 dnů a skončí nejpozději 30. 6.");
   else if (A.state==="stst") set("host","no",fmt(s.end),"Po dobu střídavého startu nejde požádat o hostování.");
+  else if (A.state==="hostuji") set("host","no",fmt(s.end),"Dvě hostování najednou mít nemůžeš. Chceš-li hostovat v jiném klubu, nejdřív musíš současné hostování ukončit (viz Ukončení hostování) a pak, pokud je přestupní období, podat nové hostování.");
   else if (unsureT) set("host","maybe",fmt(s.end),unsureT);
-  else if (A.state==="hostuji") set("host","maybe",fmt(s.end),"Právě hostuješ. Další hostování řád výslovně neřeší, ověř to u matriky ČF.");
   else if (A.state==="sth") set("host","yes",fmt(s.end),"Hostovat můžeš jen do klubu, ve kterém střídavě hostuješ.",hostSteps);
   else set("host","yes",fmt(s.end),"",hostSteps);
 
@@ -554,7 +554,7 @@ function renderAll(){
   const rows = [
     ["zop","Kdykoliv, nejdříve 3 měsíce od předchozí změny oddílové příslušnosti","Bez klubu, nebo členem ČF déle než 1 rok, 1 rok bez utkání a bez evidenčního dodatku"],
     ["prestup","V přestupním období","Po přestupu 3 měsíce nelze podat další přestup ani hostování"],
-    ["host","Začátek 1. 7. až konec přestupního období, nejdéle do 30. 6.","Nejméně 30 dnů"],
+    ["host","Začátek 1. 7. až konec přestupního období, nejdéle do 30. 6.","Nejméně 30 dnů; jen jedno hostování najednou (do jiného klubu až po ukončení současného)"],
     ["stst","Začátek 1. 7. – 31. 1., nejdéle do 30. 6.",`Jen v prvních třech sezónách v dospělých, tedy 19–21 let (${yearsOf("dospeli21")}); hraješ jen za A-družstvo mateřského klubu (v nejvyšší celostátní soutěži) a za A-družstvo druhého klubu, který hraje nejvýš o 2 úrovně níže (muži a ženy zvlášť, viz tabulka níže); jen 1× za sezónu`],
     ["sth","Začátek 1. 7. až konec přestupního období, nejvýše 105 dní",`Od starších žáků po první tři sezóny v dospělých (${yearsFor(catById("starsi").minAge, catById("dospeli21").maxAge)}); jen do celostátní soutěže podle úrovně soutěže tvého klubu (viz tabulky níže); jen v základní části soutěže; nelze předčasně ukončit; do stejného klubu 1× za sezónu`],
     ["endHost","Nejpozději konec přestupního období","Hostování trvá alespoň 30 dnů"],
