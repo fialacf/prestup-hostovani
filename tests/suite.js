@@ -355,6 +355,17 @@ await S('24', async () => {
     eq('cíl bez klubu: název beze změny', await p.evaluate(() => { A.state = 'bez'; return goalPhrase(); }), 'Přihlásit se do nového klubu'); await p.close(); }
 });
 
+// ---------- 25) podklady: krátké zmínky o startu v jiné věkové kategorii ----------
+await S('25', async () => {
+  const p = await open(1000, 'podklady.html'); const t = await p.textContent('body');
+  ok('podklady: start v jiné kategorii o jednu výš', /o jednu kategorii výš/.test(t) && /SŘ čl\. 15\.5/.test(t));
+  ok('podklady: o dvě kategorie výš se souhlasem', /O dvě kategorie výš jen v regionálních soutěžích/.test(t) && /SŘ čl\. 5\.4/.test(t));
+  ok('podklady: hráčky v mužských kategoriích', /Hráčky smějí startovat v mužských kategoriích/.test(t) && /SŘ čl\. 5\.5/.test(t));
+  ok('podklady: hráčky za jiný klub bez přestupu', /bez přestupu\. Jen za jeden klub v ročníku/.test(t) && /SŘ čl\. 15\.4/.test(t));
+  ok('podklady: otevřený bod odkazuje na zmínky', /zatím jen krátce v tabulce pravidel/.test(t));
+  await p.close();
+});
+
 ok('žádné chyby v konzoli',consoleErrs.length===0,consoleErrs.slice(0,3));ok('žádné výjimky stránky',pageErrs.length===0,pageErrs.slice(0,3));
 console.log(`PASS ${pass}  FAIL ${fail}`);if(fail){console.log('\nSelhání:');failures.forEach(f=>console.log(' - '+f.slice(0,300)));}
 await b.close();process.exit(fail?1:0);})().catch(e=>{console.error('SUITE CRASH',e.message);process.exit(2);});

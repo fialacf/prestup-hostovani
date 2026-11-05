@@ -160,6 +160,10 @@ const R = [
   ["Členství",`Členský příspěvek ${CONFIG.membershipFee} Kč na sezónu, platí se ve FISu, nebo přes klub.`,"ČF","up"],
   ["Nový hráč","Registrace se dělá Přihláškou člena do ČF (s názvem klubu, souhlasem klubu a hráče, u hráčů mladších 15 let i zákonného zástupce). Registrace je bezplatná.","RegŘ čl. 2.1","rad"],
   ["Evidenční dodatek","Smlouvu s klubem (a tedy evidenční dodatek) lze uzavřít jen s hráčem starším 16 let. U hráčů mladších 18 let podepisuje i zákonný zástupce. Nejdéle na 3 roky. Matrika za registraci dodatku neúčtuje.","PŘ čl. 6.2, 6.5, 6.6, 6.7","rad","Průvodce se na dodatek neptá kategorií U15 a mladších. Od U17 ano (hráč může během sezóny oslavit 17. narozeniny)."],
+  ["Start v jiné věkové kategorii","Hráč smí vedle své kategorie nastoupit i o jednu kategorii výš, o tom rozhoduje klub. Z vyšší kategorie do nižší hrát nesmí.","SŘ čl. 15.5, 5.3 e)","rad","Platí, pokud soutěžní dokumenty nestanoví jinak. Ty zatím nemáme. Průvodce to neřeší, týká se to startu v soutěžích, ne změny klubu."],
+  ["Start v jiné věkové kategorii","O dvě kategorie výš jen v regionálních soutěžích a s povolením řídícího orgánu soutěže (žádost klubu, zpráva lékaře, souhlas rodičů).","SŘ čl. 5.4","rad"],
+  ["Start v jiné věkové kategorii","Hráčky smějí startovat v mužských kategoriích kromě nejvyšších celostátních soutěží, zpravidla ve věkově odpovídající kategorii.","SŘ čl. 5.5 a), b)","rad"],
+  ["Start v jiné věkové kategorii","Když klub nemá družstvo kategorie starších žákyň, dorostenek nebo juniorek, smějí tyto hráčky hrát v regionální soutěži za jiný klub bez přestupu. Jen za jeden klub v ročníku.","SŘ čl. 15.4 b) až d)","rad"],
   ["Mimo rozsah","Mezinárodní přestupy průvodce neřeší.","PŘ čl. 7","rad"]
 ];
 $("s-rules").innerHTML = `<h2>Pravidla podle možností</h2>` + table(["Oblast","Pravidlo","Zdroj","Typ"], R.map(([o,t,src,k,note]) => [
@@ -202,7 +206,7 @@ const O = [
   ["Hostování při hostování","Průvodce říká „Teď ne“ (dvě hostování najednou nejdou). Řád to výslovně neříká."],
   ["Členem ČF déle než 1 rok","Podmínka u změny oddílové příslušnosti je výklad ČF, v řádech není."],
   ["Názvy lig","„Divize“ a „Regionální liga mužů“ jsme zvolili podle zadání. Ověřit oficiální názvy."],
-  ["Start v jiné věkové kategorii","Podle informací ČF umožňuje Soutěžní řád za určitých podmínek start v jiné věkové kategorii. Průvodce předpokládá, že hráč hraje ve své kategorii. Není vyřešen ani případ dívky hrající v chlapecké soutěži (u střídavého hostování se ptáme na chlapeckou nebo dívčí kategorii). Je potřeba rozhodnout, jak to v průvodci zachytit."],
+  ["Start v jiné věkové kategorii","Pravidla jsou zatím jen krátce v tabulce pravidel (SŘ čl. 5.4, 5.5, 15.4, 15.5), průvodce je neřeší a předpokládá, že hráč hraje ve své kategorii. Nejasné zůstává, jestli soutěžní dokumenty (směrnice, propozice) nejsou přísnější, a který žebříček lig má u střídavého hostování platit pro dívku hrající v chlapecké kategorii (ptáme se na chlapeckou nebo dívčí kategorii)."],
   ["Ověření výkladů matrikou","Všechna pravidla označená „Upřesnění ČF“ a „Předpoklad“ má projít matrika ČF a potvrdit je, nejlépe s datem a jménem toho, kdo je potvrdil. Zejména střídavé hostování 19–21 let, družstva klubu jen ve vlastní kategorii, názvy lig, ukončení hostování po 30 dnech od začátku a hostování, když už hráč hostuje.","ukol"],
   ["Postup na novou sezónu","Sepsat krátký roční postup: kontrola nové Edice řádů, poplatků, termínů, ročníků a odkazů, aktualizace data a času stavu dat, spuštění testů, kdo změny schvaluje. Dosud je jen v hlavě a v souboru CLAUDE.md pro vývoj.","ukol"],
   ["Kontakt na správce","Na webu není uvedeno, komu hlásit chybu nebo nejasnost. Je potřeba určit e-mail nebo odkaz a umístit ho do patičky průvodce i na tuto stránku.","ukol"],

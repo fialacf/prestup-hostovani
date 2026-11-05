@@ -116,6 +116,6 @@ Spuštění před každým nahráním (z kořene repozitáře): `node tests/suit
 - Ročníky narození se počítají z věku dovršeného v kalendářním roce začátku sezóny a dnes se přepínají 1. 7.
   Žádosti na novou sezónu se ale podávají od 1. 5., přechod mezi sezónami není vyřešen a návrh je přepnout vždy k 1. 5.
 - Přestupní období: 1. 7. – 31. 1. (dorost, junioři, dospělí) a 1. 7. – 31. 3. (starší žáci a mladší).
-- Mimo rozsah: mezinárodní přestupy. Odloženo: obnova po zrušení klubem a opakovaný přestup.
+- Mimo rozsah: mezinárodní přestupy a start v jiné věkové kategorii (zadavatelka chce zatím jen krátké zmínky v Podkladech, průvodce je neřeší). Odloženo: obnova po zrušení klubem a opakovaný přestup.
 - Úplný seznam otevřených bodů a úkolů je na stránce Podklady a pravidla (pole `O` v `podklady.html`). Při práci
   na nich ho aktualizuj.
