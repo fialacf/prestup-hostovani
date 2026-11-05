@@ -90,11 +90,11 @@ Spuštění před každým nahráním (z kořene repozitáře): `node tests/suit
   (ne elektronická) a řeší se e-mailem na matrika@ceskyflorbal.cz. Podmínky zůstávají, včetně „člen ČF déle než
   1 rok“ (výklad: rok neaktivity). Otázka na novou registraci za poslední 3 měsíce je přeformulovaná, aby se
   nepletla s přestupem.
-- Když se mateřský klub do 14 dnů nevyjádří, nic se neděje automaticky: hráč to aktivně řeší s matrikou před
-  vypršením lhůty a matrika může žádost posoudit, jako by klub souhlasil. Přestup se schválí i přes nesouhlas klubu,
+- Když se mateřský klub do 14 dnů nevyjádří (zadavatelka potvrdila, že „lhůta“ je těch 14 dnů), nic se neděje
+  automaticky: hráč to aktivně řeší s matrikou před vypršením lhůty a matrika může žádost posoudit, jako by klub souhlasil. Přestup se schválí i přes nesouhlas klubu,
   pokud je hráč členem ČF nejvýš 12 měsíců, nebo mu není 12 let.
 - Zrušení členství není způsob, jak změnit klub. Obnoví-li hráč členství do roka od posledního zápasu, vrátí se do
-  původního klubu. Obnovuje se přihláškou ve FISu. Členský příspěvek 200 Kč na sezónu platí hráč ve FISu, nebo přes klub.
+  původního klubu. Obnovuje se přihlášením ve FISu. Členský příspěvek 200 Kč na sezónu platí hráč ve FISu, nebo přes klub.
 - Evidenční dodatek lze uzavřít jen s hráčem starším 16 let, proto se na něj ptáme až od U17.
 - Hráč bez klubu: zůstává, jak je. Otázky na důvod a datum ztráty klubu zadavatelka zatím odložila.
 - Nový hráč: odkaz na hledání klubu podle věku (do U15 mickoni.cz, od U17 ceskyflorbal.cz/hraj).

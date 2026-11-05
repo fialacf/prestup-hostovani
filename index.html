@@ -36,7 +36,7 @@
 /* Konfigurace (kategorie, termíny, poplatky, žebříčky soutěží, odkazy) je v config.js, stejná data používá i stránka podklady.html. */
 
 const OPTIONS = [
-  {id:"prihlaska", code:"Členství", name:"Obnovení členství", what:"Zrušené členství v Českém florbalu si obnovíš přes přihlášku ve FISu (Florbalový informační systém). Pokud členství obnovíš do roka od posledního zápasu, vrátíš se do původního klubu. Zrušení členství tedy není způsob, jak změnit klub.", goal:["trvale"]},
+  {id:"prihlaska", code:"Členství", name:"Obnovení členství", what:"Zrušené členství v Českém florbalu si obnovíš přihlášením ve FISu (Florbalový informační systém). Pokud členství obnovíš do roka od posledního zápasu, vrátíš se do původního klubu. Zrušení členství tedy není způsob, jak změnit klub.", goal:["trvale"]},
   {id:"zop", code:"Bez přestupu", name:"Změna oddílové příslušnosti", what:`Přihlásíš se do nového klubu bez přestupu a zdarma. Jde to, když nemáš žádný klub, nebo když jsi rok nehrál(a). Žádost je papírová (ne elektronická) a řeší se e-mailem na ${CONFIG.matrikaEmail}.`, goal:["trvale"]},
   {id:"prestup", code:"Natrvalo", name:"Přestup", what:"Přejdeš do nového klubu natrvalo. Z mateřského oddílu tě vyřadí k datu přestupu.", goal:["trvale"]},
   {id:"host", code:"Dočasně", name:"Hostování", what:"Dočasně budeš hrát za jiný klub, nejdéle do konce sezóny 30. 6. Pak se vracíš.", goal:["docasne"]},
@@ -215,11 +215,11 @@ function evaluate(){
   const zopSubmit = `Žádost o změnu oddílové příslušnosti je papírová, nejde ji podat elektronicky. Řeš ji e-mailem na ${matrika}.`;
   if (A.state!=="bez") set("prihlaska","no","Kdykoliv v roce","Týká se jen hráčů bez klubu, kteří už nejsou členy ČF.");
   else if (A.memberNow==="ne") set("prihlaska","yes","Kdykoliv v roce","",[`Vyplň ${fisApply}. Po zadání rodného čísla se ti předvyplní členské číslo. (Pokud máš přístup, můžeš se taky rovnou ${fisLogin}.)`,`Zaplať členský příspěvek ${CONFIG.membershipFee} Kč na sezónu. Můžeš ho zaplatit přímo ve FISu, nebo přes klub.`,"Pokud členství obnovíš do roka od posledního zápasu, obnoví se ti do původního klubu. Zrušení členství tedy není způsob, jak změnit klub.",`Do jiného klubu se dostaneš až po roce bez zápasu, a to přes změnu oddílové příslušnosti. Nový klub najdeš na ${clubLink}. ${zopSubmit}`]);
-  else if (A.memberNow==="nevim") set("prihlaska","maybe","Kdykoliv v roce","Pokud jsi členství zrušil(a), nejdřív si ho obnov přes přihlášku ve FISu. Zrušení členství není způsob, jak změnit klub.",[`Zkus se ${fisLogin} a zkontroluj, jestli máš aktivní členství.`,`Pokud ho nemáš, vyplň ${fisApply}. Po zadání rodného čísla se ti předvyplní členské číslo.`]);
+  else if (A.memberNow==="nevim") set("prihlaska","maybe","Kdykoliv v roce","Pokud jsi členství zrušil(a), nejdřív si ho obnov přihlášením ve FISu. Zrušení členství není způsob, jak změnit klub.",[`Zkus se ${fisLogin} a zkontroluj, jestli máš aktivní členství.`,`Pokud ho nemáš, vyplň ${fisApply}. Po zadání rodného čísla se ti předvyplní členské číslo.`]);
   else set("prihlaska","no","Kdykoliv v roce","Jsi pořád členem ČF, stačí ti změna oddílové příslušnosti.");
 
   if (A.state==="bez") {
-    if (A.memberNow==="ne") set("zop","no","Kdykoliv v roce","Nejdřív si obnov členství přes přihlášku ve FISu. Obnovíš-li ho do roka od posledního zápasu, vrátíš se do původního klubu.");
+    if (A.memberNow==="ne") set("zop","no","Kdykoliv v roce","Nejdřív si obnov členství přihlášením ve FISu. Obnovíš-li ho do roka od posledního zápasu, vrátíš se do původního klubu.");
     else if (A.zop3m==="ano") set("zop","no","Kdykoliv v roce","Od poslední nové registrace v klubu (obnovy oddílové příslušnosti) musí uběhnout alespoň 3 měsíce.");
     else if (A.zop3m==="nevim" || A.memberNow==="nevim") set("zop","maybe","Kdykoliv v roce", A.memberNow==="nevim" ? "Ověř, jestli jsi pořád členem ČF." : "Ověř, jestli ses v posledních 3 měsících znovu nezaregistroval(a) do klubu po zrušení příslušnosti.");
     else set("zop","yes","Kdykoliv v roce","",["Vyber si nový klub a domluv se s ním.",zopSubmit]);
@@ -251,7 +251,7 @@ function evaluate(){
   const unsureT = A.recent==="nevim" ? "Ověř, jestli jsi neměl(a) přestup v posledních 3 měsících." : "";
   // Vyjádření mateřského klubu (čl. 2.2, 3.3, 4.7, 5.5) a odstupné (čl. 14)
   const ASK = ["Požádej mateřský klub o vyjádření. Má na něj 14 dnů.","Když se klub nevyjádří, nic se neděje automaticky. Řeš to aktivně s matrikou ČF před vypršením lhůty. Matrika může žádost posoudit, jako by klub souhlasil."];
-  const ODST = "Odstupné mezi kluby se řeší dohodou, platí ho nový klub. Ty neplatíš.";
+  const ODST = "Odstupné se řeší dohodou. Může ho zaplatit klub, nebo ty, záleží na dohodě.";
   const hEnd = hostEndInfo();
   const endHint = hEnd ? ` Hostování jde ukončit nejdříve ${fmt(hEnd.earliest)}, protože musí trvat minimálně 30 dnů od začátku.` : "";
   const prestupSteps = [...ASK,"Žádost se podává v informačním systému ČF, datum přestupu musí být v přestupním období.",ODST,`Uhraď poplatek ${fee("prestup")}.`];
@@ -574,7 +574,7 @@ function noOptionNotice(R, sorted, isMatch){
 }
 // Co hráč chtěl (krátce, do nadpisu a upozornění)
 function goalPhrase(){
-  return {trvale: A.state==="bez" ? "Přihlásit se do nového klubu" : "Změnit klub natrvalo", docasne:"Hrát dočasně za jiný klub", dva:"Hrát za dva kluby zároveň",
+  return {trvale: A.state==="bez" ? "Přihlásit se do nového klubu" : "Změnit natrvalo klub", docasne:"Hrát dočasně za jiný klub", dva:"Hrát za dva kluby zároveň",
     ukoncit: A.state==="stst" ? "Ukončit střídavý start" : "Ukončit hostování"}[A.goal] || "";
 }
 // Karta jiné možnosti, než jakou hráč chtěl: stručně, v čem se liší
@@ -669,7 +669,7 @@ function renderAll(){
   const REQ = "Žádost lze podat od 1. 5. do konce přestupního období. Datum OD musí být v přestupním období.";
   const CLUB14 = "Mateřský klub se má vyjádřit do 14 dnů. Když se nevyjádří, nic se neděje automaticky. Řeš to s matrikou ČF před vypršením lhůty.";
   const DODATEK = "S evidenčním dodatkem (smlouvou) jde jen se souhlasem klubu. Smlouvu lze uzavřít jen s hráčem starším 16 let.";
-  const ODSTUPNE = "Odstupné mezi kluby se řeší dohodou, platí ho nový klub. Hráč neplatí.";
+  const ODSTUPNE = "Odstupné se řeší dohodou. Může ho zaplatit klub, nebo hráč, záleží na dohodě.";
   const groups = [
     ["Změna klubu", [
       {id:"zop", short:"Nový klub bez přestupu a zdarma.", kdy:"Kdykoliv v roce. Nejdříve 3 měsíce od poslední nové registrace v klubu (obnovy oddílové příslušnosti).", pod:["Nemáš žádný klub, nebo jsi členem ČF déle než 1 rok, rok jsi nehrál(a) a nemáš evidenční dodatek.","Evidenční dodatek lze uzavřít jen s hráčem starším 16 let, mladší hráči ho mít nemohou.","Nejde během hostování, střídavého startu ani střídavého hostování.","Při obnově po zrušení registrace klubem do 6 měsíců se platí přestupní poplatek (RegŘ čl. 5.2)."]},
@@ -687,7 +687,7 @@ function renderAll(){
       {id:"endStst", short:"Předčasně ukončíš střídavý start.", kdy:"Nejpozději 31. 1.", pod:["Ukončuje se dohodou obou klubů a hráče. Tehdy se platí poplatek.","Zdarma zaniká sám při přestupu nebo když hráč v základní části soutěže nenastoupí aspoň k 30 % utkání družstva."]}
     ]],
     ["Členství", [
-      {id:"prihlaska", short:"Obnovíš zrušené členství v ČF.", kdy:"Kdykoliv v roce, přes přihlášku ve FISu.", pod:["Máš zrušené členství v ČF.","Obnovíš-li ho do roka od posledního zápasu, vrátíš se do původního klubu. Zrušení členství není způsob, jak změnit klub.",`Členský příspěvek ${CONFIG.membershipFee} Kč na sezónu se platí ve FISu, nebo přes klub.`]}
+      {id:"prihlaska", short:"Obnovíš zrušené členství v ČF.", kdy:"Kdykoliv v roce, přihlášením ve FISu.", pod:["Máš zrušené členství v ČF.","Obnovíš-li ho do roka od posledního zápasu, vrátíš se do původního klubu. Zrušení členství není způsob, jak změnit klub.",`Členský příspěvek ${CONFIG.membershipFee} Kč na sezónu se platí ve FISu, nebo přes klub.`]}
     ]]
   ];
   const keep = new Set([...document.querySelectorAll("#all details.acc[open]")].map(d => d.dataset.id));

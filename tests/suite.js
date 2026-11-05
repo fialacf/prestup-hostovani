@@ -263,7 +263,7 @@ await S('21', async () => {
   ok('Přestup: přes nesouhlas klubu (12 měsíců / 12 let)', /12 měsíců/.test(pr) && /12 let/.test(pr));
   ok('Přestup: dodatek jen od 16 let', /starším 16 let/.test(pr));
   ok('Přestup: hostující jen do klubu, kde hostuje', /kde hostuje/.test(pr));
-  ok('Přestup: odstupné platí nový klub', /platí ho nový klub/.test(pr));
+  ok('Přestup: odstupné platí klub, nebo hráč, podle dohody', /Může ho zaplatit klub, nebo hráč, záleží na dohodě/.test(pr) && !/platí ho nový klub/.test(pr));
   const zp = await body('zop'); ok('ZOP: dodatek mladší hráči nemohou', /mladší hráči ho mít nemohou/.test(zp)); ok('ZOP: nejde při hostování', /Nejde během hostování/.test(zp)); ok('ZOP: výjimka RegŘ 5.2', /RegŘ čl\. 5\.2/.test(zp));
   const ho = await body('host'); ok('Hostování: jedno najednou, 14 dnů, dodatek', /Jen jedno hostování najednou/.test(ho) && /14 dnů/.test(ho) && /starším 16 let/.test(ho));
   ok('Hostování: končí nejpozději 30. 6.', /končí nejpozději 30\. 6\./.test(ho) && !/samo/.test(ho));
@@ -349,6 +349,10 @@ await S('24', async () => {
   eq('situace: nápověda střídavý start', await help('dospeli21', 'stst'), 'Hraju za A-družstvo svého klubu a zároveň za A-družstvo jiného klubu, které hraje o 1–2 ligy níž.');
   eq('situace: nápověda střídavé hostování', await help('dorost', 'sth'), 'Hraju za svůj klub a zároveň za jedno družstvo jiného klubu v celostátní soutěži. Třeba dorostenec, který vypomáhá ve vyšší soutěži.');
   eq('situace: střídavý start jen pro 19–21', await (async () => { const p = await open(); await p.click('button[data-v=dorost]'); const n = await p.locator('#wizard button[data-v=stst]').count(); await p.close(); return n; })(), 0);
+  // název cíle ve výsledcích je stejný jako název volby
+  { const p = await open(); await p.click('button[data-v=dorost]'); await p.click('button[data-v=oddil]');
+    eq('cíl natrvalo: stejný název ve výsledcích i ve volbě', await p.evaluate(() => { A.state = 'oddil'; A.goal = 'trvale'; return goalPhrase(); }), 'Změnit natrvalo klub');
+    eq('cíl bez klubu: název beze změny', await p.evaluate(() => { A.state = 'bez'; return goalPhrase(); }), 'Přihlásit se do nového klubu'); await p.close(); }
 });
 
 ok('žádné chyby v konzoli',consoleErrs.length===0,consoleErrs.slice(0,3));ok('žádné výjimky stránky',pageErrs.length===0,pageErrs.slice(0,3));
