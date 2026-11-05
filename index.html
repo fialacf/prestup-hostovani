@@ -111,6 +111,14 @@ const cat = () => CONFIG.categories.find(c => c.id === A.cat);
 const ststAge = () => A.cat === "dospeli21";
 // střídavé hostování: od starších žáků po první tři sezóny v dospělých
 const sthAge = () => ["starsi","dorost","junior"].includes(A.cat) || ststAge();
+// Vysvětlení u cíle „Změnit natrvalo klub“: čekací doba po přestupu (PŘ čl. 1.4 c) a co se jí netýká.
+// Střídavé hostování a střídavý start nabízíme jen kategoriím, které je podle řádu mohou využít.
+const afterMoveText = () => "Po přestupu nemůžeš 3 měsíce znovu přestoupit ani hostovat." +
+  (ststAge() ? " Pokud to půjde, můžeš využít střídavé hostování nebo střídavý start."
+   : sthAge() ? " Pokud to půjde, můžeš využít střídavé hostování." : "");
+// Nejzazší datum DO hostování (PŘ čl. 3.2: 30. 6.). Žádosti na novou sezónu se podávají od 1. 5., takže mimo
+// přestupní období bereme 30. 6. příští sezóny, stejně jako výsledek.
+const hostMaxDate = () => { const g = cat().group, s = season(todayIso(), g); return fmt(season(iso(s.d > s.end ? s.next : s.d), g).seasonEnd); };
 
 // otázky ke změně oddílové příslušnosti (bez přestupu); obě skupiny s „3 měsíci“ se ptají v jednom kroku, aby se nepletly
 // Evidenční dodatek lze uzavřít jen s hráčem starším 16 let (PŘ čl. 6.5), proto se na něj ptáme až od U17.
@@ -133,8 +141,8 @@ const STEPS = [
       const NO_CLUB = "Bez klubu to nejde. Nejdřív se musíš přihlásit do nového klubu.";
       const lockDva = {hostuji:"Dokud hostuješ, nejde hrát za dva kluby. Nejdřív ukonči hostování.", stst:"Střídavý start už máš.", sth:"Střídavé hostování už máš."}[A.state];
       const o = [
-        bez ? ["trvale","Přihlásit se do nového klubu","Přes změnu oddílové příslušnosti."] : ["trvale","Změnit natrvalo klub",""],
-        ["docasne","Hrát dočasně za jiný klub","Třeba na půl sezóny.", bez ? NO_CLUB : A.state==="stst" ? "Po dobu střídavého startu nejde hostovat." : ""],
+        bez ? ["trvale","Přihlásit se do nového klubu","Přes změnu oddílové příslušnosti."] : ["trvale","Změnit natrvalo klub",afterMoveText()],
+        ["docasne","Hrát dočasně za jiný klub",`Třeba na půl sezóny. Nejméně 30 dnů, nejdéle do ${hostMaxDate()}.`, bez ? NO_CLUB : A.state==="stst" ? "Po dobu střídavého startu nejde hostovat." : ""],
         ["dva","Hrát za dva kluby zároveň","", bez ? NO_CLUB : lockDva || (!sthAge() ? "Za dva kluby můžou hrát jen kategorie od U15 starších žáků po muže a ženy 19–21 let." : "")]
       ];
       if (["hostuji","stst"].includes(A.state)) o.push(["ukoncit", A.state==="hostuji" ? "Ukončit hostování" : "Ukončit střídavý start",""]);
