@@ -87,8 +87,10 @@ Spuštění před každým nahráním (z kořene repozitáře): `node tests/suit
 - Hostování musí trvat minimálně 30 dnů a nejde ukončit dřív než 30 dnů od jeho **začátku**. Je to vědomá odchylka
   od PŘ čl. 3.5 (ten mluví o schválení). Jedno hostování najednou: chce-li hráč hostovat jinde, nejdřív ukončí
   současné a pak (je-li přestupní období) podá nové. Hostující hráč může přestoupit jen do klubu, kde hostuje.
-- Změna oddílové příslušnosti nejde během hostování, střídavého startu ani střídavého hostování. Žádost je papírová
-  (ne elektronická) a řeší se e-mailem na matrika@ceskyflorbal.cz. Podmínky zůstávají, včetně „člen ČF déle než
+- Změna oddílové příslušnosti nejde během hostování, střídavého startu ani střídavého hostování. Žádost „Změna oddílové
+  příslušnosti“ se podává elektronicky ve FISu a systém sám zruší i obnoví příslušnost, hráč to nemusí řešit zvlášť.
+  Papírově se řeší jen výjimečné případy (zrušení oddílové příslušnosti, obnova v původním klubu nebo po zrušení
+  klubem). Průvodce papírové žádosti nenabízí a k nim nenavádí (rozhodnutí zadavatelky). Podmínky zůstávají, včetně „člen ČF déle než
   1 rok“ (výklad: rok neaktivity). Otázka na novou registraci za poslední 3 měsíce je přeformulovaná, aby se
   nepletla s přestupem.
 - Když se mateřský klub do 14 dnů nevyjádří (zadavatelka potvrdila, že „lhůta“ je těch 14 dnů), nic se neděje

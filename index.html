@@ -37,7 +37,7 @@
 
 const OPTIONS = [
   {id:"prihlaska", code:"Členství", name:"Obnovení členství", what:"Zrušené členství v Českém florbalu si obnovíš přihlášením ve FISu (Florbalový informační systém). Pokud členství obnovíš do roka od posledního zápasu, vrátíš se do původního klubu. Zrušení členství tedy není způsob, jak změnit klub.", goal:["trvale"]},
-  {id:"zop", code:"Bez přestupu", name:"Změna oddílové příslušnosti", what:`Přihlásíš se do nového klubu bez přestupu a zdarma. Jde to, když nemáš žádný klub, nebo když jsi rok nehrál(a). Žádost je papírová (ne elektronická) a řeší se e-mailem na ${CONFIG.matrikaEmail}.`, goal:["trvale"]},
+  {id:"zop", code:"Bez přestupu", name:"Změna oddílové příslušnosti", what:`Přihlásíš se do nového klubu bez přestupu a zdarma. Jde to, když nemáš žádný klub, nebo když jsi rok nehrál(a). Žádost podáš elektronicky ve FISu.`, goal:["trvale"]},
   {id:"prestup", code:"Natrvalo", name:"Přestup", what:"Přejdeš do nového klubu natrvalo. Z mateřského oddílu tě vyřadí k datu přestupu.", goal:["trvale"]},
   {id:"host", code:"Dočasně", name:"Hostování", what:"Dočasně budeš hrát za jiný klub, nejdéle do konce sezóny 30. 6. Pak se vracíš.", goal:["docasne"]},
   {id:"stst", code:"Dva kluby", name:"Střídavý start", what:"Budeš hrát za A-družstvo svého klubu i za A-družstvo druhého klubu v nižší soutěži.", goal:["dva"]},
@@ -211,8 +211,7 @@ function evaluate(){
   const clubLink = link(findClub().url, findClub().label);
   const fisApply = link(CONFIG.fisApplicationUrl, "přihlášku ve FISu");
   const fisLogin = link(CONFIG.fisLoginUrl, "přihlásit do FISu");
-  const matrika = link("mailto:"+CONFIG.matrikaEmail, CONFIG.matrikaEmail);
-  const zopSubmit = `Žádost o změnu oddílové příslušnosti je papírová, nejde ji podat elektronicky. Řeš ji e-mailem na ${matrika}.`;
+  const zopSubmit = `Podej ve FISu elektronickou žádost „Změna oddílové příslušnosti“ (${link(CONFIG.fisLoginUrl, "přihlášení do FISu")}). Zrušení i obnovu oddílové příslušnosti udělá systém sám v rámci jedné žádosti, nemusíš je řešit zvlášť.`;
   if (A.state!=="bez") set("prihlaska","no","Kdykoliv v roce","Týká se jen hráčů bez klubu, kteří už nejsou členy ČF.");
   else if (A.memberNow==="ne") set("prihlaska","yes","Kdykoliv v roce","",[`Vyplň ${fisApply}. Po zadání rodného čísla se ti předvyplní členské číslo. (Pokud máš přístup, můžeš se taky rovnou ${fisLogin}.)`,`Zaplať členský příspěvek ${CONFIG.membershipFee} Kč na sezónu. Můžeš ho zaplatit přímo ve FISu, nebo přes klub.`,"Pokud členství obnovíš do roka od posledního zápasu, obnoví se ti do původního klubu. Zrušení členství tedy není způsob, jak změnit klub.",`Do jiného klubu se dostaneš až po roce bez zápasu, a to přes změnu oddílové příslušnosti. Nový klub najdeš na ${clubLink}. ${zopSubmit}`]);
   else if (A.memberNow==="nevim") set("prihlaska","maybe","Kdykoliv v roce","Pokud jsi členství zrušil(a), nejdřív si ho obnov přihlášením ve FISu. Zrušení členství není způsob, jak změnit klub.",[`Zkus se ${fisLogin} a zkontroluj, jestli máš aktivní členství.`,`Pokud ho nemáš, vyplň ${fisApply}. Po zadání rodného čísla se ti předvyplní členské číslo.`]);

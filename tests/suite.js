@@ -353,6 +353,12 @@ await S('24', async () => {
   { const p = await open(); await p.click('button[data-v=dorost]'); await p.click('button[data-v=oddil]');
     eq('cíl natrvalo: stejný název ve výsledcích i ve volbě', await p.evaluate(() => { A.state = 'oddil'; A.goal = 'trvale'; return goalPhrase(); }), 'Změnit natrvalo klub');
     eq('cíl bez klubu: název beze změny', await p.evaluate(() => { A.state = 'bez'; return goalPhrase(); }), 'Přihlásit se do nového klubu'); await p.close(); }
+  // změna oddílové příslušnosti je elektronická ve FISu, průvodce nenavádí k papírovým žádostem
+  { const p = await flow({cat: 'dospeli', state: 'bez', goal: 'trvale', memberNow: 'ano', zop3m: 'ne'});
+    const rt = await p.textContent('body'); ok('změna příslušnosti: elektronicky ve FISu', /elektronickou žádost „Změna oddílové příslušnosti“/.test(rt), rt.slice(0, 80));
+    ok('změna příslušnosti: bez papírové žádosti a e-mailu matriky', !/papírov/.test(rt) && !/mailto:matrika/.test(await p.innerHTML('body'))); 
+    await p.click('#tab-all'); const at = await p.textContent('#all');
+    ok('všechny možnosti: změna příslušnosti elektronicky', /Žádost podáš elektronicky ve FISu/.test(at) && !/papírov/.test(at)); await p.close(); }
 });
 
 // ---------- 25) podklady: krátké zmínky o startu v jiné věkové kategorii ----------

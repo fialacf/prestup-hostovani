@@ -1,6 +1,6 @@
 /* ===== Konfigurace: vše, co se mění se sezónou ===== */
 const CONFIG = {
-  dataUpdated: "2026-11-05 21:02", // datum a čas (pražský) poslední úpravy dat a pravidel, zobrazuje se na stránce Podklady
+  dataUpdated: "2026-11-05 21:07", // datum a čas (pražský) poslední úpravy dat a pravidel, zobrazuje se na stránce Podklady
   dateMin: "2020-01-01", dateMax: "2035-12-31", // rozsah data, které lze v průvodci zadat
   categories: [
     // minAge/maxAge = věk dovršený v kalendářním roce, kdy sezóna začíná; z toho se počítají ročníky narození
@@ -49,7 +49,7 @@ const CONFIG = {
   },
   // Evidenční dodatek: smlouvu lze uzavřít jen s hráčem starším 16 let (PŘ čl. 6.5). Od jaké kategorie (minimální věk v kategorii) se na něj ptáme: U17 dorost a starší.
   dodatekFromCategoryAge: 15,
-  matrikaEmail: "matrika@ceskyflorbal.cz", // zrušení a obnova oddílové příslušnosti se řeší papírovou žádostí přes matriku
+  matrikaEmail: "matrika@ceskyflorbal.cz", // dotazy hráčů; papírové zrušení a obnova oddílové příslušnosti jsou jen výjimečné a průvodce k nim nenavádí
   membershipFee: 200, // členský příspěvek ČF za sezónu (Kč)
   fisLoginUrl: "https://login.ceskyflorbal.cz/osoba/",
   fisApplicationUrl: "https://fis.ceskyflorbal.cz/index.php?pageid=2599&onlycontent=1" // přihláška; po zadání RČ předvyplní členské číslo
