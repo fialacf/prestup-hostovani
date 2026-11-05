@@ -13,6 +13,7 @@ Statická stránka bez sestavování:
 - `config.js` – kategorie, termíny, poplatky, žebříčky soutěží a odkazy,
 - `style.css` – společný vzhled.
 - `tests/` – testy průvodce (Playwright), spuštění viz níže,
+- `rady/` – Přestupní a Registrační řád (Edice 2026) jako PDF a text, zdroj pravidel,
 - `CLAUDE.md` – popis projektu a pravidla práce pro Claude Code.
 
 ## Úpravy pro novou sezónu

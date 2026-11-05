@@ -2,9 +2,19 @@
 
 Statický web, který hráči a rodičům řekne, jakou možnost změny klubu mají (přestup, hostování, střídavý start,
 střídavé hostování, změna oddílové příslušnosti), kolik stojí a co udělat dál. Pravidla vycházejí z Přestupního (PŘ),
-Registračního (RegŘ) a Soutěžního řádu (SŘ) ČF, Edice 2026, platné od 1. 7. 2026. Řády jsou PDF, která dodává
-zadavatelka, v repozitáři nejsou. Web běží na GitHub Pages: https://fialacf.github.io/prestup-hostovani/
+Registračního (RegŘ) a Soutěžního řádu (SŘ) ČF, Edice 2026, platné od 1. 7. 2026. Řády jsou ve složce `rady/`
+(viz níže). Web běží na GitHub Pages: https://fialacf.github.io/prestup-hostovani/
 (repozitář `fialacf/prestup-hostovani`, větev `main`). Repozitář je veřejný, nepiš do něj osobní údaje.
+
+## Řády (zdroj pravidel)
+Složka `rady/` obsahuje řády ČF, Edice 2026, jako PDF a vedle nich textovou verzi (`pdftotext -layout`), kterou jde
+prohledávat příkazem `grep`:
+- `rady/Prestupni-rad-2026.pdf` a `.txt` – Přestupní řád (PŘ),
+- `rady/Registracni-rad-2026.pdf` a `.txt` – Registrační řád (RegŘ).
+Soutěžní řád (SŘ) zatím v repozitáři není, požádej o něj zadavatelku. Před každou změnou pravidla otevři příslušný
+článek v `.txt` (u sporného místa i v PDF, kde je přesné znění) a cituj ho jen tak, jak skutečně stojí. Když zadavatelka
+nahraje novou edici, nahraď soubory (název s ročníkem edice), znovu vytvoř `.txt` a projdi pravidla na stránce Podklady.
+Řády jsou veřejné dokumenty ČF, repozitář je veřejný a stránka je tak jako soubory dostupná na GitHub Pages.
 
 ## Technologie
 Čisté HTML, CSS a JavaScript bez sestavování a bez závislostí. Písma z Google Fonts. Testy používají Playwright
@@ -31,7 +41,7 @@ zadavatelka, v repozitáři nejsou. Web běží na GitHub Pages: https://fialacf
    Výjimka: zadavatelka sama přesně zadá, co mám udělat.
 2. **Nevymýšlej pravidla.** Každé pravidlo má zdroj: „Z řádu“ (číslo článku), „Upřesnění ČF“ (od zadavatelky,
    v řádu není nebo je to výklad) nebo „Předpoklad“. Štítek „Z řádu“ dej jen tomu, co v článku skutečně stojí,
-   a ověř to proti PDF. Když si nejsi jistý, zeptej se.
+   a ověř to proti řádu ve složce `rady/`. Když si nejsi jistý, zeptej se.
 3. **Změna pravidla nebo textu = ve stejné změně upravit všechna místa:** `config.js` / `evaluate()`, stránku
    `podklady.html` (pole `R`, `B`, `O`), záložku Všechny možnosti (`renderAll()` v `index.html`) a `dataUpdated`
    v `config.js` (tvar `RRRR-MM-DD HH:MM`, pražský čas, čas skutečné změny).
@@ -42,7 +52,7 @@ zadavatelka, v repozitáři nejsou. Web běží na GitHub Pages: https://fialacf
    změně textu, uprav test, ne obráceně. Nová funkce nebo oprava chyby = nový test.
 5. Hotové změny nahraj na `main`. Pull request jen na výslovné přání.
 6. Do repozitáře nepatří screenshoty, výstupy testů ani pomocné soubory. **Výjimka: složka `tests/`**, kde jsou
-   povolené testovací skripty a jejich `package.json`. Dočasné soubory ukládej mimo repozitář (`.gitignore`
+   povolené testovací skripty a jejich `package.json`, a složka `rady/` s řády. Dočasné soubory ukládej mimo repozitář (`.gitignore`
    blokuje `*.png` a `node_modules`).
 7. Jména z řádu a od zadavatelky se nepřejmenovávají (například „Změna oddílové příslušnosti“, „Divize“).
 
@@ -99,7 +109,7 @@ Spuštění před každým nahráním (z kořene repozitáře): `node tests/suit
 - Nikdy netvrď, že je změna vidět na `fialacf.github.io`: z cloudové relace ta doména není dostupná. Po nahrání ji
   upozorni, že má stránku obnovit natvrdo (Ctrl+F5).
 - Snímky obrazovky od zadavatelky bývají z telefonu a často v tmavém režimu. Kontroluj mobil i tmavý režim.
-- Větší revizi dělej s nezávislým přečtením kódu a porovnáním pravidel s PDF řády, ne jen vlastním pohledem.
+- Větší revizi dělej s nezávislým přečtením kódu a porovnáním pravidel s řády ve složce `rady/`, ne jen vlastním pohledem.
 
 ## Co vědět a co zbývá
 - Ročníky narození se počítají z věku dovršeného v kalendářním roce začátku sezóny a dnes se přepínají 1. 7.

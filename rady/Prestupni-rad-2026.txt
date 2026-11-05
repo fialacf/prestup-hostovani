@@ -1,0 +1,441 @@
+Přestupní řád Českého florbalu
+Obsah
+článek 1            Základní ustanovení                                                              1
+článek 2            Přestup                                                                          2
+článek 3            Hostování                                                                        2
+článek 4            Střídavé hostování (STH)                                                         3
+článek 5            Střídavý start (STST)                                                            4
+článek 6            Zamezení možnosti přestupu či hostování hráče                                    5
+článek 7            Mezinárodní přestup                                                              5
+článek 8            Rozhodování o přestupu                                                           6
+článek 9            Rozhodování o hostování                                                          6
+článek 10           Rozhodování o střídavém hostování                                                7
+článek 11           Rozhodování o střídavém startu                                                   7
+článek 12           Oznamování rozhodnutí                                                            7
+článek 13           Odvolání                                                                         8
+článek 14           Odstupné                                                                         8
+článek 15           Společná a závěrečná ustanovení                                                  9
+                                                  článek 1
+                                             Základní ustanovení
+1.1.
+PŘ stanovuje podmínky, za nichž se uskutečňují změny oddílové příslušnosti (přestup, hostování,
+předčasné ukončení hostování), střídavé hostování, střídavý start a předčasné ukončení střídavého
+startu všech hráčů v přestupním období. Jedná se o hráče, kteří s mateřským oddílem buď mají
+uzavřenou evidovanou smlouvu, nebo jejich vztah k oddílu není nijak smluvně upraven.
+1.2.
+Účastníky řízení o změně oddílové příslušnosti, střídavém hostování a střídavém startu jsou:
+  a) hráč;
+  b) oddíl, v němž má hráč oddílovou příslušnost (dále jen "mateřský oddíl");
+  c) oddíl, do něhož hráč hlásí přestup nebo hostování (dále jen "nový oddíl");
+  d) oddíl družstva pro střídavé hostování či střídavý start.
+1.3.
+O změnách oddílové příslušnosti a střídavém hostování, střídavém startu a jeho předčasném ukončení
+rozhoduje MÚ.
+1.4. Přestupní období
+  a) Přestupní období je od 1. července do 31. března pro kategorie starších žáků či starších žákyň a
+      mladších kategorií a do 31. ledna pro ostatní kategorie, přičemž přestup, hostování, předčasné
+      ukončení hostování, střídavé hostování, střídavý start a předčasné ukončení střídavého startu je
+
+
+
+Přestupní řád Českého florbalu                          1                                      Edice 2026
+      možné podat od 1. května do 31. března pro kategorie starších žáků či starších žákyň a mladších
+      kategorií a do 31. ledna pro ostatní kategorie.
+  b) Opakovaný přestup (po čekací době) se podává kdykoliv při dodržení ustanovení bodu 8.3. písm.
+      b) PŘ.
+  c) Přestup a hostování nemůže hráč podat dříve, než uplyne od schválení jeho předešlého přestupu
+      doba 3 měsíce (registrační doba). Toto ustanovení se netýká střídavého hostování a střídavého
+      startu.
+  d) Přestup se považuje za podaný v přestupním období, pokud byl v přestupním období podán
+      návrh na zahájení arbitrážního řízení.
+  e) Datum platnosti přestupu, hostování, předčasného ukončení hostování, střídavého hostování,
+      střídavého startu a předčasného ukončení střídavého startu podaného na konci přestupního
+      období bude stanoveno datem schválení MÚ, přičemž musí být rozhodnuto do 14 dnů od konce
+      přestupního období.
+1.5. Žádosti
+Žádosti dle PŘ jsou elektronické a tištěné.
+  a) Elektronické žádosti se podávají prostřednictvím systému FIS.
+  b) Tištěné žádosti se podávají poštou, osobně, nebo jiným prokazatelným způsobem MÚ. Tištěné
+      žádosti lze využívat pouze v případě výpadku systému FIS.
+1.6.
+„Datum OD“ musí spadat do přestupního období dle bodu 1.4. PŘ, ve kterém jsou žádost o přestup,
+hostování, ukončení hostování, střídavé hostování, střídavý start nebo ukončení střídavého startu
+podávány.
+                                             článek 2
+                                             Přestup
+2.1.
+Za přestup se považuje trvalá změna oddílové příslušnosti. MÚ provede změnu záznamu ve FISu na
+základě splnění náležitostí k přestupu a přiřazení platby poplatku za přestup k hráči ve FISu.
+2.2. Náležitosti přestupu
+Hráč, který žádá o přestup, je povinen řádně vyplnit formulář „PŘESTUP“ se svými údaji, „datem OD“ a
+názvem a číslem mateřského a nového oddílu.
+Pokud hráč střídavě startuje, musí při podání PŘESTUPU informovat doložitelným způsobem (např.:
+elektronickou formou) oddíl, ve kterém střídavě startuje.
+Hráč požádá doložitelným způsobem mateřský oddíl o vyjádření k jeho PŘESTUPU. Mateřský oddíl je
+povinen se do 14 dnů vyjádřit k PŘESTUPU hráče. Pokud mateřský oddíl nesplní tuto lhůtu, může být
+předán k disciplinárnímu řízení a PŘESTUP může být posuzován MÚ, jako když s ním oddíl souhlasí.
+2.3. Poplatek za přestup
+Poplatek za přestup je stanoven ve výši:
+  a) v kategoriích dorostenci či dorostenky a mladších 250,- Kč
+  b) v ostatních kategoriích                              500,- Kč
+2.4.
+Podaný Přestup hráče nemůže být vzat zpět.
+                                             článek 3
+                                            Hostování
+3.1.
+Za hostování se považuje časově omezená změna oddílové příslušnosti hráče, během které může
+nastupovat pouze za nový oddíl. MÚ provede dočasnou změnu záznamu ve FISu na základě splnění
+náležitostí k hostování a přiřazení platby poplatku za hostování k hráči ve FISu.
+3.2.
+Na základě dohody mezi oddíly lze hráče s jeho souhlasem uvolnit na hostování v jiném oddílu, a to na
+dobu, která nesmí být kratší než 30 dní a zadat “datum DO“ nejpozději vždy k 30. 6. každého roku.
+
+
+Přestupní řád Českého florbalu                    2                                          Edice 2026
+3.3. Náležitosti hostování
+Hráč, který žádá o hostování, je povinen řádně vyplnit formulář „HOSTOVÁNÍ“ se svými údaji, „datem
+OD“, „datem DO“ a názvem a číslem mateřského a nového oddílu.
+Hráč požádá doložitelným způsobem mateřský oddíl o vyjádření k jeho HOSTOVÁNÍ. Mateřský oddíl je
+povinen se do 14 dnů vyjádřit k HOSTOVÁNÍ hráče. Pokud mateřský oddíl nesplní tuto lhůtu, může být
+předán k disciplinárnímu řízení a HOSTOVÁNÍ může být posuzováno MÚ, jako když s ním oddíl
+souhlasí.
+3.4. Poplatek za hostování
+Poplatek za hostování je stanoven ve výši:
+  a) v kategoriích dorostenci či dorostenky a mladších 150,- Kč
+  b) v ostatních kategoriích                              300,- Kč
+3.5. Ukončení hostování
+Hostování lze předčasně ukončit dohodou oddílů a hráče před uplynutím sjednané doby podáním
+formuláře „UKONČENÍ HOSTOVÁNÍ“ s „datem OD“, ne však dříve než za 30 dní ode dne rozhodnutí
+MÚ o schválení hostování, a pouze v termínu dle bodu 1.4. PŘ.
+3.6.
+Poplatek za předčasně ukončené hostování je stanoven ve výši 200,- Kč.
+3.7.
+Podané HOSTOVÁNÍ či UKONČENÍ HOSTOVÁNÍ nemůže být vzato zpět.
+                                            článek 4
+                                    Střídavé hostování (STH)
+4.1.
+Střídavé hostování je dočasné oprávnění hráče nastupovat v mateřském oddíle a současně i v
+konkrétním družstvu nového oddílu v celostátní soutěži. Toto ustanovení mohou využít pouze hráči v
+mládežnických kategoriích a maximálně první tři soutěžní ročníky v kategorii dospělých. Toto
+ustanovení mohou využít hráči pouze v základní části soutěže.
+4.2.
+Na základě dohody mezi oddíly lze hráče s jeho souhlasem uvolnit na střídavé hostování, a to na dobu
+maximálně 105 dnů. MÚ provede o střídavém hostování záznam ve FISu na základě splnění
+náležitostí ke střídavému hostování a přiřazení platby poplatku za střídavé hostování k hráči ve FISu.
+Střídavé hostování nelze předčasně ukončit.
+4.3.
+Střídavé hostování hráče je vázáno na možnost nastoupení v konkrétním družstvu v novém oddíle
+pouze ve vyšší soutěži. Pro hráče, jehož mateřský oddíl má družstvo v příslušné věkové kategorii, se
+za vyšší soutěž považuje i soutěž o úroveň nižší ve starší věkové kategorii.
+Liga dorostenek je pro účely střídavého hostování považována za celostátní soutěž.
+Hráči mladší kategorie než starší žáci (starší žákyně) nemohou střídavě hostovat.
+4.4.
+Střídavé hostování je povoleno pouze v případě, že mateřský oddíl nemá družstvo ve stejné či vyšší
+úrovni soutěže, než kam by hráč střídavě hostoval.
+4.5.
+Během střídavého hostování je hráč nadále oprávněn nastupovat za svůj mateřský oddíl bez omezení,
+pouze s dodržením ustanovení soutěžního řádu.
+4.6.
+Jeden hráč smí do stejného oddílu střídavě hostovat pouze jedenkrát za sezónu. Hráč, který podává
+STŘÍDAVÉ HOSTOVÁNÍ, nesmí být současně na hostování v jiném oddílu.
+4.7. Náležitosti střídavého hostování
+Hráč, který žádá o střídavé hostování, je povinen řádně vyplnit formulář "STŘÍDAVÉ HOSTOVÁNÍ” se
+svými údaji, „datem OD“, „datem DO“ a názvem a číslem mateřského oddílu a oddílu družstva pro
+střídavé hostování.
+
+
+
+Přestupní řád Českého florbalu                    3                                            Edice 2026
+Hráč požádá mateřský oddíl o vyjádření k jeho STŘÍDAVÉMU HOSTOVÁNÍ osobně, doporučenou
+poštou anebo jiným doložitelným způsobem (např. elektronickou formou). Mateřský oddíl je povinen se
+do 14 dnů vyjádřit ke STŘÍDAVÉMU HOSTOVÁNÍ hráče. Pokud mateřský oddíl nesplní tuto lhůtu,
+může být předán k disciplinárnímu řízení a STŘÍDAVÉ HOSTOVÁNÍ může být posuzováno MÚ, jako
+když s ním oddíl souhlasí.
+4.8. Poplatek za střídavé hostování
+Poplatek za střídavé hostování je stanoven ve výši 250,- Kč pro všechny kategorie.
+4.9.
+Podané STŘÍDAVÉ HOSTOVÁNÍ hráče nemůže být vzato zpět.
+                                             článek 5
+                                       Střídavý start (STST)
+5.1.
+Střídavý start je dočasné oprávnění hráče nastupovat pouze za A družstvo mateřského oddílu a
+současně i za A družstvo nového oddílu. Toto ustanovení mohou využít pouze hráči první tři sezóny v
+kategorii dospělých. Střídavý start se nevztahuje na pohárové soutěže.
+5.2.
+Na základě dohody mezi oddíly lze hráče s jeho souhlasem uvolnit na střídavý start. MÚ provede o
+střídavém startu záznam ve FISu na základě splnění náležitostí ke střídavému startu a přiřazení platby
+poplatku za střídavý start k hráči ve FISu. Střídavý start je ukončen nejpozději vždy k 30. 6. každého
+roku.
+5.3.
+Hráč může být v rámci střídavého startu uvolněný pouze do soutěží o jednu nebo dvě úrovně nižší, než
+hraje A družstvo jeho mateřského oddílu. Hráče na střídavý start mohou uvolňovat pouze oddíly, jejichž
+A družstva hrají nejvyšší celostátní soutěže.
+5.4.
+Jeden hráč smí využít střídavý start pouze jedenkrát za sezónu. Hráč, který podává STŘÍDAVÝ
+START, nesmí být současně na hostování nebo střídavém hostování. Po dobu trvání střídavého startu
+nesmí hráč požádat o hostování či střídavé hostování.
+5.5. Náležitosti střídavého startu
+Hráč, který žádá o střídavý start, je povinen řádně vyplnit formulář "STŘÍDAVÝ START” se svými údaji,
+„datem OD“ a názvem a číslem mateřského oddílu a oddílu družstva pro střídavý start.
+Hráč požádá mateřský oddíl o vyjádření k jeho STŘÍDAVÉMU STARTU osobně, doporučenou poštou
+anebo jiným doložitelným způsobem (např.: elektronickou formou). Mateřský oddíl je povinen se do 14
+dnů vyjádřit ke STŘÍDAVÉMU STARTU hráče. Pokud mateřský oddíl nesplní tuto lhůtu, může být
+předán k disciplinárnímu řízení a STŘÍDAVÝ START může být posuzována MÚ, jako když s ním
+souhlasí.
+5.6. Poplatek za střídavý start
+Poplatek za střídavý start je stanoven ve výši 300,- Kč.
+5.7. Ukončení střídavého startu
+   a) Střídavý start lze předčasně ukončit dohodou oddílů a hráče podáním tiskopisu „UKONČENÍ
+      STŘÍDAVÉHO STARTU“ pouze v termínu dle bodu 1.4. tohoto PŘ.
+   b) Střídavý start automaticky zaniká k uvedenému dni „datum OD“ v žádosti o PŘESTUP hráče do
+      jiného oddílu.
+   c) Střídavý start automaticky zaniká, pokud hráč nenastoupí v základní části soutěže alespoň k 30
+      % utkání družstva, ve kterém střídavě startuje.
+Poplatek za předčasně ukončený střídavý start je stanoven ve výši 200,- Kč.
+V případě ukončení střídavého startu dle bodů 5.7. písm. b) a c) PŘ není vybírán poplatek.
+5.8.
+Podaný STŘÍDAVÝ START či UKONČENÍ STŘÍDAVÉHO STARTU nemůže být vzato zpět.
+
+
+
+
+Přestupní řád Českého florbalu                    4                                           Edice 2026
+                                                   článek 6
+                                 Zamezení možnosti přestupu či hostování hráče
+
+6.1.
+Oddíl může s hráčem uzavřít smlouvu, na základě které se hráč na určité období vzdá práva podat
+PŘESTUP, HOSTOVÁNÍ, STŘÍDAVÉ HOSTOVÁNÍ či STŘÍDAVÝ START v jiném oddílu bez souhlasu
+mateřského oddílu.
+6.2.
+Aby tato smlouva byla účinná pro účely PŘ (dále jen „registrovaná smlouva“) musí být u MÚ do 1
+měsíce od uzavření smlouvy řádně registrován evidenční dodatek. EVIDENČNÍ DODATEK je možno
+vyplnit tištěnou nebo elektronickou formou. Podpis hráče, a u hráčů mladších 18 let i podpis zákonného
+zástupce, musí být na tištěném formuláři úředně ověřen. Evidenční dodatek potvrzuje existenci
+smlouvy a délku její platnosti s „datem OD“ a „datem DO“. Dnem doručení evidenčního dodatku MÚ se
+stane smlouva účinná vůči ostatním oddílům.
+6.3.
+Během platnosti této smlouvy může hráč podat PŘESTUP, HOSTOVÁNÍ, STŘÍDAVÉ HOSTOVÁNÍ či
+STŘÍDAVÝ START pouze na základě souhlasu mateřského oddílu.
+6.4.
+Hráč nesmí podepsat a zaregistrovat novou smlouvu s jiným oddílem dříve než šest měsíců před
+vypršením platnosti platné registrované smlouvy. Po vypršení platnosti dosavadní smlouvy hráč
+přestupuje za stejných podmínek jako hráč beze smlouvy.
+6.5.
+Smlouvu lze uzavřít pouze s hráčem starším 16 let.
+6.6.
+Maximální délka smlouvy, a tedy i evidenčního dodatku, je tříletá.
+6.7.
+MÚ neúčtuje žádný poplatek za registraci evidenčního dodatku.
+6.8.
+Seznam evidenčních dodatků je veřejně přístupný prostřednictvím webových stránek ČF.
+6.9.
+Pokud smlouva pozbude platnosti před koncem platnosti evidenčního dodatku je oddíl povinen o tomto
+informovat MÚ. Okamžikem zániku platnosti smlouvy zaniká i platnost evidenčního dodatku.
+                                                  článek 7
+                                             Mezinárodní přestup
+7.1.
+Mezinárodní přestupy, tedy přestupy členů ČF do zahraničního oddílu, se řídí přestupním řádem IFF
+v platném znění.
+7.2.
+Mezinárodní přestup nemůže hráč podat dříve, než uplyne od schválení jeho předešlého přestupu
+v rámci ČF doba 1 měsíce.
+Hráč, který je na hostování musí před podáním mezinárodního přestupu hostování nejprve předčasně
+ukončit dle bodu 3.5. PŘ.
+7.3.
+V případě, že má ČF na základě přestupního řádu IFF potvrdit mezinárodní přestup, bude pro
+zjišťování důvodů, které bránit v přestupu hráče, rozhodující, zda má hráč registrovaný evidenční
+dodatek dle PŘ nebo je v disciplinárním trestu dle DŘ. V případě, že hráč nemá registrovaný evidenční
+dodatek, MÚ přestup schválí.
+7.4.
+MÚ neúčtuje žádný poplatek za řešení a potvrzování mezinárodního přestupu.
+7.5.
+Mezinárodní přestup do ČF se řeší dle čl. 5 RegŘ.
+
+
+Přestupní řád Českého florbalu                         5                                      Edice 2026
+                                           článek 8
+                                     Rozhodování o přestupu
+8.1.
+MÚ PŘESTUP neprojedná:
+  a) byl-li podán mimo stanovené přestupní období nebo v registrační době dle bodu 1.4. PŘ, s
+     výjimkou ustanovení v bodu 8.3. písm. b) PŘ (čekací doba);
+  b) nemá-li některou z náležitostí uvedenou v bodech 2.2. a 8.3. PŘ;
+  c) nemá-li hráč ukončené hostování včetně střídavého hostování kromě přestupu do oddílu, ve
+     kterém hostuje nebo střídavě hostuje;
+  d) směřuje-li z oddílu nebo do oddílu, vůči němuž byl vysloven zákaz přestupů;
+  e) eviduje-li MÚ platný evidenční dodatek, na základě kterého se hráč vzdal práva podat přestup a
+     nemá souhlas mateřského oddílu.
+8.2.
+MÚ PŘESTUP neschválí:
+  a) nebyl-li uhrazen poplatek za přestup.
+8.3.
+MÚ PŘESTUP schválí:
+  a) souhlasí-li s PŘESTUPEM mateřský oddíl;
+  b) jedná-li se o opakovaný PŘESTUP do téhož oddílu po uplynutí čekací doby, která činí 6 měsíců
+     od podání předešlého PŘESTUPU. Za opakovaný se PŘESTUP uznává, jestliže hráč v průběhu
+     čekací doby nepodal žádný jiný PŘESTUP nebo HOSTOVÁNÍ a zaslal-li opakovaný PŘESTUP
+     do 14 dnů po uplynutí čekací doby MÚ. Opakovaný PŘESTUP musí obsahovat náležitosti
+     uvedené v bodu 2.2. PŘ a výše odstupného bude určena dle bodů 14.3. a 14.5. PŘ. MÚ
+     PŘESTUP schválí, jsou-li splněny výše uvedené podmínky opakovaného PŘESTUPU, avšak až
+     po předložení dokladu o úhradě odstupného nejpozději do 14 dnů od doručení výzvy MÚ novému
+     oddílu k předložení takového dokladu. Nebude-li dodržena tato lhůta, přestup se neuskuteční;
+  c) přes nesouhlas mateřského oddílu a bez práva mateřského oddílu na odstupné v případě, že
+     tento hráč v době podání PŘESTUPU není členem ČF déle než 12 měsíců;
+  d) jde-li o hráče, který nedosáhl 12 let věku, se souhlasem zákonného zástupce i proti námitkám
+     mateřského oddílu bez čekací doby a práva mateřského oddílu na odstupné;
+  e) pokud existuje o přestupu hráče rozhodnutí AK a nový oddíl prokáže, že splnil podmínky
+     stanovené v tomto rozhodnutí.
+                                            článek 9
+                                     Rozhodování o hostování
+9.1.
+MÚ HOSTOVÁNÍ neprojedná:
+  a) byla-li podána mimo stanovené přestupní období dle bodu 1.4. PŘ;
+  b) nemá-li některou z náležitostí uvedenou v bodu 3.3. PŘ;
+  c) směřuje-li z oddílu nebo do oddílu, vůči němuž byl vysloven zákaz přestupů;
+  d) je-li hráč na střídavém hostování, s výjimkou hostování do oddílu, ve kterém již střídavě hostuje;
+  e) je-li hráč na střídavém startu;
+  f) eviduje-li MÚ platný evidenční dodatek, na základě kterého se hráč vzdal práva podat hostování
+     a nemá souhlas mateřského oddílu.
+9.2.
+MÚ HOSTOVÁNÍ neschválí:
+  a) nebyl-li uhrazen poplatek za hostování.
+9.3.
+MÚ HOSTOVÁNÍ schválí:
+  a) souhlasí-li s HOSTOVÁNÍM mateřský oddíl;
+
+
+
+
+Přestupní řád Českého florbalu                     6                                            Edice 2026
+  b) přes nesouhlas mateřského oddílu a bez práva mateřského oddílu na odstupné, jde-li o hráče,
+     který proto, že jeho mateřský oddíl nemá žádné družstvo v kategorii, kde by hráč mohl hrát, a tím
+     nemůže za mateřský oddíl startovat.
+9.4.
+Hostování se ukončí na základě písemné žádosti mateřského oddílu nebo hráče, pokud odpadne
+důvod, pro nějž bylo hostování přes nesouhlas mateřského oddílu schváleno.
+                                            článek 10
+                                 Rozhodování o střídavém hostování
+10.1.
+MÚ STŘÍDAVÉ HOSTOVÁNÍ neprojedná:
+  a) bylo-li podáno mimo stanovené období dle bodu 1.4. PŘ;
+  b) nemá-li některou z náležitostí uvedenou v bodu 4.7. PŘ;
+  c) směřuje-li z oddílu nebo do oddílu vůči němuž byl vysloven zákaz přestupů;
+  d) podává-li STŘÍDAVÉ HOSTOVÁNÍ hráč, který nesplňuje pravidlo o věkové hranici pro střídavé
+      hostování;
+  e) pokud hráč již během sezóny střídavě hostoval ve stejném oddílu;
+  f) nemá-li hráč ukončené hostování, či střídavý start, případně právě střídavě hostuje;
+  g) nejsou-li dodržena ustanovení dle bodů 4.3. a 4.4. PŘ;
+10.2.
+MÚ STŘÍDAVÉ HOSTOVÁNÍ neschválí:
+  a) nebyl-li uhrazen poplatek za střídavé hostování.
+10.3.
+MÚ STŘÍDAVÉ HOSTOVÁNÍ schválí:
+  a) souhlasí-li se STŘÍDAVÝM HOSTOVÁNÍM mateřský oddíl.
+                                           článek 11
+                                  Rozhodování o střídavém startu
+11.1.
+MÚ STŘÍDAVÝ START neprojedná:
+  a) byl-li podán mimo stanovené období dle bodu 1.4. PŘ;
+  b) nemá-li některou z náležitostí uvedenou v bodu 5.5. PŘ;
+  c) směřuje-li z oddílu nebo do oddílu vůči němuž byl vysloven zákaz přestupů;
+  d) podává-li STŘÍDAVÝ START hráč, který nesplňuje pravidlo o věkové hranici pro střídavý start;
+  e) pokud hráč již během sezóny střídavě startoval;
+  f) nemá-li hráč ukončené hostování, případně právě střídavě hostuje;
+  g) nejsou-li dodržena ustanovení dle bodu 5.3. PŘ;
+11.2.
+MÚ STŘÍDAVÝ START neschválí:
+  a) nebyl-li uhrazen poplatek za střídavý start.
+11.3.
+MÚ STŘÍDAVÝ START schválí:
+  a) souhlasí-li se STŘÍDAVÝM STARTEM mateřský oddíl.
+                                           článek 12
+                                      Oznamování rozhodnutí
+12.1.
+Všechny projednané i neprojednané žádosti jsou účastníkům řízení oznamovány skrze FIS, případně
+e-mailem.
+
+
+
+
+Přestupní řád Českého florbalu                    7                                           Edice 2026
+                                              článek 13
+                                              Odvolání
+13.1.
+Proti rozhodnutí, které bylo vydáno v I. stupni dle PŘ, je možné podat odvolání k ORK za podmínek
+stanovených v Odvolacím řádu ČF.
+13.2.
+Odvolání nemá odkladný účinek.
+                                              článek 14
+                                              Odstupné
+14.1.
+Za přestup nebo hostování uhradí nový oddíl mateřskému oddílu odstupné dle vzájemné dohody
+anebo na základě rozhodnutí AK.
+14.2.
+Odstupné se použije také při rozhodování o opakovaném PŘESTUPU (po čekací době) dle bodu 8.3.
+písm. b) PŘ.
+14.3.
+V případě opakovaného PŘESTUPU (po čekací době) se oddílům v jednotlivých soutěžích přiřazují
+přestupní částky následovně:
+  a) reprezentace                     6.000,- Kč
+  b) nejvyšší celostátní soutěže 4.000,- Kč
+  c) ostatní soutěže                  1.000,- Kč
+14.4.
+Za reprezentanta je považován hráč, který v průběhu 12 měsíců před datem podání opakovaného
+PŘESTUPU nastoupil v mezinárodním utkání za reprezentační družstvo.
+14.5.
+Přestupní částky přiřazené v bodu 14.3. PŘ mateřskému a novému oddílu se sečtou a dělí dvěma. Tak
+se vypočte výsledná částka odstupného, kterou nový oddíl uhradí mateřskému oddílu. To však neplatí
+při přestupu hráčů starších 34 let z vyšší do nižší soutěže. Za přestup takového hráče se uhradí částka
+přiřazená novému oddílu podle jeho účasti v úrovni soutěže.
+14.6.
+Přestoupí-li hráč do oddílu, který má ve stejné kategorii více družstev, uhradí nový oddíl odstupné pro
+soutěž, v níž hraje jeho A družstvo.
+14.7.
+Přestupuje-li hráč z oddílu, který má ve stejné kategorii více družstev, hráč je považován za hráče toho
+družstva, na jehož je soupisce.
+14.8. Částka určená ČF
+Pokud oddíl hradí odstupné za hráče na základě předpisu ČF (např. přestup po čekací době) či na
+základě rozhodnutí orgánu ČF (např. rozhodnutí AK), je tato částka osvobozena od DPH.
+14.9. Částka určená dohodou oddílů
+V případě smluvní dohody oddílů je částka za odstupné, pokud je mateřský oddíl plátce DPH, vždy
+zatížena DPH.
+14.10. Vydávání daňových dokladů
+Pro platby odstupného platí standardní obchodní povinnosti, a proto je vždy příjemce částky povinen
+vystavit patřičný daňový doklad (do částky 10.000,- Kč možno daňový doklad zjednodušený – tj
+paragon, či příjmový doklad, na částky převyšující 10.000,- Kč nutno vystavit fakturu).
+
+
+
+
+Přestupní řád Českého florbalu                     8                                            Edice 2026
+                                            článek 15
+                                 Společná a závěrečná ustanovení
+15.1.
+Všechna podání, vyjádření a potvrzení, která při ohlašování přestupu, hostování, střídavém hostování,
+střídavém startu, ukončení hostování a ukončení střídavého startu apod. činí mateřský oddíl, nový
+oddíl či oddíl družstva pro střídavé hostování či střídavý start, musí obsahovat stanoviska a datum
+nesmí být v den podání starší 6 měsíců. Jinak jsou neplatná a orgány činné v přestupním řízení je
+neprojednají.
+15.2.
+Přestupní náležitosti může za hráče, který je předepsaným způsobem podepsal, odesílat i předávat
+adresátu kdokoli. MÚ neprojednává spory vzniklé z těchto vztahů. Má se za to, že co bylo učiněno,
+učinil hráč.
+15.3.
+Veškeré změny oddílové příslušnosti, střídavá hostování a střídavé starty musí být provedeny
+výhradně podle PŘ, případně dalších předpisů ČF.
+15.4.
+Porušování ustanovení PŘ, jejich obcházení, jakož i jednání proti pravidlům sportovní morálky, je
+nepřípustné a podléhá sankcím dle DŘ.
+15.5. Výklad řádu
+Výklad tohoto řádu, jeho změny a doplňky provádí VV.
+15.6. Závěrečné ustanovení
+Tento PŘ je platný dnem schválení na zasedání VV dne 14.04.2026. Účinnost tohoto PŘ je od
+01.07.2026 a současně se ruší účinnost a platnost předchozího Přestupního řádu se všemi změnami a
+doplňky.
+
+
+
+
+Přestupní řád Českého florbalu                    9                                           Edice 2026
+
