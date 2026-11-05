@@ -10,8 +10,9 @@ Registračního (RegŘ) a Soutěžního řádu (SŘ) ČF, Edice 2026, platné od
 Složka `rady/` obsahuje řády ČF, Edice 2026, jako PDF a vedle nich textovou verzi (`pdftotext -layout`), kterou jde
 prohledávat příkazem `grep`:
 - `rady/Prestupni-rad-2026.pdf` a `.txt` – Přestupní řád (PŘ),
-- `rady/Registracni-rad-2026.pdf` a `.txt` – Registrační řád (RegŘ).
-Soutěžní řád (SŘ) zatím v repozitáři není, požádej o něj zadavatelku. Před každou změnou pravidla otevři příslušný
+- `rady/Registracni-rad-2026.pdf` a `.txt` – Registrační řád (RegŘ),
+- `rady/Soutezni-rad-2026.pdf` a `.txt` – Soutěžní řád (SŘ).
+Licenční řád (hráčské licence) v repozitáři zatím není, požádej o něj zadavatelku, až na něj dojde. Před každou změnou pravidla otevři příslušný
 článek v `.txt` (u sporného místa i v PDF, kde je přesné znění) a cituj ho jen tak, jak skutečně stojí. Když zadavatelka
 nahraje novou edici, nahraď soubory (název s ročníkem edice), znovu vytvoř `.txt` a projdi pravidla na stránce Podklady.
 Řády jsou veřejné dokumenty ČF, repozitář je veřejný a stránka je tak jako soubory dostupná na GitHub Pages.
