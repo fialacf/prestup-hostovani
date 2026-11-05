@@ -322,20 +322,26 @@ await S('23', async () => {
   p = await flow({cat: 'dorost', state: 'oddil', goal: 'docasne', recent: 'ano'}); ok('dočasně a přestup před 3 měsíci: nouzový stav beze změny', /Teď nemáš žádnou možnost/.test(await p.textContent('#wizard h2')), await p.textContent('#wizard h2')); await p.close();
 });
 
-// ---------- 24) vysvětlení u cílů: čekací doba po přestupu a délka hostování ----------
+// ---------- 24) vysvětlení u cílů: čekací doba po přestupu, délka hostování, kdo smí za dva kluby ----------
 await S('24', async () => {
   const sub = async (cat, goal) => { const p = await open(); await p.click(`button[data-v=${cat}]`); await p.click('button[data-v=oddil]');
     const t = await p.$$eval(`#wizard button[data-v=${goal}] small`, x => x.map(y => y.textContent)); await p.close(); return t[0] || ''; };
-  // 30. 6. příští sezóny: v lednu tatáž sezóna, od února (žádosti od 1. 5.) a v létě až další rok
-  // skupina A má období do 31. 1., skupina B do 31. 3.; po jeho konci se bere příští sezóna
-  const n = new Date(), m = n.getMonth() + 1, yrFor = lastM => m <= lastM ? n.getFullYear() : n.getFullYear() + 1;
   const base = 'Po přestupu nemůžeš 3 měsíce znovu přestoupit ani hostovat.';
   for (const [cat, extra] of [['dospeli21', ' Pokud to půjde, můžeš využít střídavé hostování nebo střídavý start.'],
     ['junior', ' Pokud to půjde, můžeš využít střídavé hostování.'], ['dorost', ' Pokud to půjde, můžeš využít střídavé hostování.'],
     ['starsi', ' Pokud to půjde, můžeš využít střídavé hostování.'], ['dospeli', ''], ['mladsi', ''], ['pripravka', '']])
     eq(`natrvalo: vysvětlení ${cat}`, await sub(cat, 'trvale'), base + extra);
-  for (const [cat, lastM] of [['dospeli', 1], ['dorost', 1], ['pripravka', 3]])
-    eq(`dočasně: nejméně 30 dnů, nejdéle do 30. 6. (${cat})`, await sub(cat, 'docasne'), `Třeba na půl sezóny. Nejméně 30 dnů, nejdéle do 30. 6. ${yrFor(lastM)}.`);
+  for (const cat of ['dospeli', 'dorost', 'pripravka'])
+    eq(`dočasně: nejméně 30 dnů, nejdéle do 30. 6. (${cat})`, await sub(cat, 'docasne'), 'Třeba na půl sezóny. Nejméně 30 dnů, nejdéle do 30. 6.');
+  // dva kluby: kdo to smí je vidět u každé kategorie, u nezpůsobilých je volba zašedlá s krátkým důvodem
+  const who = 'Střídavé hostování: od U15 starších žáků po muže a ženy 19–21 let. Střídavý start: jen muži a ženy 19–21 let.';
+  for (const [cat, off] of [['dospeli21', false], ['dorost', false], ['starsi', false], ['dospeli', true], ['mladsi', true], ['pripravka', true]]) {
+    const p = await open(); await p.click(`button[data-v=${cat}]`); await p.click('button[data-v=oddil]');
+    const o = p.locator('#wizard .opt', {hasText: 'Hrát za dva kluby zároveň'});
+    ok(`dva kluby: vysvětlení (${cat})`, (await o.locator('small').first().textContent()) === who);
+    eq(`dva kluby: zašedlá jen u nezpůsobilých (${cat})`, await o.isDisabled(), off);
+    eq(`dva kluby: důvod (${cat})`, await o.locator('small.why').count() ? await o.locator('small.why').textContent() : '', off ? 'Pro tvoji kategorii to nejde.' : '');
+    await p.close(); }
 });
 
 ok('žádné chyby v konzoli',consoleErrs.length===0,consoleErrs.slice(0,3));ok('žádné výjimky stránky',pageErrs.length===0,pageErrs.slice(0,3));
