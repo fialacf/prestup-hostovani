@@ -1,6 +1,6 @@
 /* ===== Konfigurace: vše, co se mění se sezónou ===== */
 const CONFIG = {
-  dataUpdated: "2026-11-05 12:39", // datum a čas (pražský) poslední úpravy dat a pravidel, zobrazuje se na stránce Podklady
+  dataUpdated: "2026-11-05 12:46", // datum a čas (pražský) poslední úpravy dat a pravidel, zobrazuje se na stránce Podklady
   dateMin: "2020-01-01", dateMax: "2035-12-31", // rozsah data, které lze v průvodci zadat
   categories: [
     // minAge/maxAge = věk dovršený v kalendářním roce, kdy sezóna začíná; z toho se počítají ročníky narození

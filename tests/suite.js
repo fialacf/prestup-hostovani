@@ -342,6 +342,13 @@ await S('24', async () => {
     eq(`dva kluby: zašedlá jen u nezpůsobilých (${cat})`, await o.isDisabled(), off);
     eq(`dva kluby: důvod (${cat})`, await o.locator('small.why').count() ? await o.locator('small.why').textContent() : '', off ? 'Pro tvoji kategorii to nejde.' : '');
     await p.close(); }
+  // nápověda u situací, kdy hráč dočasně hraje jinde (střídavé možnosti jen pro kategorie, které je smějí využít)
+  const help = async (cat, st) => { const p = await open(); await p.click(`button[data-v=${cat}]`);
+    const t = await p.$$eval(`#wizard button[data-v=${st}] small`, x => x.map(y => y.textContent)); await p.close(); return t[0] || ''; };
+  eq('situace: nápověda hostování', await help('dospeli', 'hostuji'), 'Dočasně hraju jen za jiný klub, než kde jsem registrovaný. Třeba do konce sezóny.');
+  eq('situace: nápověda střídavý start', await help('dospeli21', 'stst'), 'Hraju za A-družstvo svého klubu a zároveň za A-družstvo jiného klubu, které hraje o 1–2 ligy níž.');
+  eq('situace: nápověda střídavé hostování', await help('dorost', 'sth'), 'Hraju za svůj klub a zároveň za jedno družstvo jiného klubu v celostátní soutěži. Třeba dorostenec, který vypomáhá ve vyšší soutěži.');
+  eq('situace: střídavý start jen pro 19–21', await (async () => { const p = await open(); await p.click('button[data-v=dorost]'); const n = await p.locator('#wizard button[data-v=stst]').count(); await p.close(); return n; })(), 0);
 });
 
 ok('žádné chyby v konzoli',consoleErrs.length===0,consoleErrs.slice(0,3));ok('žádné výjimky stránky',pageErrs.length===0,pageErrs.slice(0,3));

@@ -125,13 +125,19 @@ const canHaveDodatek = () => !!cat() && cat().minAge >= CONFIG.dodatekFromCatego
 // hráč má hostování, střídavý start nebo střídavé hostování (má mateřský klub, ale dočasně hraje jinde)
 const TEMP_STATES = ["hostuji","stst","sth"];
 const zopQShown = () => A.state==="bez" || (["trvale","vse"].includes(A.goal) && !TEMP_STATES.includes(A.state));
+// Nápověda u situací, kdy hráč dočasně hraje jinde (PŘ čl. 3.1, 4.1, 5.1, 5.3, 4.3). Stručně a s příkladem, aby šlo pochopit bez znalosti řádu.
+const STATE_HELP = {
+  hostuji:"Dočasně hraju jen za jiný klub, než kde jsem registrovaný. Třeba do konce sezóny.",
+  stst:"Hraju za A-družstvo svého klubu a zároveň za A-družstvo jiného klubu, které hraje o 1–2 ligy níž.",
+  sth:"Hraju za svůj klub a zároveň za jedno družstvo jiného klubu v celostátní soutěži. Třeba dorostenec, který vypomáhá ve vyšší soutěži."
+};
 const STEPS = [
   {id:"cat", title:"V jaké jsi kategorii?", hint:() => `Ročníky narození platí pro sezónu ${seasonLabel()}. Podle kategorie se řídí přestupní období a výše poplatků.`, type:"choice",
     options:() => CONFIG.categories.map(c => [c.id, `${c.label} (${yearsFor(c.minAge, c.maxAge)})`, (c.note ? c.note + " " : "") + "Přestupní období " + periodText(c.group)])},
   {id:"state", title:"Jaká je tvoje situace teď?", type:"choice",
-    options:() => [["oddil","Mám svůj (mateřský) klub","Jsem registrovaný v klubu a hraju za něj."],["bez","Nemám žádný klub","Byl(a) jsem registrovaný v Českém florbalu, ale teď nepatřím k žádnému klubu."],["novy","Jsem nový hráč","Ještě jsem nikdy nebyl(a) registrovaný v Českém florbalu."],["hostuji","Právě hostuji v jiném klubu",""]]
-      .concat(ststAge() ? [["stst","Mám střídavý start",""]] : [])
-      .concat(sthAge() ? [["sth","Mám střídavé hostování",""]] : [])},
+    options:() => [["oddil","Mám svůj (mateřský) klub","Jsem registrovaný v klubu a hraju za něj."],["bez","Nemám žádný klub","Byl(a) jsem registrovaný v Českém florbalu, ale teď nepatřím k žádnému klubu."],["novy","Jsem nový hráč","Ještě jsem nikdy nebyl(a) registrovaný v Českém florbalu."],["hostuji","Právě hostuji v jiném klubu",STATE_HELP.hostuji]]
+      .concat(ststAge() ? [["stst","Mám střídavý start",STATE_HELP.stst]] : [])
+      .concat(sthAge() ? [["sth","Mám střídavé hostování",STATE_HELP.sth]] : [])},
   {id:"hostStart", show:() => A.state==="hostuji", title:"Kdy tvoje hostování začalo?", hint:"Hostování musí trvat minimálně 30 dnů. Dřív než 30 dnů od začátku ho ukončit nejde.", type:"date"},
   {id:"goal", title:"Co chceš udělat?", type:"choice",
     options:() => {
