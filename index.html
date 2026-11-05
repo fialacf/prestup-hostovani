@@ -133,7 +133,7 @@ const STEPS = [
       const NO_CLUB = "Bez klubu to nejde. Nejdřív se musíš přihlásit do nového klubu.";
       const lockDva = {hostuji:"Dokud hostuješ, nejde hrát za dva kluby. Nejdřív ukonči hostování.", stst:"Střídavý start už máš.", sth:"Střídavé hostování už máš."}[A.state];
       const o = [
-        bez ? ["trvale","Přihlásit se do nového klubu","Přes změnu oddílové příslušnosti."] : ["trvale","Hrát natrvalo za jiný klub",""],
+        bez ? ["trvale","Přihlásit se do nového klubu","Přes změnu oddílové příslušnosti."] : ["trvale","Změnit natrvalo klub",""],
         ["docasne","Hrát dočasně za jiný klub","Třeba na půl sezóny.", bez ? NO_CLUB : A.state==="stst" ? "Po dobu střídavého startu nejde hostovat." : ""],
         ["dva","Hrát za dva kluby zároveň","", bez ? NO_CLUB : lockDva || (!sthAge() ? "Za dva kluby můžou hrát jen kategorie od U15 starších žáků po muže a ženy 19–21 let." : "")]
       ];
