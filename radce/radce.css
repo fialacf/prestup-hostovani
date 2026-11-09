@@ -1,0 +1,79 @@
+/* Veřejné vysvětlení možností. Barvy podle vizuálního stylu ČF; písmo zatím jen Arial. */
+:root{
+  --cf-cervena:#d51223; --cf-modra:#102d69;
+  --cerna-60:#666666; --cerna-20:#cccccc; --cerna-05:#f2f2f2; --bila:#ffffff;
+  --text:var(--cf-modra); --text-tlumeny:var(--cerna-60); --linka:var(--cf-modra);
+  --font:Arial,Helvetica,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bila);color:var(--text);font:16px/24px var(--font);font-variant-ligatures:none}
+a{color:var(--cf-modra)}
+a:focus-visible,button:focus-visible{outline:3px solid var(--cf-cervena);outline-offset:2px}
+.wrap{max-width:760px;margin:0 auto;padding:0 16px}
+header.top{border-bottom:1px solid var(--linka);padding:16px 0}
+header.top .wrap{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.brand{font-weight:700;letter-spacing:.02em;text-transform:uppercase;font-size:14px;color:var(--cf-modra);text-decoration:none}
+.crumb{font-size:14px;color:var(--text-tlumeny)}
+.crumb a{color:var(--text-tlumeny)}
+h1{font-size:40px;line-height:44px;margin:40px 0 16px;font-weight:700}
+h1 .plus{color:var(--cf-cervena)}
+h2{font-size:26px;line-height:32px;margin:0 0 16px;font-weight:700}
+h3{font-size:18px;line-height:26px;margin:0 0 4px;font-weight:700}
+.perex{font-size:19px;line-height:28px;margin:0 0 24px}
+section{border-top:1px solid var(--linka);padding:32px 0}
+p{margin:0 0 12px}
+.zdroj{display:block;font-size:12px;line-height:16px;color:var(--text-tlumeny);margin-top:4px}
+.tag{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;padding:2px 8px;border:1px solid var(--cf-modra);margin-right:8px;vertical-align:middle}
+.tag.up{border-color:var(--cf-cervena);color:var(--cf-cervena)}
+
+/* pro koho */
+.box{background:var(--cerna-05);padding:16px 24px;margin:0 0 16px}
+.box p:last-child{margin:0}
+
+/* časová osa */
+.osa{margin:24px 0 8px;position:relative}
+.osa .rad{display:grid;grid-template-columns:1fr 1fr;margin-bottom:8px}
+.osa .pruh{padding:12px 16px;font-weight:700;font-size:15px;line-height:20px;min-height:48px}
+.osa .stary{background:var(--cerna-20);color:var(--cf-modra)}
+.osa .novy{background:var(--cf-modra);color:var(--bila);grid-column:2}
+.osa .stary-r .pruh{grid-column:1}
+.osa .znacka{position:absolute;left:50%;top:-4px;bottom:36px;border-left:3px solid var(--cf-cervena)}
+.osa .popis{display:grid;grid-template-columns:1fr 1fr;margin-top:12px;font-size:14px;line-height:20px}
+.osa .popis div:last-child{grid-column:2;padding-left:16px}
+.osa .popis strong{color:var(--cf-cervena)}
+.osa-pozn{font-size:14px;color:var(--text-tlumeny)}
+
+/* kroky */
+ol.kroky{list-style:none;margin:0;padding:0;counter-reset:k}
+ol.kroky li{counter-increment:k;display:grid;grid-template-columns:40px 1fr;gap:12px;padding:12px 0;border-top:1px solid var(--cerna-20)}
+ol.kroky li:first-child{border-top:0}
+ol.kroky li::before{content:counter(k);width:32px;height:32px;background:var(--cf-cervena);color:var(--bila);font-weight:700;display:flex;align-items:center;justify-content:center}
+
+/* seznamy */
+ul.pole{list-style:none;margin:0;padding:0}
+ul.pole li{padding:12px 0 12px 32px;border-top:1px solid var(--cerna-20);position:relative}
+ul.pole li:first-child{border-top:0}
+ul.pole li::before{content:"";position:absolute;left:4px;top:19px;width:14px;height:8px;border-left:3px solid var(--cf-modra);border-bottom:3px solid var(--cf-modra);transform:rotate(-45deg)}
+ul.pozor li::before{content:"!";border:0;transform:none;left:8px;top:12px;width:auto;height:auto;color:var(--cf-cervena);font-weight:700;font-size:18px}
+
+/* cena a termíny */
+.dvojice{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.cislo{border:1px solid var(--linka);padding:16px 24px}
+.cislo .velke{font-size:34px;line-height:40px;font-weight:700;display:block}
+.cislo .velke small{font-size:16px;font-weight:400}
+@media (max-width:560px){.dvojice{grid-template-columns:1fr}h1{font-size:32px;line-height:36px}}
+
+.tlacitka{display:flex;flex-wrap:wrap;gap:12px;margin-top:8px}
+.tl{display:inline-block;padding:12px 24px;font-weight:700;text-decoration:none;border:2px solid var(--cf-cervena)}
+.tl.hlavni{background:var(--cf-cervena);color:var(--bila)}
+.tl.vedlejsi{background:var(--bila);color:var(--cf-cervena)}
+footer{border-top:1px solid var(--linka);padding:24px 0 48px;font-size:13px;line-height:18px;color:var(--text-tlumeny)}
+footer a{color:var(--cf-cervena);font-weight:700;text-decoration:none}
+
+/* rozcestník */
+.dlazdice{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:0 0 24px}
+.dlazdice a,.dlazdice span{display:block;padding:16px 24px;border:1px solid var(--linka);text-decoration:none;font-weight:700}
+.dlazdice a:hover{background:var(--cerna-05)}
+.dlazdice .brzy{color:var(--text-tlumeny);border-color:var(--cerna-20);font-weight:400}
+@media (max-width:560px){.dlazdice{grid-template-columns:1fr}}
