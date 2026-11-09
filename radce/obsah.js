@@ -12,11 +12,14 @@ const OBSAH = {
       "Pokud chceš hrát jen na čas a pak se vrátit, hledej v nabídce hostování."
     ],
     osa: {
-      stary: "Starý klub (dosavadní mateřský oddíl)",
-      novy: "Nový klub (nový mateřský oddíl)",
-      popis: ["Do data OD hraješ za starý klub.", "Od data OD hraješ jen za nový klub."],
-      znacka: "datum OD = přestup",
-      pozn: "Datum OD si volíš v žádosti. Musí být v přestupním období, ve kterém žádost podáváš."
+      stary: "Starý klub",
+      novy: "Nový klub",
+      znacka: "datum OD = přestup (příklad)",
+      zadost: "Žádost jde podat od 1. května",
+      obdobi: "Přestupní období (datum OD musí být v něm)",
+      blokace: "3 měsíce nejde podat další přestup ani hostování",
+      blokaceZdroj: "Počítá se od schválení přestupu, PŘ čl. 1.4 c).",
+      pozn: "Datum OD si volíš v žádosti. Musí být v přestupním období, ve kterém žádost podáváš. Žádost lze podat už od 1. května, ale datum OD je nejdřív 1. července."
     },
     kroky: [
       ["Domluv se.", "Požádej starý klub o vyjádření k přestupu, nejlépe e-mailem, aby to šlo doložit. Starý klub se musí vyjádřit do 14 dnů.", "PŘ čl. 2.2", "rad"],
